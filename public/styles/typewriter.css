@@ -1,0 +1,19 @@
+/* ═══════════ TYPEWRITER EFFECT ═══════════ */
+
+.typewriter-text {
+  filter: blur(4px);
+  transition: filter 0.3s ease;
+  min-height: 1.8em;
+  display: inline-block;
+  white-space: pre-wrap;
+}
+
+.active-typing {
+  filter: blur(0);
+}
+
+/* For answer blocks, ensure container doesn't jump as text appears */
+.resp-answer .typewriter-text {
+  min-height: 2.2em;
+  display: block;
+}

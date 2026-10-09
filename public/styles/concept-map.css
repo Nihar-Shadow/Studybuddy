@@ -1,0 +1,39 @@
+/* ═══════════ CONCEPT MAP MODAL ═══════════ */
+#concept-map-modal {
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,0.6);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  display: none; align-items: center; justify-content: center;
+  z-index: 1000;
+}
+#concept-map-modal.active { display: flex; }
+.concept-map-panel {
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  padding: 24px;
+  width: 92%;
+  max-width: 700px;
+  max-height: 85vh;
+  overflow-y: auto;
+  animation: scaleUp 0.3s ease;
+}
+.concept-map-panel h2 {
+  font-family: var(--font-display);
+  font-size: var(--font-size-xl);
+  color: var(--text-primary);
+  margin-bottom: 16px;
+}
+.concept-map-svg-wrap {
+  width: 100%;
+  overflow: auto;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-subtle);
+  background: var(--bg-surface);
+}
+.concept-map-svg-wrap svg {
+  display: block;
+  width: 100%;
+  min-height: 300px;
+}

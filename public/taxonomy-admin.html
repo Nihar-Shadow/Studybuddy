@@ -1,0 +1,691 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>StudyBuddy — Taxonomy Admin</title>
+<style>
+  /* ── Reset & Variables (matches teacher.html) ── */
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg:       #0a0a0f;
+    --card:     #141420;
+    --card-alt: #1c1c2e;
+    --border:   #2a2a3d;
+    --text:     #e8e8f0;
+    --muted:    #8888a0;
+    --accent:   #6C63FF;
+    --accent-soft: rgba(108,99,255,0.12);
+    --accent2:  #34d399;
+    --danger:   #f87171;
+    --warning:  #fbbf24;
+    --info:     #60a5fa;
+    --radius:   12px;
+    --shadow:   0 2px 12px rgba(0,0,0,.35);
+  }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+    background: var(--bg); color: var(--text); font-size: 14px;
+    line-height: 1.5; min-height: 100vh;
+  }
+
+  /* ── Navbar (same as teacher.html) ── */
+  .navbar {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0 28px; background: var(--card);
+    border-bottom: 1px solid var(--border);
+    position: sticky; top: 0; z-index: 100; height: 56px;
+  }
+  .navbar-brand {
+    display: flex; align-items: center; gap: 10px;
+    font-size: 1.15rem; font-weight: 700;
+    text-decoration: none; color: var(--text);
+  }
+  .navbar-brand span { color: var(--accent); }
+  .nav-tabs { display: flex; align-items: center; gap: 0; height: 100%; }
+  .nav-tab {
+    display: flex; align-items: center; gap: 6px;
+    padding: 0 20px; height: 100%;
+    font-size: .875rem; font-weight: 500; color: var(--muted);
+    text-decoration: none;
+    border-bottom: 2px solid transparent;
+    transition: color .2s, border-color .2s;
+    cursor: pointer;
+    background: none; border-top: none; border-left: none; border-right: none; border-radius: 0;
+  }
+  .nav-tab:hover { color: var(--text); }
+  .nav-tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+  .nav-tab.logout-tab { color: var(--danger); }
+  .nav-tab.logout-tab:hover { color: #fca5a5; }
+
+  /* ── Content ── */
+  .container { max-width: 1100px; margin: 0 auto; padding: 24px 28px; }
+
+  /* ── Stat cards ── */
+  .stats-row { display: grid; grid-template-columns: repeat(4,1fr); gap: 12px; margin-bottom: 20px; }
+  .stat-card {
+    background: var(--card); border: 1px solid var(--border); border-radius: var(--radius);
+    padding: 16px; text-align: center; box-shadow: var(--shadow);
+  }
+  .stat-num { font-size: 24px; font-weight: 700; color: var(--accent); }
+  .stat-lbl { font-size: 11px; color: var(--muted); margin-top: 4px; text-transform: uppercase; letter-spacing: .05em; }
+
+  /* ── Tabs ── */
+  .tabs { display: flex; gap: 0; border-bottom: 2px solid var(--border); margin-bottom: 20px; }
+  .tab {
+    padding: 10px 20px; cursor: pointer; font-weight: 500;
+    color: var(--muted); border-bottom: 2px solid transparent;
+    margin-bottom: -2px; transition: all 0.2s;
+  }
+  .tab.active { color: var(--accent); border-color: var(--accent); }
+  .tab:hover { color: var(--text); }
+  .panel { display: none; }
+  .panel.active { display: block; }
+
+  /* ── Tables ── */
+  table {
+    width: 100%; border-collapse: collapse; background: var(--card);
+    border-radius: var(--radius); overflow: hidden;
+    border: 1px solid var(--border);
+  }
+  th {
+    background: var(--card-alt); color: var(--accent); font-size: 11px;
+    text-transform: uppercase; letter-spacing: 0.06em;
+    padding: 10px 14px; text-align: left;
+  }
+  td {
+    padding: 10px 14px; border-bottom: 1px solid var(--border);
+    vertical-align: middle; color: var(--text);
+  }
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: rgba(108,99,255,0.04); }
+
+  /* ── Buttons ── */
+  .btn {
+    padding: 5px 12px; border-radius: 6px; border: none;
+    cursor: pointer; font-size: 12px; font-weight: 500;
+    transition: opacity 0.2s;
+  }
+  .btn:hover { opacity: 0.85; }
+  .btn-approve { background: rgba(52,211,153,0.15); color: var(--accent2); }
+  .btn-reject  { background: rgba(248,113,113,0.15); color: var(--danger); }
+  .btn-remove  { background: rgba(248,113,113,0.15); color: var(--danger); }
+  .btn-primary { background: var(--accent); color: white; }
+  .btn-primary:hover { opacity: 0.9; }
+
+  /* ── Tags / Badges ── */
+  .badge {
+    display: inline-block; padding: 3px 10px; border-radius: 12px;
+    font-size: 12px; font-weight: 600;
+  }
+  .tag {
+    display: inline-block; padding: 2px 8px; border-radius: 10px;
+    font-size: 11px; margin: 1px;
+  }
+  .tag.green  { background: rgba(52,211,153,0.15); color: var(--accent2); }
+  .tag.amber  { background: rgba(251,191,36,0.15); color: var(--warning); }
+  .tag.purple { background: var(--accent-soft); color: var(--accent); }
+
+  /* ── Progress bar ── */
+  .progress-bar { background: var(--card-alt); border-radius: 4px; height: 6px; width: 80px; overflow: hidden; }
+  .progress-fill { background: var(--accent); height: 6px; border-radius: 4px; }
+
+  /* ── Forms ── */
+  .add-form {
+    background: var(--card); border: 1px solid var(--border); border-radius: var(--radius);
+    padding: 20px; margin-bottom: 20px; box-shadow: var(--shadow);
+  }
+  .add-form h3 { font-size: 14px; margin-bottom: 14px; color: var(--accent); }
+  .form-row { display: flex; gap: 10px; align-items: flex-start; flex-wrap: wrap; }
+  .form-row input, .form-row select {
+    padding: 8px 12px; border: 1px solid var(--border); background: var(--card-alt);
+    color: var(--text); border-radius: 6px; font-size: 13px; flex: 1; min-width: 140px;
+  }
+  .form-row input:focus, .form-row select:focus { outline: none; border-color: var(--accent); }
+  .search {
+    padding: 8px 14px; border: 1px solid var(--border); background: var(--card-alt);
+    color: var(--text); border-radius: 8px; font-size: 13px; width: 240px; margin-bottom: 14px;
+  }
+  .search:focus { outline: none; border-color: var(--accent); }
+  .search::placeholder { color: var(--muted); }
+  .empty { text-align: center; padding: 32px; color: var(--muted); }
+
+  /* ── Bulk Upload Styles ── */
+  .upload-zone {
+    border: 2px dashed var(--border); border-radius: var(--radius);
+    padding: 40px 20px; text-align: center; cursor: pointer;
+    transition: all 0.25s; background: var(--card-alt); position: relative;
+  }
+  .upload-zone:hover, .upload-zone.dragover {
+    border-color: var(--accent); background: rgba(108,99,255,0.06);
+  }
+  .upload-zone.dragover {
+    transform: scale(1.01);
+    box-shadow: 0 0 0 4px rgba(108,99,255,0.15);
+  }
+  .upload-zone-icon { font-size: 40px; margin-bottom: 8px; }
+  .upload-zone-text { color: var(--muted); font-size: 13px; line-height: 1.6; }
+  .upload-zone-text strong { color: var(--accent); }
+  .upload-zone input[type="file"] { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
+  .upload-actions { display: flex; gap: 10px; justify-content: center; margin-top: 16px; flex-wrap: wrap; }
+  .btn-outline {
+    padding: 8px 18px; border-radius: 8px; border: 1px solid var(--border);
+    background: var(--card-alt); color: var(--accent); font-size: 13px; font-weight: 500;
+    cursor: pointer; transition: all 0.2s; text-decoration: none;
+  }
+  .btn-outline:hover { background: rgba(108,99,255,0.08); border-color: var(--accent); }
+  .upload-results {
+    margin-top: 20px; background: var(--card); border: 1px solid var(--border);
+    border-radius: var(--radius); overflow: hidden; display: none;
+  }
+  .upload-results.visible { display: block; }
+  .upload-results-header {
+    padding: 14px 18px; display: flex; gap: 14px; align-items: center;
+    border-bottom: 1px solid var(--border); background: var(--card-alt);
+  }
+  .result-pill { padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 600; }
+  .result-pill.green { background: rgba(52,211,153,0.15); color: var(--accent2); }
+  .result-pill.amber { background: rgba(251,191,36,0.15); color: var(--warning); }
+  .result-pill.red   { background: rgba(248,113,113,0.15); color: var(--danger); }
+  .upload-results-body { padding: 14px 18px; max-height: 300px; overflow-y: auto; }
+  .result-row {
+    display: flex; align-items: center; gap: 10px;
+    padding: 6px 0; border-bottom: 1px solid var(--border); font-size: 13px;
+  }
+  .result-row:last-child { border-bottom: none; }
+  .result-icon { width: 20px; text-align: center; }
+  .template-preview {
+    margin-top: 16px; background: var(--card-alt); border: 1px solid var(--border);
+    border-radius: 8px; overflow: hidden;
+  }
+  .template-preview table { font-size: 12px; width: 100%; }
+  .template-preview th { font-size: 10px; padding: 8px 12px; }
+  .template-preview td { padding: 6px 12px; font-size: 12px; }
+  .upload-spinner {
+    display: none; align-items: center; justify-content: center;
+    gap: 10px; padding: 24px; color: var(--accent); font-size: 14px;
+  }
+  .upload-spinner.visible { display: flex; }
+  .upload-spinner .dot {
+    width: 8px; height: 8px; border-radius: 50%; background: var(--accent);
+    animation: dotBounce 0.6s infinite alternate;
+  }
+  .upload-spinner .dot:nth-child(2) { animation-delay: 0.2s; }
+  .upload-spinner .dot:nth-child(3) { animation-delay: 0.4s; }
+  @keyframes dotBounce { 0% { transform: translateY(0); } 100% { transform: translateY(-6px); } }
+
+  /* ── Responsive ── */
+  @media (max-width: 768px) {
+    .stats-row { grid-template-columns: repeat(2, 1fr); }
+    .navbar { padding: 0 16px; flex-wrap: wrap; height: auto; }
+    .nav-tabs { flex-wrap: wrap; gap: 0; }
+    .nav-tab { padding: 0 12px; font-size: .8rem; }
+    .container { padding: 16px; }
+    .form-row { flex-direction: column; }
+    .form-row input, .form-row select { min-width: 100%; }
+    .search { width: 100%; }
+    table { display: block; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+    table thead, table tbody, table tr { min-width: 600px; }
+    .tabs { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+    .tab { white-space: nowrap; flex-shrink: 0; }
+  }
+  @media (max-width: 480px) {
+    .stats-row { grid-template-columns: 1fr; gap: 8px; }
+    .stat-card { padding: 12px; }
+    .stat-num { font-size: 20px; }
+    .navbar-brand { font-size: 1rem; }
+    .nav-tab { padding: 0 8px; font-size: .75rem; }
+    .tab { padding: 8px 14px; font-size: 13px; }
+    .add-form { padding: 14px; }
+    .add-form h3 { font-size: 13px; }
+    .upload-zone { padding: 24px 14px; }
+    .upload-zone-icon { font-size: 32px; }
+  }
+</style>
+<!-- System font stack — no CDN, works offline. -->
+</head>
+<body>
+
+<nav class="navbar">
+  <a class="navbar-brand" href="/teacher">� <span>StudyBuddy</span></a>
+  <div class="nav-tabs">
+    <a class="nav-tab" href="/teacher" title="Live Dashboard">📈 Live Dashboard</a>
+    <a class="nav-tab active" href="/taxonomy-admin" title="Taxonomy Admin">🏷️ Taxonomy Admin</a>
+    <span style="display:inline-flex;align-items:center;gap:5px;font-size:.72rem;font-weight:600;padding:3px 10px;border-radius:20px;background:var(--accent-soft);color:var(--accent);margin-left:14px;" id="live-count">Loading…</span>
+    <span style="display:inline-flex;align-items:center;gap:5px;font-size:.72rem;font-weight:600;padding:3px 10px;border-radius:20px;background:rgba(251,191,36,0.12);color:var(--warning);margin-left:6px;" id="pending-badge">0 pending</span>
+    <button class="nav-tab logout-tab" onclick="logout()" title="Sign out">🚪 Logout</button>
+  </div>
+</nav>
+
+<div class="container">
+
+  <!-- Stats row -->
+  <div class="stats-row">
+    <div class="stat-card">
+      <div class="stat-num" id="stat-learned">0</div>
+      <div class="stat-lbl">Learned topics</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-num" id="stat-pending" style="color:var(--warning);">0</div>
+      <div class="stat-lbl">Pending review</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-num" id="stat-keywords">0</div>
+      <div class="stat-lbl">Live keywords</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-num" id="stat-threshold">2</div>
+      <div class="stat-lbl">Promotion threshold</div>
+    </div>
+  </div>
+
+  <!-- Tabs -->
+  <div class="tabs">
+    <div class="tab active" onclick="showTab('pending')">Pending Review</div>
+    <div class="tab" onclick="showTab('learned')">Learned Topics</div>
+    <div class="tab" onclick="showTab('add')">Add Manually</div>
+    <div class="tab" onclick="showTab('bulk')">📁 Bulk Upload</div>
+  </div>
+
+  <!-- Pending panel -->
+  <div class="panel active" id="panel-pending">
+    <p style="color:var(--muted);margin-bottom:14px;font-size:13px;">
+      Topics students have asked that aren't in the taxonomy yet.
+      Approve to add them instantly. Reject to ignore permanently.
+    </p>
+    <table id="pending-table">
+      <thead>
+        <tr>
+          <th>Topic</th>
+          <th>Subject</th>
+          <th>Times asked</th>
+          <th>Progress</th>
+          <th>Example question</th>
+          <th>First seen</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody id="pending-body">
+        <tr><td colspan="7" class="empty">No pending topics</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Learned panel -->
+  <div class="panel" id="panel-learned">
+    <input class="search" id="learned-search" placeholder="Search topics..." oninput="filterLearned()">
+    <table id="learned-table">
+      <thead>
+        <tr>
+          <th>Topic</th>
+          <th>Subject</th>
+          <th>Keywords</th>
+          <th>Times asked</th>
+          <th>Source</th>
+          <th>Added</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody id="learned-body">
+        <tr><td colspan="7" class="empty">No learned topics yet</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Add manually panel -->
+  <div class="panel" id="panel-add">
+    <div class="add-form">
+      <h3>Add a topic manually</h3>
+      <div class="form-row">
+        <input id="add-topic"    placeholder="Topic name (e.g. black holes)" />
+        <select id="add-subject">
+          <option value="biology">Biology</option>
+          <option value="chemistry">Chemistry</option>
+          <option value="physics">Physics</option>
+          <option value="mathematics">Mathematics</option>
+          <option value="history">History</option>
+          <option value="english">English</option>
+          <option value="computer_science">Computer Science</option>
+          <option value="geography">Geography</option>
+          <option value="other">Other</option>
+        </select>
+        <input id="add-keywords" placeholder="Keywords, comma separated" style="flex:2;" />
+        <button class="btn btn-primary" onclick="addTopic()">Add Topic</button>
+      </div>
+      <p style="font-size:12px;color:var(--muted);margin-top:10px;">
+        Keywords are aliases students might use, e.g. "singularity, event horizon, hawking radiation"
+      </p>
+    </div>
+  </div>
+
+  <!-- Bulk Upload panel -->
+  <div class="panel" id="panel-bulk">
+    <div class="add-form">
+      <h3>📁 Bulk Upload — Add Topics from a Spreadsheet</h3>
+      <p style="font-size:13px;color:var(--muted);margin-bottom:16px;">
+        Upload a <strong>.csv</strong> or <strong>.xlsx</strong> (Excel) file with your topics.
+        Each row becomes a topic in the taxonomy — no need to add them one by one.
+      </p>
+
+      <!-- Template preview -->
+      <div class="template-preview">
+        <table>
+          <thead>
+            <tr><th>topic</th><th>keywords</th><th>subject</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Photosynthesis</td>
+              <td>photosynthesis, chloroplast, light reaction, calvin cycle</td>
+              <td>biology</td>
+            </tr>
+            <tr>
+              <td>Newton's Laws</td>
+              <td>newton, force, motion, inertia, f=ma</td>
+              <td>physics</td>
+            </tr>
+            <tr>
+              <td>Quadratic Equations</td>
+              <td>quadratic, parabola, discriminant, roots</td>
+              <td>mathematics</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="upload-actions" style="margin-top:12px;margin-bottom:18px;">
+        <a href="/admin/taxonomy/template.csv" download class="btn-outline">⬇ Download CSV Template</a>
+      </div>
+
+      <!-- Drop zone -->
+      <div class="upload-zone" id="drop-zone">
+        <input type="file" id="bulk-file" accept=".csv,.xlsx,.xls" onchange="handleFileSelect(event)">
+        <div class="upload-zone-icon">📄</div>
+        <div class="upload-zone-text">
+          <strong>Click to browse</strong> or drag & drop your file here<br>
+          Supports <strong>.csv</strong> and <strong>.xlsx</strong> (Excel)
+        </div>
+      </div>
+
+      <!-- Spinner -->
+      <div class="upload-spinner" id="upload-spinner">
+        <div class="dot"></div><div class="dot"></div><div class="dot"></div>
+        <span>Uploading and processing…</span>
+      </div>
+
+      <!-- Results -->
+      <div class="upload-results" id="upload-results">
+        <div class="upload-results-header" id="results-header"></div>
+        <div class="upload-results-body" id="results-body"></div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+  let allLearned = [];
+  const TAB_NAMES  = ['pending', 'learned', 'add', 'bulk'];
+  const PANEL_IDS  = ['panel-pending', 'panel-learned', 'panel-add', 'panel-bulk'];
+
+  async function logout() {
+    await fetch('/auth/logout', { method: 'POST' });
+    window.location.href = '/login';
+  }
+
+  function showTab(name) {
+    document.querySelectorAll('.tab').forEach((t, i) => {
+      t.classList.toggle('active', TAB_NAMES[i] === name);
+    });
+    document.querySelectorAll('.panel').forEach((p, i) => {
+      p.classList.toggle('active', PANEL_IDS[i] === 'panel-' + name);
+    });
+  }
+
+  async function loadData() {
+    const res  = await fetch('/admin/taxonomy');
+    const data = await res.json();
+
+    document.getElementById('stat-learned').textContent  = data.learnedCount;
+    document.getElementById('stat-pending').textContent  = data.pendingCount;
+    document.getElementById('stat-keywords').textContent = data.liveKeywords;
+    document.getElementById('stat-threshold').textContent= data.threshold;
+    document.getElementById('live-count').textContent    = data.liveKeywords + ' keywords';
+    document.getElementById('pending-badge').textContent = data.pendingCount + ' pending';
+
+    // Render pending
+    const pb = document.getElementById('pending-body');
+    if (data.pending.length === 0) {
+      pb.innerHTML = '<tr><td colspan="7" class="empty">No pending topics — all clear!</td></tr>';
+    } else {
+      pb.innerHTML = data.pending.map(p => `
+        <tr>
+          <td><b>${p.topic}</b></td>
+          <td><span class="tag purple">${p.subject}</span></td>
+          <td>${p.count}</td>
+          <td>
+            <div class="progress-bar">
+              <div class="progress-fill" style="width:${p.pct}%"></div>
+            </div>
+            <span style="font-size:11px;color:var(--muted);">${p.count}/${data.threshold}</span>
+          </td>
+          <td style="max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-style:italic;color:var(--muted);"
+              title="${p.example}">"${p.example}"</td>
+          <td style="font-size:11px;color:var(--muted);">${new Date(p.firstSeen).toLocaleDateString()}</td>
+          <td style="display:flex;gap:6px;">
+            <button class="btn btn-approve" onclick="approve('${p.topic}')">Approve</button>
+            <button class="btn btn-reject"  onclick="reject('${p.topic}')">Reject</button>
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    // Render learned
+    allLearned = data.learned;
+    renderLearned(allLearned);
+  }
+
+  function renderLearned(list) {
+    const lb = document.getElementById('learned-body');
+    if (list.length === 0) {
+      lb.innerHTML = '<tr><td colspan="7" class="empty">No learned topics yet.<br>Topics will appear here after students ask about them.</td></tr>';
+      return;
+    }
+    lb.innerHTML = list.map(t => `
+      <tr>
+        <td><b>${t.topic}</b></td>
+        <td><span class="tag purple">${t.subject}</span></td>
+        <td>${t.keywords} keywords</td>
+        <td><span class="tag green">${t.askCount} asks</span></td>
+        <td><span class="tag ${t.source === 'manual' ? 'amber' : ''}">${t.source}</span></td>
+        <td style="font-size:11px;color:var(--muted);">${new Date(t.addedAt).toLocaleDateString()}</td>
+        <td><button class="btn btn-remove" onclick="removeLearned('${t.topic}')">Remove</button></td>
+      </tr>
+    `).join('');
+  }
+
+  function filterLearned() {
+    const q = document.getElementById('learned-search').value.toLowerCase();
+    renderLearned(allLearned.filter(t => t.topic.includes(q) || t.subject.includes(q)));
+  }
+
+  async function approve(topic) {
+    await fetch(`/admin/taxonomy/pending/${encodeURIComponent(topic)}/approve`, { method: 'POST' });
+    loadData();
+  }
+
+  async function reject(topic) {
+    if (!confirm(`Reject "${topic}"? It will be ignored permanently.`)) return;
+    await fetch(`/admin/taxonomy/pending/${encodeURIComponent(topic)}`, { method: 'DELETE' });
+    loadData();
+  }
+
+  async function removeLearned(topic) {
+    if (!confirm(`Remove "${topic}" from learned taxonomy?`)) return;
+    await fetch(`/admin/taxonomy/learned/${encodeURIComponent(topic)}`, { method: 'DELETE' });
+    loadData();
+  }
+
+  async function addTopic() {
+    const topic    = document.getElementById('add-topic').value.trim();
+    const subject  = document.getElementById('add-subject').value;
+    const keywords = document.getElementById('add-keywords').value
+                       .split(',').map(k => k.trim()).filter(Boolean);
+    if (!topic) return alert('Please enter a topic name');
+    await fetch('/admin/taxonomy', {
+      method:  'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body:    JSON.stringify({ topic, keywords, subject })
+    });
+    document.getElementById('add-topic').value    = '';
+    document.getElementById('add-keywords').value = '';
+    alert(`Added "${topic}" to taxonomy!`);
+    loadData();
+  }
+
+  // Load on page open
+  loadData();
+  // Auto-refresh every 10 seconds
+  setInterval(loadData, 10000);
+
+  // ── Bulk Upload Logic ────────────────────────────────────
+
+  // Drag-and-drop handling
+  const dropZone = document.getElementById('drop-zone');
+  dropZone.addEventListener('dragover', (e) => {
+    e.preventDefault();
+    dropZone.classList.add('dragover');
+  });
+  dropZone.addEventListener('dragleave', () => {
+    dropZone.classList.remove('dragover');
+  });
+  dropZone.addEventListener('drop', (e) => {
+    e.preventDefault();
+    dropZone.classList.remove('dragover');
+    const file = e.dataTransfer.files[0];
+    if (file) uploadFile(file);
+  });
+
+  function handleFileSelect(event) {
+    const file = event.target.files[0];
+    if (file) uploadFile(file);
+  }
+
+  async function uploadFile(file) {
+    // Validate file type
+    const ext = file.name.split('.').pop().toLowerCase();
+    if (!['csv', 'xlsx', 'xls'].includes(ext)) {
+      alert('Please upload a .csv or .xlsx file');
+      return;
+    }
+
+    // Show spinner, hide previous results
+    document.getElementById('upload-spinner').classList.add('visible');
+    document.getElementById('upload-results').classList.remove('visible');
+
+    const formData = new FormData();
+    formData.append('file', file);
+
+    try {
+      const res = await fetch('/admin/taxonomy/bulk-upload', {
+        method: 'POST',
+        body: formData
+      });
+      const data = await res.json();
+
+      // Hide spinner
+      document.getElementById('upload-spinner').classList.remove('visible');
+
+      if (!res.ok) {
+        showUploadError(data.error || 'Upload failed');
+        return;
+      }
+
+      // Show results
+      showUploadResults(data, file.name);
+
+      // Refresh the taxonomy data
+      loadData();
+
+    } catch (err) {
+      document.getElementById('upload-spinner').classList.remove('visible');
+      showUploadError('Network error: ' + err.message);
+    }
+
+    // Reset file input so the same file can be re-uploaded
+    document.getElementById('bulk-file').value = '';
+  }
+
+  function showUploadResults(data, fileName) {
+    const resultsEl = document.getElementById('upload-results');
+    const headerEl  = document.getElementById('results-header');
+    const bodyEl    = document.getElementById('results-body');
+
+    // Header with summary pills
+    headerEl.innerHTML = `
+      <span style="font-weight:600;font-size:13px;">📄 ${fileName}</span>
+      <span class="result-pill green">✓ ${data.added} added</span>
+      ${data.skipped > 0 ? `<span class="result-pill amber">⊘ ${data.skipped} skipped</span>` : ''}
+      ${data.errors > 0 ? `<span class="result-pill red">✕ ${data.errors} errors</span>` : ''}
+      <span style="font-size:12px;color:var(--muted);margin-left:auto;">${data.total_rows} rows processed</span>
+    `;
+
+    // Body with per-row details
+    let html = '';
+
+    // Added topics
+    if (data.details.added.length > 0) {
+      html += '<div style="font-size:11px;font-weight:600;color:var(--accent2);margin-bottom:6px;margin-top:8px;">ADDED</div>';
+      data.details.added.forEach(r => {
+        html += `<div class="result-row">
+          <span class="result-icon">✅</span>
+          <span><b>${r.topic}</b></span>
+          <span class="tag green">${r.keywords_count} keywords</span>
+          <span style="font-size:11px;color:var(--muted);">Row ${r.row}</span>
+        </div>`;
+      });
+    }
+
+    // Skipped
+    if (data.details.skipped.length > 0) {
+      html += '<div style="font-size:11px;font-weight:600;color:var(--warning);margin-bottom:6px;margin-top:12px;">SKIPPED</div>';
+      data.details.skipped.forEach(r => {
+        html += `<div class="result-row">
+          <span class="result-icon">⚠️</span>
+          <span style="color:var(--muted);">${r.reason}</span>
+          <span style="font-size:11px;color:var(--muted);">Row ${r.row}</span>
+        </div>`;
+      });
+    }
+
+    // Errors
+    if (data.details.errors.length > 0) {
+      html += '<div style="font-size:11px;font-weight:600;color:var(--danger);margin-bottom:6px;margin-top:12px;">ERRORS</div>';
+      data.details.errors.forEach(r => {
+        html += `<div class="result-row">
+          <span class="result-icon">❌</span>
+          <span><b>${r.topic}</b>: ${r.error}</span>
+          <span style="font-size:11px;color:var(--muted);">Row ${r.row}</span>
+        </div>`;
+      });
+    }
+
+    bodyEl.innerHTML = html;
+    resultsEl.classList.add('visible');
+  }
+
+  function showUploadError(message) {
+    const resultsEl = document.getElementById('upload-results');
+    const headerEl  = document.getElementById('results-header');
+    const bodyEl    = document.getElementById('results-body');
+
+    headerEl.innerHTML = `<span class="result-pill red">Upload Failed</span>`;
+    bodyEl.innerHTML = `<div class="result-row">
+      <span class="result-icon">❌</span>
+      <span>${message}</span>
+    </div>`;
+    resultsEl.classList.add('visible');
+  }
+</script>
+</body>
+</html>

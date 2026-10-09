@@ -1,0 +1,910 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>StudyBuddy — Student Reports</title>
+  <script src="/vendor/jspdf.umd.min.js"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg:       #0a0a0f;
+      --card:     #141420;
+      --card-alt: #1c1c2e;
+      --border:   #2a2a3d;
+      --text:     #e8e8f0;
+      --muted:    #8888a0;
+      --accent:   #6C63FF;
+      --accent2:  #34d399;
+      --danger:   #f87171;
+      --warning:  #fbbf24;
+      --info:     #60a5fa;
+      --radius:   12px;
+    }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+    }
+
+    /* ── Navbar ── */
+    .navbar {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 28px;
+      background: var(--card);
+      border-bottom: 1px solid var(--border);
+      position: sticky; top: 0; z-index: 100; height: 56px;
+    }
+    .navbar-brand {
+      display: flex; align-items: center; gap: 10px;
+      font-size: 1.15rem; font-weight: 700;
+      text-decoration: none; color: var(--text);
+    }
+    .navbar-brand span { color: var(--accent); }
+    .nav-tabs { display: flex; align-items: center; gap: 0; height: 100%; }
+    .nav-tab {
+      display: flex; align-items: center; gap: 6px;
+      padding: 0 20px; height: 100%;
+      font-size: .875rem; font-weight: 500; color: var(--muted);
+      text-decoration: none;
+      border-bottom: 2px solid transparent;
+      transition: color .2s, border-color .2s;
+      cursor: pointer;
+      background: none; border-top: none; border-left: none; border-right: none; border-radius: 0;
+    }
+    .nav-tab:hover { color: var(--text); }
+    .nav-tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+    .nav-tab.logout-tab { color: var(--danger); }
+
+    /* ── Page Layout ── */
+    .page { max-width: 960px; margin: 0 auto; padding: 32px 24px; }
+    .page-header { margin-bottom: 28px; }
+    .page-header h1 { font-size: 1.6rem; font-weight: 700; margin-bottom: 6px; }
+    .page-header p  { color: var(--muted); font-size: .9rem; }
+
+    /* ── Controls ── */
+    .controls-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 24px;
+      margin-bottom: 24px;
+    }
+    .controls-row {
+      display: flex; align-items: flex-end; gap: 16px; flex-wrap: wrap;
+    }
+    .form-field { display: flex; flex-direction: column; gap: 6px; flex: 1; min-width: 200px; }
+    .form-field label { font-size: .8rem; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: .05em; }
+    select, input[type="text"] {
+      background: var(--card-alt);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--text);
+      padding: 10px 14px;
+      font-size: .9rem;
+      font-family: inherit;
+      outline: none;
+      transition: border-color .2s;
+    }
+    select:focus, input[type="text"]:focus { border-color: var(--accent); }
+    .btn {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 10px 20px; border-radius: 8px;
+      font-size: .9rem; font-weight: 600;
+      cursor: pointer; border: none; transition: opacity .2s, transform .1s;
+    }
+    .btn:hover { opacity: .88; }
+    .btn:active { transform: scale(.97); }
+    .btn-primary { background: var(--accent); color: #fff; }
+    .btn-success { background: var(--accent2); color: #0a0a0f; }
+    .btn-outline  {
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--text);
+    }
+    .btn:disabled { opacity: .4; cursor: not-allowed; }
+
+    /* ── Preview Card ── */
+    .preview-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+      display: none;
+    }
+    .preview-card.visible { display: block; }
+    .preview-header {
+      padding: 20px 24px;
+      border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px;
+    }
+    .preview-header h2 { font-size: 1.1rem; font-weight: 700; }
+    .preview-body { padding: 24px; }
+
+    /* ── Report Sections ── */
+    .report-meta { display: flex; gap: 32px; flex-wrap: wrap; margin-bottom: 24px; }
+    .meta-item { display: flex; flex-direction: column; gap: 4px; }
+    .meta-label { font-size: .72rem; font-weight: 600; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); }
+    .meta-value { font-size: 1.15rem; font-weight: 700; }
+
+    .section { margin-bottom: 28px; }
+    .section-title {
+      font-size: .8rem; font-weight: 700; text-transform: uppercase;
+      letter-spacing: .06em; color: var(--muted);
+      margin-bottom: 12px; padding-bottom: 8px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    /* Stat pills row */
+    .stat-row { display: flex; gap: 12px; flex-wrap: wrap; }
+    .stat-pill {
+      background: var(--card-alt); border: 1px solid var(--border);
+      border-radius: 10px; padding: 12px 18px;
+      display: flex; flex-direction: column; gap: 4px;
+      min-width: 100px; flex: 1;
+    }
+    .stat-pill .label { font-size: .72rem; color: var(--muted); font-weight: 600; text-transform: uppercase; }
+    .stat-pill .value { font-size: 1.4rem; font-weight: 800; }
+    .stat-pill.green .value { color: var(--accent2); }
+    .stat-pill.purple .value { color: var(--accent); }
+    .stat-pill.yellow .value { color: var(--warning); }
+    .stat-pill.red .value { color: var(--danger); }
+
+    /* Topic lists */
+    .topic-list { display: flex; flex-direction: column; gap: 8px; }
+    .topic-row {
+      display: flex; align-items: center; gap: 12px;
+      background: var(--card-alt); border: 1px solid var(--border);
+      border-radius: 8px; padding: 10px 14px;
+    }
+    .topic-name { flex: 1; font-size: .9rem; font-weight: 500; }
+    .topic-badge {
+      font-size: .72rem; font-weight: 700; padding: 3px 10px;
+      border-radius: 20px; text-transform: uppercase; letter-spacing: .04em;
+    }
+    .badge-mastered  { background: rgba(52,211,153,.15); color: var(--accent2); }
+    .badge-developing{ background: rgba(251,191,36,.15);  color: var(--warning); }
+    .badge-needs-work{ background: rgba(248,113,113,.15); color: var(--danger); }
+    .badge-untested  { background: rgba(136,136,160,.15); color: var(--muted); }
+    .topic-score { font-size: .85rem; font-weight: 700; color: var(--muted); min-width: 40px; text-align: right; }
+
+    /* Bar chart */
+    .bar-chart { display: flex; flex-direction: column; gap: 6px; }
+    .bar-row { display: flex; align-items: center; gap: 10px; }
+    .bar-label { font-size: .8rem; color: var(--muted); width: 130px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; flex-shrink: 0; }
+    .bar-track { flex: 1; background: var(--card-alt); border-radius: 4px; height: 10px; overflow: hidden; }
+    .bar-fill  { height: 100%; border-radius: 4px; transition: width .4s; }
+    .bar-val   { font-size: .78rem; font-weight: 700; color: var(--muted); min-width: 34px; text-align: right; }
+
+    /* Engagement ring */
+    .engagement-ring {
+      display: flex; align-items: center; gap: 16px;
+      margin-bottom: 12px;
+    }
+    .ring-svg { flex-shrink: 0; }
+    .ring-desc { font-size: .85rem; color: var(--muted); line-height: 1.6; }
+
+    /* Status bar */
+    .status-bar {
+      position: fixed; bottom: 20px; right: 24px;
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: 10px; padding: 10px 18px;
+      font-size: .82rem; color: var(--muted);
+      display: none; gap: 8px; align-items: center;
+      box-shadow: 0 4px 24px rgba(0,0,0,.5);
+      z-index: 999;
+    }
+    .status-bar.visible { display: flex; }
+    .spinner {
+      width: 14px; height: 14px;
+      border: 2px solid var(--border);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin .7s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .empty-state {
+      text-align: center; padding: 48px 24px; color: var(--muted);
+    }
+    .empty-state .icon { font-size: 3rem; margin-bottom: 12px; }
+    .empty-state p { font-size: .95rem; }
+
+    @media (max-width: 600px) {
+      .page { padding: 20px 16px; }
+      .controls-row { flex-direction: column; }
+      .report-meta { gap: 16px; }
+      .nav-tab { padding: 0 12px; font-size: .8rem; }
+    }
+  </style>
+</head>
+<body>
+
+<nav class="navbar">
+  <a class="navbar-brand" href="/teacher">📊 <span>StudyBuddy</span></a>
+  <div class="nav-tabs">
+    <a class="nav-tab" href="/teacher" title="Live Dashboard">📈 Live Dashboard</a>
+    <a class="nav-tab" href="/taxonomy-admin" title="Taxonomy Admin">🏷️ Taxonomy Admin</a>
+    <a class="nav-tab active" href="/teacher/reports" title="Student Reports">📄 Reports</a>
+    <button class="nav-tab logout-tab" onclick="logout()" title="Sign out">🚪 Logout</button>
+  </div>
+</nav>
+
+<div class="page">
+  <div class="page-header">
+    <h1>📄 Student Performance Reports</h1>
+    <p>Generate and download PDF reports for individual students — includes strengths, weaknesses, quiz scores, and SRS progress.</p>
+  </div>
+
+  <!-- Controls -->
+  <div class="controls-card">
+    <div class="controls-row">
+      <div class="form-field">
+        <label for="studentSelect">Select Student</label>
+        <div style="display:flex;gap:8px;align-items:center;">
+          <select id="studentSelect" style="flex:1;"></select>
+          <button class="btn btn-outline" onclick="loadStudents()" title="Refresh student list" style="padding:10px 12px;flex-shrink:0;">🔄</button>
+        </div>
+      </div>
+      <div class="form-field" style="max-width:260px;">
+        <label for="reportTitle">Report Title (optional)</label>
+        <input type="text" id="reportTitle" placeholder="e.g. Term 1 Progress Report">
+      </div>
+      <div style="display:flex;gap:10px;align-items:flex-end;">
+        <button class="btn btn-primary" id="btnPreview" onclick="generatePreview()" disabled>
+          👁️ Preview
+        </button>
+        <button class="btn btn-success" id="btnDownload" onclick="downloadPDF()" disabled>
+          ⬇️ Download PDF
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Preview -->
+  <div class="preview-card" id="previewCard">
+    <div class="preview-header">
+      <h2 id="previewTitle">Student Report</h2>
+      <div style="display:flex;gap:10px;">
+        <span id="generatedAt" style="font-size:.8rem;color:var(--muted);align-self:center;"></span>
+        <button class="btn btn-success" onclick="downloadPDF()">⬇️ Download PDF</button>
+      </div>
+    </div>
+    <div class="preview-body" id="previewBody">
+      <div class="empty-state">
+        <div class="icon">📋</div>
+        <p>Select a student and click Preview to generate their report.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Status bar -->
+<div class="status-bar" id="statusBar">
+  <div class="spinner"></div>
+  <span id="statusText">Generating report…</span>
+</div>
+
+<script>
+// ── State ──
+let currentReport = null;
+
+// ── Boot ──
+(async () => {
+  try {
+    const r = await fetch('/auth/me');
+    const d = await r.json();
+    if (!d.authenticated || d.role !== 'teacher') {
+      window.location.href = '/login';
+      return;
+    }
+    await loadStudents();
+    // Attach change listener once after initial load
+    document.getElementById('studentSelect').addEventListener('change', () => {
+      currentReport = null;
+      const val = document.getElementById('studentSelect').value;
+      document.getElementById('btnPreview').disabled  = !val;
+      document.getElementById('btnDownload').disabled = true;
+      document.getElementById('previewCard').classList.remove('visible');
+      document.getElementById('previewBody').innerHTML = `
+        <div class="empty-state">
+          <div class="icon">📋</div>
+          <p>Select a student and click Preview to generate their report.</p>
+        </div>`;
+    });
+  } catch {
+    window.location.href = '/login';
+  }
+})();
+
+async function loadStudents() {
+  const sel = document.getElementById('studentSelect');
+  const prevVal = sel.value;
+  sel.innerHTML = '<option value="">— Loading… —</option>';
+  try {
+    const r = await fetch('/api/students');
+    const d = await r.json();
+    const students = d.students || [];
+    if (students.length === 0) {
+      sel.innerHTML = '<option value="">— No students yet —</option>';
+      // No students means data was cleared — reset everything
+      currentReport = null;
+      document.getElementById('btnPreview').disabled  = true;
+      document.getElementById('btnDownload').disabled = true;
+      document.getElementById('previewCard').classList.remove('visible');
+      return;
+    }
+    sel.innerHTML = '<option value="">— Select a student —</option>';
+    students.forEach(s => {
+      const opt = document.createElement('option');
+      opt.value = s.id;
+      opt.textContent = `${s.name} (${s.id})`;
+      sel.appendChild(opt);
+    });
+    // Re-select previous student if they still exist
+    const stillExists = students.some(s => s.id === prevVal);
+    if (stillExists) {
+      sel.value = prevVal;
+    } else if (prevVal) {
+      // Previously selected student was cleared — reset preview
+      currentReport = null;
+      document.getElementById('btnDownload').disabled = true;
+      document.getElementById('previewCard').classList.remove('visible');
+      document.getElementById('previewBody').innerHTML = `
+        <div class="empty-state">
+          <div class="icon">�️</div>
+          <p>The previously selected student's data has been cleared.</p>
+          <p style="margin-top:8px;font-size:.82rem;">Select another student to generate a report.</p>
+        </div>`;
+      document.getElementById('previewCard').classList.add('visible');
+    }
+    document.getElementById('btnPreview').disabled = !sel.value;
+  } catch (err) {
+    sel.innerHTML = '<option value="">— Error loading students —</option>';
+    console.error('Failed to load students', err);
+  }
+}
+
+async function fetchReport(studentId) {
+  const r = await fetch(`/api/student-report/${encodeURIComponent(studentId)}`);
+  if (!r.ok) throw new Error(await r.text());
+  return r.json();
+}
+
+async function generatePreview() {
+  const studentId = document.getElementById('studentSelect').value;
+  if (!studentId) return;
+
+  // Always reset before fetching — never show stale data
+  currentReport = null;
+  document.getElementById('btnDownload').disabled = true;
+  document.getElementById('previewCard').classList.remove('visible');
+
+  showStatus('Fetching student data…');
+  try {
+    const report = await fetchReport(studentId);
+
+    // Check if the student has any actual data after a clear
+    const isEmpty = report.summary.totalSessions === 0 && report.summary.totalTopics === 0;
+    if (isEmpty) {
+      document.getElementById('previewCard').classList.add('visible');
+      document.getElementById('previewTitle').textContent = `${report.student.name} — No Data`;
+      document.getElementById('generatedAt').textContent  = '';
+      document.getElementById('previewBody').innerHTML = `
+        <div class="empty-state">
+          <div class="icon">🗑️</div>
+          <p><strong>${esc(report.student.name)}</strong> has no recorded sessions or topics.</p>
+          <p style="margin-top:8px;font-size:.82rem;">Data may have been cleared. Ask the student to complete at least one session first.</p>
+        </div>`;
+      return;
+    }
+
+    currentReport = report;
+    renderPreview(report);
+    document.getElementById('btnDownload').disabled = false;
+    document.getElementById('previewCard').classList.add('visible');
+  } catch (err) {
+    alert('Failed to load report: ' + err.message);
+  } finally {
+    hideStatus();
+  }
+}
+
+function renderPreview(r) {
+  const title = document.getElementById('reportTitle').value.trim() || 'Performance Report';
+  document.getElementById('previewTitle').textContent = `${r.student.name} — ${title}`;
+  document.getElementById('generatedAt').textContent  = `Generated: ${new Date(r.generatedAt).toLocaleString()}`;
+
+  const engColor = r.summary.engagement >= 70 ? '#34d399' : r.summary.engagement >= 40 ? '#fbbf24' : '#f87171';
+
+  const topicsHtml = r.topicDetails.length === 0
+    ? '<p style="color:var(--muted);font-size:.875rem;">No topics studied yet.</p>'
+    : buildTopicBars(r.topicDetails);
+
+  const strengthsHtml  = buildTopicList(r.strengths,  'mastered');
+  const developingHtml = buildTopicList(r.developing, 'developing');
+  const needsWorkHtml  = buildTopicList(r.needsWork,  'needs-work');
+  const untestedHtml   = buildTopicList(r.untested,   'untested');
+
+  document.getElementById('previewBody').innerHTML = `
+    <!-- Student Meta -->
+    <div class="report-meta">
+      <div class="meta-item">
+        <span class="meta-label">Student</span>
+        <span class="meta-value">${esc(r.student.name)}</span>
+      </div>
+      <div class="meta-item">
+        <span class="meta-label">Student ID</span>
+        <span class="meta-value" style="font-size:.95rem;color:var(--muted)">${esc(r.student.id)}</span>
+      </div>
+      <div class="meta-item">
+        <span class="meta-label">First Seen</span>
+        <span class="meta-value" style="font-size:.9rem;">${fmtDate(r.student.firstSeen)}</span>
+      </div>
+      <div class="meta-item">
+        <span class="meta-label">Last Active</span>
+        <span class="meta-value" style="font-size:.9rem;">${fmtDate(r.student.lastSeen)}</span>
+      </div>
+    </div>
+
+    <!-- Summary Stats -->
+    <div class="section">
+      <div class="section-title">Summary</div>
+      <div class="stat-row">
+        <div class="stat-pill purple">
+          <span class="label">Topics</span>
+          <span class="value">${r.summary.totalTopics}</span>
+        </div>
+        <div class="stat-pill purple">
+          <span class="label">Sessions</span>
+          <span class="value">${r.summary.totalSessions}</span>
+        </div>
+        <div class="stat-pill ${r.streak.current >= 3 ? 'green' : 'yellow'}">
+          <span class="label">Streak</span>
+          <span class="value">${r.streak.current}d</span>
+        </div>
+        <div class="stat-pill ${r.streak.longest >= 5 ? 'green' : 'yellow'}">
+          <span class="label">Best Streak</span>
+          <span class="value">${r.streak.longest}d</span>
+        </div>
+        <div class="stat-pill ${r.summary.dueReviews > 0 ? 'red' : 'green'}">
+          <span class="label">Due Reviews</span>
+          <span class="value">${r.summary.dueReviews}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Engagement -->
+    <div class="section">
+      <div class="section-title">Engagement Score</div>
+      <div class="engagement-ring">
+        <svg class="ring-svg" width="72" height="72" viewBox="0 0 72 72">
+          <circle cx="36" cy="36" r="28" fill="none" stroke="var(--border)" stroke-width="8"/>
+          <circle cx="36" cy="36" r="28" fill="none" stroke="${engColor}" stroke-width="8"
+            stroke-dasharray="${Math.round(2*Math.PI*28 * r.summary.engagement / 100)} 999"
+            stroke-linecap="round"
+            transform="rotate(-90 36 36)"/>
+          <text x="36" y="41" text-anchor="middle" font-size="14" font-weight="800" fill="${engColor}">${r.summary.engagement}</text>
+        </svg>
+        <div class="ring-desc">
+          Engagement is calculated from session count, streak, and breadth of topics studied.<br>
+          <strong style="color:${engColor}">${engLabel(r.summary.engagement)}</strong>
+        </div>
+      </div>
+    </div>
+
+    <!-- Strengths -->
+    <div class="section">
+      <div class="section-title">✅ Strengths (avg ≥ 85%)</div>
+      ${r.strengths.length ? strengthsHtml : '<p style="color:var(--muted);font-size:.875rem;">No mastered topics yet — keep practising!</p>'}
+    </div>
+
+    <!-- Developing -->
+    <div class="section">
+      <div class="section-title">📈 Developing (65–84%)</div>
+      ${r.developing.length ? developingHtml : '<p style="color:var(--muted);font-size:.875rem;">None in this range.</p>'}
+    </div>
+
+    <!-- Needs Work -->
+    <div class="section">
+      <div class="section-title">⚠️ Needs Work (< 65%)</div>
+      ${r.needsWork.length ? needsWorkHtml : '<p style="color:var(--muted);font-size:.875rem;">None — great job!</p>'}
+    </div>
+
+    <!-- Untested -->
+    ${r.untested.length ? `
+    <div class="section">
+      <div class="section-title">🔵 Explored but Not Quizzed</div>
+      ${untestedHtml}
+    </div>` : ''}
+
+    <!-- Topic Score Bars -->
+    ${r.topicDetails.filter(t => t.avgScore !== null).length > 0 ? `
+    <div class="section">
+      <div class="section-title">Quiz Score Breakdown</div>
+      <div class="bar-chart">${topicsHtml}</div>
+    </div>` : ''}
+
+    <!-- Recent Topics -->
+    ${r.recentTopics.length ? `
+    <div class="section">
+      <div class="section-title">Recent Topics</div>
+      <div style="display:flex;flex-wrap:wrap;gap:8px;">
+        ${r.recentTopics.map(t => `<span style="background:var(--card-alt);border:1px solid var(--border);border-radius:20px;padding:4px 12px;font-size:.8rem;">${esc(t)}</span>`).join('')}
+      </div>
+    </div>` : ''}
+  `;
+}
+
+function buildTopicList(topics, masteryClass) {
+  if (!topics.length) return '';
+  return `<div class="topic-list">${topics.map(t => `
+    <div class="topic-row">
+      <span class="topic-name">${esc(t.name)}</span>
+      <span style="font-size:.78rem;color:var(--muted);">×${t.timesStudied}</span>
+      <span class="topic-badge badge-${masteryClass}">${t.mastery}</span>
+      <span class="topic-score">${t.avgScore !== null ? t.avgScore + '%' : '—'}</span>
+    </div>`).join('')}</div>`;
+}
+
+function buildTopicBars(topics) {
+  return topics
+    .filter(t => t.avgScore !== null)
+    .sort((a,b) => b.avgScore - a.avgScore)
+    .map(t => {
+      const col = t.avgScore >= 85 ? '#34d399' : t.avgScore >= 65 ? '#fbbf24' : '#f87171';
+      return `<div class="bar-row">
+        <span class="bar-label" title="${esc(t.name)}">${esc(t.name)}</span>
+        <div class="bar-track"><div class="bar-fill" style="width:${t.avgScore}%;background:${col};"></div></div>
+        <span class="bar-val">${t.avgScore}%</span>
+      </div>`;
+    }).join('');
+}
+
+// ── PDF Generation ──
+async function downloadPDF() {
+  if (!currentReport) { await generatePreview(); }
+  if (!currentReport) return;
+
+  showStatus('Building PDF…');
+  try {
+    const { jsPDF } = window.jspdf;
+    const r = currentReport;
+    const title = document.getElementById('reportTitle').value.trim() || 'Performance Report';
+    const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+    const W = 210, H = 297;
+    let y = 0;
+
+    // ── Helpers ──
+    const col = { purple:'#6C63FF', green:'#34d399', red:'#f87171', yellow:'#fbbf24', muted:'#8888a0', text:'#1a1a2e', bg:'#f7f7fb', white:'#ffffff', border:'#e2e2ef' };
+
+    function newPage() { doc.addPage(); y = 20; }
+    function checkY(need = 20) { if (y + need > H - 20) newPage(); }
+
+    function sectionTitle(label, iconChar) {
+      checkY(14);
+      doc.setFillColor(col.bg);
+      doc.roundedRect(14, y, W-28, 9, 2, 2, 'F');
+      doc.setFontSize(8); doc.setFont('helvetica','bold');
+      doc.setTextColor(col.muted);
+      doc.text(`${iconChar}  ${label.toUpperCase()}`, 19, y+6);
+      y += 13;
+    }
+
+    function masteryColor(m) {
+      return m==='mastered' ? col.green : m==='developing' ? col.yellow : m==='needs-work' ? col.red : col.muted;
+    }
+
+    // ────────────────────────────────────────────
+    // PAGE 1 — Cover
+    // ────────────────────────────────────────────
+    doc.setFillColor('#0a0a0f');
+    doc.rect(0, 0, W, H, 'F');
+
+    // Accent bar
+    doc.setFillColor(col.purple);
+    doc.rect(0, 0, W, 3, 'F');
+
+    // Logo area
+    doc.setFontSize(28); doc.setFont('helvetica','bold'); doc.setTextColor('#ffffff');
+    doc.text('StudyBuddy', W/2, 50, { align:'center' });
+    doc.setFontSize(11); doc.setFont('helvetica','normal'); doc.setTextColor(col.muted);
+    doc.text('AI-Powered Learning Platform', W/2, 59, { align:'center' });
+
+    // Report title box
+    doc.setFillColor('#141420');
+    doc.roundedRect(30, 74, W-60, 28, 4, 4, 'F');
+    doc.setFontSize(13); doc.setFont('helvetica','bold'); doc.setTextColor('#ffffff');
+    doc.text(title, W/2, 84, { align:'center', maxWidth: W-70 });
+    doc.setFontSize(9); doc.setFont('helvetica','normal'); doc.setTextColor(col.muted);
+    doc.text('Prepared for', W/2, 92, { align:'center' });
+    doc.setFontSize(16); doc.setFont('helvetica','bold'); doc.setTextColor(col.purple);
+    doc.text(r.student.name, W/2, 101, { align:'center' });
+
+    // Divider
+    doc.setDrawColor(col.purple); doc.setLineWidth(.4);
+    doc.line(50, 112, W-50, 112);
+
+    // Quick stats row
+    const stats = [
+      { label:'Topics Studied', val: r.summary.totalTopics },
+      { label:'Sessions',       val: r.summary.totalSessions },
+      { label:'Day Streak',     val: r.streak.current + 'd' },
+      { label:'Engagement',     val: r.summary.engagement + '/100' }
+    ];
+    stats.forEach((s, i) => {
+      const x = 20 + i * 44;
+      doc.setFontSize(18); doc.setFont('helvetica','bold'); doc.setTextColor(col.purple);
+      doc.text(String(s.val), x + 20, 128, { align:'center' });
+      doc.setFontSize(7.5); doc.setFont('helvetica','normal'); doc.setTextColor(col.muted);
+      doc.text(s.label, x + 20, 135, { align:'center' });
+    });
+
+    // Dates
+    doc.setFontSize(8); doc.setFont('helvetica','normal'); doc.setTextColor(col.muted);
+    doc.text(`First seen: ${fmtDate(r.student.firstSeen)}   •   Last active: ${fmtDate(r.student.lastSeen)}`, W/2, 150, { align:'center' });
+    doc.text(`Report generated: ${new Date(r.generatedAt).toLocaleString()}`, W/2, 157, { align:'center' });
+
+    // Strengths / Needs Work callout boxes
+    if (r.strengths.length || r.needsWork.length) {
+      let bx = 20;
+      if (r.strengths.length) {
+        doc.setFillColor('#0d2c20');
+        doc.roundedRect(bx, 168, (W/2)-26, 40, 3, 3, 'F');
+        doc.setFontSize(8); doc.setFont('helvetica','bold'); doc.setTextColor(col.green);
+        doc.text('✓  TOP STRENGTHS', bx+6, 178);
+        doc.setFontSize(8); doc.setFont('helvetica','normal'); doc.setTextColor('#b0f0d8');
+        r.strengths.slice(0,4).forEach((t,i) => {
+          doc.text(`• ${t.name} (${t.avgScore}%)`, bx+6, 186 + i*6);
+        });
+        bx = W/2 + 6;
+      }
+      if (r.needsWork.length) {
+        doc.setFillColor('#2c0d0d');
+        doc.roundedRect(bx, 168, (W/2)-26, 40, 3, 3, 'F');
+        doc.setFontSize(8); doc.setFont('helvetica','bold'); doc.setTextColor(col.red);
+        doc.text('⚠  NEEDS ATTENTION', bx+6, 178);
+        doc.setFontSize(8); doc.setFont('helvetica','normal'); doc.setTextColor('#f0b0b0');
+        r.needsWork.slice(0,4).forEach((t,i) => {
+          doc.text(`• ${t.name} (${t.avgScore}%)`, bx+6, 186 + i*6);
+        });
+      }
+    }
+
+    // Footer
+    doc.setFillColor(col.purple);
+    doc.rect(0, H-12, W, 12, 'F');
+    doc.setFontSize(7); doc.setFont('helvetica','normal'); doc.setTextColor('#ffffff');
+    doc.text('StudyBuddy — AI-Powered Learning', W/2, H-5, { align:'center' });
+
+    // ────────────────────────────────────────────
+    // PAGE 2 — Detailed Breakdown
+    // ────────────────────────────────────────────
+    doc.addPage();
+    doc.setFillColor(col.bg);
+    doc.rect(0, 0, W, H, 'F');
+    doc.setFillColor(col.purple); doc.rect(0, 0, W, 3, 'F');
+
+    y = 14;
+    doc.setFontSize(13); doc.setFont('helvetica','bold'); doc.setTextColor(col.text);
+    doc.text('Detailed Performance Breakdown', 14, y + 6); y += 16;
+
+    // ── Strengths section ──
+    sectionTitle('Strengths — Mastered Topics', '✓');
+    if (r.strengths.length === 0) {
+      doc.setFontSize(9); doc.setFont('helvetica','italic'); doc.setTextColor(col.muted);
+      doc.text('No mastered topics yet.', 19, y); y += 10;
+    } else {
+      r.strengths.forEach(t => {
+        checkY(10);
+        doc.setFillColor(col.white); doc.setDrawColor(col.border); doc.setLineWidth(.3);
+        doc.roundedRect(14, y, W-28, 8, 1.5, 1.5, 'FD');
+        doc.setFontSize(9); doc.setFont('helvetica','bold'); doc.setTextColor(col.text);
+        doc.text(t.name, 19, y+5.5);
+        doc.setFillColor(col.green);
+        doc.roundedRect(W-65, y+1.5, 22, 5, 1, 1, 'F');
+        doc.setFontSize(7); doc.setFont('helvetica','bold'); doc.setTextColor('#0a0a0f');
+        doc.text('MASTERED', W-64, y+5.3);
+        doc.setFontSize(9); doc.setFont('helvetica','bold'); doc.setTextColor(col.green);
+        doc.text(`${t.avgScore}%`, W-36, y+5.5);
+        doc.setFontSize(7.5); doc.setFont('helvetica','normal'); doc.setTextColor(col.muted);
+        doc.text(`×${t.timesStudied} sessions`, W-22, y+5.5, { align:'right' });
+        y += 10;
+      });
+    }
+    y += 4;
+
+    // ── Developing section ──
+    sectionTitle('Developing Topics', '📈');
+    if (r.developing.length === 0) {
+      doc.setFontSize(9); doc.setFont('helvetica','italic'); doc.setTextColor(col.muted);
+      doc.text('None in this range.', 19, y); y += 10;
+    } else {
+      r.developing.forEach(t => {
+        checkY(10);
+        doc.setFillColor(col.white); doc.setDrawColor(col.border); doc.setLineWidth(.3);
+        doc.roundedRect(14, y, W-28, 8, 1.5, 1.5, 'FD');
+        doc.setFontSize(9); doc.setFont('helvetica','bold'); doc.setTextColor(col.text);
+        doc.text(t.name, 19, y+5.5);
+        doc.setFillColor(col.yellow);
+        doc.roundedRect(W-76, y+1.5, 30, 5, 1, 1, 'F');
+        doc.setFontSize(7); doc.setFont('helvetica','bold'); doc.setTextColor('#0a0a0f');
+        doc.text('DEVELOPING', W-75, y+5.3);
+        doc.setFontSize(9); doc.setFont('helvetica','bold'); doc.setTextColor(col.yellow);
+        doc.text(`${t.avgScore}%`, W-36, y+5.5);
+        doc.setFontSize(7.5); doc.setFont('helvetica','normal'); doc.setTextColor(col.muted);
+        doc.text(`×${t.timesStudied} sessions`, W-22, y+5.5, { align:'right' });
+        y += 10;
+      });
+    }
+    y += 4;
+
+    // ── Needs Work ──
+    sectionTitle('Needs Work — Priority Focus Areas', '⚠');
+    if (r.needsWork.length === 0) {
+      doc.setFontSize(9); doc.setFont('helvetica','italic'); doc.setTextColor(col.muted);
+      doc.text('None — great performance!', 19, y); y += 10;
+    } else {
+      r.needsWork.forEach(t => {
+        checkY(10);
+        doc.setFillColor(col.white); doc.setDrawColor(col.red); doc.setLineWidth(.4);
+        doc.roundedRect(14, y, W-28, 8, 1.5, 1.5, 'FD');
+        doc.setFontSize(9); doc.setFont('helvetica','bold'); doc.setTextColor(col.text);
+        doc.text(t.name, 19, y+5.5);
+        doc.setFillColor(col.red);
+        doc.roundedRect(W-76, y+1.5, 30, 5, 1, 1, 'F');
+        doc.setFontSize(7); doc.setFont('helvetica','bold'); doc.setTextColor('#fff');
+        doc.text('NEEDS WORK', W-75, y+5.3);
+        doc.setFontSize(9); doc.setFont('helvetica','bold'); doc.setTextColor(col.red);
+        doc.text(`${t.avgScore}%`, W-36, y+5.5);
+        doc.setFontSize(7.5); doc.setFont('helvetica','normal'); doc.setTextColor(col.muted);
+        doc.text(`Trend: ${t.trend}`, W-22, y+5.5, { align:'right' });
+        y += 10;
+      });
+    }
+
+    // ────────────────────────────────────────────
+    // PAGE 3 — Score Bars + SRS + Recommendations
+    // ────────────────────────────────────────────
+    doc.addPage();
+    doc.setFillColor(col.bg); doc.rect(0, 0, W, H, 'F');
+    doc.setFillColor(col.purple); doc.rect(0, 0, W, 3, 'F');
+    y = 14;
+    doc.setFontSize(13); doc.setFont('helvetica','bold'); doc.setTextColor(col.text);
+    doc.text('Quiz Scores & SRS Progress', 14, y+6); y += 16;
+
+    const tested = r.topicDetails.filter(t => t.avgScore !== null).sort((a,b) => b.avgScore - a.avgScore);
+    if (tested.length === 0) {
+      doc.setFontSize(9); doc.setFont('helvetica','italic'); doc.setTextColor(col.muted);
+      doc.text('No quiz scores recorded yet.', 19, y); y += 14;
+    } else {
+      sectionTitle('Quiz Score Breakdown', '📊');
+      tested.forEach(t => {
+        checkY(12);
+        const barW = Math.round((W - 80) * t.avgScore / 100);
+        const barCol = t.avgScore >= 85 ? col.green : t.avgScore >= 65 ? col.yellow : col.red;
+        doc.setFontSize(8.5); doc.setFont('helvetica','normal'); doc.setTextColor(col.text);
+        doc.text(t.name.length > 28 ? t.name.slice(0,27)+'…' : t.name, 14, y+4);
+        doc.setFillColor('#e0e0ef'); doc.roundedRect(90, y, W-110, 6, 1, 1, 'F');
+        doc.setFillColor(barCol);   doc.roundedRect(90, y, Math.max(barW, 2), 6, 1, 1, 'F');
+        doc.setFontSize(8); doc.setFont('helvetica','bold'); doc.setTextColor(barCol);
+        doc.text(`${t.avgScore}%`, W-14, y+4.5, { align:'right' });
+        y += 9;
+      });
+      y += 6;
+    }
+
+    // SRS summary
+    sectionTitle('Spaced Repetition Status', '🔁');
+    checkY(10);
+    doc.setFontSize(8.5); doc.setFont('helvetica','normal'); doc.setTextColor(col.muted);
+    doc.text(`${r.summary.dueReviews} topic${r.summary.dueReviews !== 1 ? 's' : ''} currently due for review.`, 19, y); y += 8;
+    const srsItems = r.topicDetails.filter(t => t.nextReview).slice(0, 6);
+    srsItems.forEach(t => {
+      checkY(8);
+      doc.setFillColor(col.white); doc.setDrawColor(col.border); doc.setLineWidth(.25);
+      doc.roundedRect(14, y, W-28, 7, 1, 1, 'FD');
+      doc.setFontSize(8.5); doc.setFont('helvetica','normal'); doc.setTextColor(col.text);
+      doc.text(t.name, 19, y+4.8);
+      doc.setFontSize(7.5); doc.setTextColor(col.muted);
+      doc.text(`Next review: ${fmtDate(t.nextReview)}   •   Interval: ${t.srsInterval}d   •   Reps: ${t.srsRepetitions}`, W-18, y+4.8, { align:'right' });
+      y += 9;
+    });
+    y += 6;
+
+    // Recommendations
+    sectionTitle('Recommendations', '💡');
+    const recs = buildRecommendations(r);
+    recs.forEach(rec => {
+      checkY(14);
+      doc.setFillColor(col.white); doc.setDrawColor(col.border); doc.setLineWidth(.25);
+      doc.roundedRect(14, y, W-28, 12, 2, 2, 'FD');
+      doc.setFontSize(9); doc.setFont('helvetica','bold'); doc.setTextColor(col.text);
+      doc.text(rec.title, 19, y+5);
+      doc.setFontSize(8); doc.setFont('helvetica','normal'); doc.setTextColor(col.muted);
+      const lines = doc.splitTextToSize(rec.detail, W-44);
+      doc.text(lines[0], 19, y+9.5);
+      y += 14;
+    });
+
+    // ── Footer all pages ──
+    const pageCount = doc.getNumberOfPages();
+    for (let i = 1; i <= pageCount; i++) {
+      doc.setPage(i);
+      doc.setFillColor(col.purple); doc.rect(0, H-10, W, 10, 'F');
+      doc.setFontSize(7); doc.setFont('helvetica','normal'); doc.setTextColor('#fff');
+      doc.text(`StudyBuddy — ${r.student.name} — ${title}`, 14, H-4);
+      doc.text(`Page ${i} of ${pageCount}`, W-14, H-4, { align:'right' });
+    }
+
+    const safeName = r.student.name.replace(/[^a-z0-9]/gi,'_');
+    doc.save(`StudyBuddy_${safeName}_${title.replace(/\s+/g,'_')}.pdf`);
+  } catch(err) {
+    console.error(err);
+    alert('PDF generation failed: ' + err.message);
+  } finally {
+    hideStatus();
+  }
+}
+
+// ── Recommendations engine ──
+function buildRecommendations(r) {
+  const out = [];
+  if (r.needsWork.length > 0) {
+    out.push({
+      title: `Focus on: ${r.needsWork[0].name}`,
+      detail: `Scored ${r.needsWork[0].avgScore}% — schedule 2–3 short review sessions this week with targeted quizzes.`
+    });
+  }
+  if (r.summary.dueReviews > 0) {
+    out.push({
+      title: `${r.summary.dueReviews} SRS review${r.summary.dueReviews>1?'s':''} overdue`,
+      detail: 'Complete pending spaced-repetition reviews to consolidate recent learning before memory fades.'
+    });
+  }
+  if (r.streak.current === 0) {
+    out.push({ title: 'Re-establish daily habit', detail: 'No active streak — even 5 minutes of study daily improves long-term retention significantly.' });
+  } else if (r.streak.current >= 5) {
+    out.push({ title: `Great streak — ${r.streak.current} days!`, detail: 'Maintain the momentum. Try introducing one new topic per session to broaden knowledge.' });
+  }
+  if (r.untested.length > 0) {
+    out.push({
+      title: `Quiz ${r.untested[0].name} to assess mastery`,
+      detail: `Explored but never quizzed. A short quiz will trigger SRS scheduling and reveal any gaps.`
+    });
+  }
+  if (r.developing.length > 0) {
+    out.push({
+      title: `Push ${r.developing[0].name} to mastery`,
+      detail: `Currently at ${r.developing[0].avgScore}% — needs 85%+ to be considered mastered. One more focused session could achieve this.`
+    });
+  }
+  if (out.length === 0) {
+    out.push({ title: 'Excellent performance!', detail: 'All tested topics are mastered. Consider expanding to new subject areas.' });
+  }
+  return out.slice(0, 4);
+}
+
+// ── Utilities ──
+function esc(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function fmtDate(iso) {
+  if (!iso) return '—';
+  try { return new Date(iso).toLocaleDateString(undefined, { year:'numeric', month:'short', day:'numeric' }); }
+  catch { return iso; }
+}
+function engLabel(n) {
+  return n >= 80 ? 'Highly Engaged' : n >= 55 ? 'Moderately Engaged' : n >= 30 ? 'Low Engagement' : 'Not Yet Engaged';
+}
+function showStatus(msg) {
+  document.getElementById('statusText').textContent = msg;
+  document.getElementById('statusBar').classList.add('visible');
+}
+function hideStatus() { document.getElementById('statusBar').classList.remove('visible'); }
+async function logout() {
+  await fetch('/auth/logout', { method:'POST' });
+  window.location.href = '/login';
+}
+</script>
+</body>
+</html>

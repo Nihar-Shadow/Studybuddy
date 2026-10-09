@@ -1,0 +1,32 @@
+node_modules/
+uploads/
+data/progress.json
+data/cache.json
+.env
+# Taxonomy files: Uncomment below to accumulate learned taxonomy across deployments
+# Commented: fresh start on each deploy (taxonomy resets)
+# Uncommented: persistent learning (recommended for production)
+# data/taxonomy_learned.json
+# data/taxonomy_pending.json
+.DS_Store
+*.log
+cookies.txt
+
+# Python
+.venv/
+__pycache__/
+*.pyc
+*.pyo
+.gstack/
+
+# Demo-verify test artifacts (corrupt-recovery backups)
+data/progress.json.corrupted-*
+
+# Local-only Claude/agent settings (project context in .claude/claude.md is fine to commit)
+.claude/settings.local.json
+
+# IDE
+.vscode/
+
+# Playwright MCP scratch
+.playwright-mcp/

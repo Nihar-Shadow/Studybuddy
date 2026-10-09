@@ -1,0 +1,5 @@
+# StudyBuddy Python ↔ Ollama bridge
+# Install: pip install -r requirements.txt
+
+httpx>=0.27,<1
+orjson>=3.10,<4

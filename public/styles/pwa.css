@@ -1,0 +1,144 @@
+/* ═══════════ PWA INSTALL BANNER ═══════════ */
+.pwa-install-banner {
+  position: fixed; inset: 0;
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  background: rgba(0,0,0,0.65);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  z-index: 2000;
+  padding: 24px;
+  text-align: center;
+  animation: fadeIn 0.3s ease;
+}
+.pwa-install-banner.show { display: flex; }
+.pwa-install-banner-icon {
+  font-size: 48px;
+}
+.pwa-install-banner-title {
+  font-family: var(--font-display);
+  font-size: var(--font-size-xl);
+  font-weight: 700;
+  color: var(--text-primary);
+}
+.pwa-install-banner-text {
+  font-size: var(--font-size-sm);
+  color: var(--text-secondary);
+  max-width: 320px;
+  line-height: 1.5;
+}
+.pwa-install-banner-buttons {
+  display: flex; gap: 10px;
+}
+.pwa-banner-btn {
+  padding: 12px 24px;
+  border-radius: var(--radius-md);
+  font-weight: 700;
+  font-size: var(--font-size-sm);
+  cursor: pointer;
+  transition: all 0.2s;
+  border: none;
+  min-height: var(--touch-min);
+}
+.pwa-banner-btn.install {
+  background: linear-gradient(135deg, var(--accent), color-mix(in srgb, var(--accent) 80%, #fff));
+  color: #fff;
+}
+.pwa-banner-btn.install:hover { opacity: 0.9; }
+.pwa-banner-btn.dismiss {
+  background: var(--glass);
+  color: var(--text-secondary);
+  border: 1px solid var(--border-subtle);
+}
+.pwa-banner-btn.dismiss:hover {
+  background: var(--accent-soft);
+  color: var(--accent);
+}
+
+/* ═══════════ STANDALONE / SAFE AREA ═══════════ */
+@media all and (display-mode: standalone) {
+  body {
+    padding-top: env(safe-area-inset-top);
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+  header {
+    padding-top: calc(12px + env(safe-area-inset-top));
+  }
+  .input-row {
+    padding-bottom: calc(16px + env(safe-area-inset-bottom));
+  }
+}
+
+/* ═══════════ RESPONSIVE ═══════════ */
+
+/* ── Small phones (≤480px) ── */
+@media (max-width: 480px) {
+  header { padding: 8px 12px; }
+  header h1 { font-size: clamp(0.9rem, 3.5vw, 1.1rem); }
+  .status-badge { padding: 3px 8px; font-size: 10px; }
+  .streak-badge { padding: 3px 6px; font-size: 10px; }
+
+  .controls {
+    padding: 8px 12px;
+    gap: 6px;
+  }
+  .controls button {
+    padding: 6px 10px;
+    font-size: 11px;
+  }
+  .controls select {
+    padding: 5px 8px;
+    font-size: 12px;
+    max-width: 120px;
+  }
+  .controls label { font-size: 11px; }
+
+  #chat { padding: 12px 10px 8px; gap: 10px; }
+  .bubble { max-width: 92%; padding: 10px 14px; font-size: 14px; }
+
+  .input-row { padding: 8px 10px 12px; gap: 6px; }
+  #input { padding: 10px 12px; font-size: 14px; }
+  #send { padding: 8px 14px; font-size: 13px; }
+  .attach-btn { padding: 8px 10px; font-size: 16px; }
+  #mic-btn { padding: 8px 10px; }
+  .button-group { gap: 4px; }
+
+  /* Modals */
+  .modal-content { padding: 20px 16px; width: 95%; }
+  .concept-map-panel { padding: 16px; width: 96%; }
+  .progress-panel { padding: 20px 16px; width: 95%; }
+  .quiz-card { padding: 16px; }
+  .quiz-options { grid-template-columns: 1fr; }
+
+  /* Evaluation report */
+  .evaluation-report { width: 96%; }
+  .evo-section { padding: 10px 14px; }
+
+  /* Vision card */
+  .vision-analysis-card { max-width: 94%; padding: 14px; }
+
+  /* PWA banner */
+  .pwa-install-banner { padding: 16px; }
+  .pwa-install-banner-buttons { flex-direction: column; width: 100%; max-width: 280px; }
+  .pwa-banner-btn { width: 100%; text-align: center; }
+}
+
+/* ── Tablets (≥768px) ── */
+@media (min-width: 768px) {
+  header { padding: 14px 32px; }
+  .controls { padding: 10px 32px; }
+  #chat { padding: 32px 40px 16px; }
+  .input-row { padding: 14px 32px 20px; }
+  .bubble { max-width: 72%; }
+}
+
+/* ── Desktop (≥1200px) ── */
+@media (min-width: 1200px) {
+  #chat { max-width: 900px; margin: 0 auto; width: 100%; }
+  .input-row { max-width: 900px; margin: 0 auto; width: 100%; }
+}
+/* ═══════════ HIDDEN FILE INPUT ═══════════ */
+#imageInput { display: none; }

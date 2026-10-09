@@ -1,0 +1,144 @@
+{
+  "organic chemistry": {
+    "keywords": [
+      "isomers",
+      "hybridization",
+      "and stereochemistry"
+    ],
+    "subject": "chemistry",
+    "addedAt": "2026-04-08T22:09:52.282Z",
+    "askCount": 0,
+    "confidence": "high",
+    "source": "manual",
+    "examples": []
+  },
+  "cellular respiration": {
+    "keywords": [
+      "cellular respiration",
+      "atp",
+      "mitochondria",
+      "glycolysis"
+    ],
+    "subject": "biology",
+    "addedAt": "2026-04-08T22:32:08.839Z",
+    "askCount": 0,
+    "confidence": "high",
+    "source": "manual",
+    "examples": []
+  },
+  "french revolution": {
+    "keywords": [
+      "french revolution",
+      "bastille",
+      "napoleon",
+      "liberty"
+    ],
+    "subject": "history",
+    "addedAt": "2026-04-08T22:32:08.843Z",
+    "askCount": 0,
+    "confidence": "high",
+    "source": "manual",
+    "examples": []
+  },
+  "trigonometry": {
+    "keywords": [
+      "trigonometry",
+      "sine",
+      "cosine",
+      "tangent",
+      "unit circle"
+    ],
+    "subject": "mathematics",
+    "addedAt": "2026-04-08T22:32:08.843Z",
+    "askCount": 0,
+    "confidence": "high",
+    "source": "manual",
+    "examples": []
+  },
+  "dna replication": {
+    "keywords": [
+      "dna",
+      "replication",
+      "helicase",
+      "polymerase"
+    ],
+    "subject": "biology",
+    "addedAt": "2026-04-08T22:32:08.847Z",
+    "askCount": 0,
+    "confidence": "high",
+    "source": "manual",
+    "examples": []
+  },
+  "electric circuits": {
+    "keywords": [
+      "circuits",
+      "ohm",
+      "voltage",
+      "resistance",
+      "current"
+    ],
+    "subject": "physics",
+    "addedAt": "2026-04-08T22:32:08.847Z",
+    "askCount": 0,
+    "confidence": "high",
+    "source": "manual",
+    "examples": []
+  },
+  "photosynthesis": {
+    "keywords": [
+      "photosynthesis",
+      "chloroplast",
+      "light reaction",
+      "calvin cycle"
+    ],
+    "subject": "biology",
+    "addedAt": "2026-04-08T22:37:24.528Z",
+    "askCount": 0,
+    "confidence": "high",
+    "source": "manual",
+    "examples": []
+  },
+  "newtons laws": {
+    "keywords": [
+      "newton",
+      "force",
+      "motion",
+      "inertia",
+      "f=ma"
+    ],
+    "subject": "physics",
+    "addedAt": "2026-04-08T22:37:24.528Z",
+    "askCount": 0,
+    "confidence": "high",
+    "source": "manual",
+    "examples": []
+  },
+  "quadratic equations": {
+    "keywords": [
+      "quadratic",
+      "parabola",
+      "discriminant",
+      "roots"
+    ],
+    "subject": "mathematics",
+    "addedAt": "2026-04-08T22:37:24.529Z",
+    "askCount": 0,
+    "confidence": "high",
+    "source": "manual",
+    "examples": []
+  },
+  "world war ii": {
+    "keywords": [
+      "ww2",
+      "world war 2",
+      "allied powers",
+      "axis powers"
+    ],
+    "subject": "history",
+    "addedAt": "2026-04-08T22:37:24.530Z",
+    "askCount": 0,
+    "confidence": "high",
+    "source": "manual",
+    "examples": []
+  }
+}

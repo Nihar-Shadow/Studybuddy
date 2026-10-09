@@ -1,0 +1,87 @@
+/* ═══════════ EVALUATION REPORT ═══════════ */
+.evaluation-report {
+  align-self: center;
+  width: 92%;
+  max-width: 540px;
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--accent);
+  background: var(--surface, #fff);
+  overflow: visible;
+  animation: fadeInUp 0.4s ease forwards;
+  margin: 10px 0;
+}
+.evo-header {
+  padding: 16px 20px 12px;
+  background: linear-gradient(135deg, rgba(99,102,241,0.08), rgba(16,185,129,0.08));
+  border-bottom: 1px solid var(--border-subtle);
+}
+.evo-header h3 {
+  margin: 0; font-size: 16px; font-weight: 700;
+  color: var(--text-primary);
+}
+.evo-header .evo-subtitle {
+  font-size: 12px; color: var(--text-muted); margin-top: 2px;
+}
+.evo-section {
+  padding: 14px 20px;
+  border-bottom: 1px solid var(--border-subtle);
+}
+.evo-section:last-child { border-bottom: none; }
+.evo-section-icon {
+  font-size: 16px; margin-right: 6px;
+}
+.evo-section-title {
+  font-size: 12px; font-weight: 700; text-transform: uppercase;
+  letter-spacing: 0.06em; color: var(--accent);
+  margin-bottom: 6px;
+}
+.evo-section-body {
+  font-size: 14px; line-height: 1.6;
+  color: var(--text-primary);
+}
+.evo-connection-badge {
+  display: inline-block;
+  padding: 2px 10px;
+  border-radius: 20px;
+  font-size: 12px; font-weight: 600;
+  background: var(--accent-soft);
+  color: var(--accent);
+  margin: 0 2px;
+}
+.evo-domino-box {
+  padding: 10px 14px;
+  background: rgba(234,179,8,0.08);
+  border: 1px solid rgba(234,179,8,0.3);
+  border-radius: var(--radius-md);
+}
+.evo-domino-topic {
+  font-weight: 700; font-size: 14px; color: #b45309;
+}
+.evo-domino-reason {
+  font-size: 13px; color: var(--text-secondary); margin-top: 4px;
+}
+.evo-mission-box {
+  padding: 10px 14px;
+  background: rgba(16,185,129,0.08);
+  border: 1px solid rgba(16,185,129,0.3);
+  border-radius: var(--radius-md);
+}
+.evo-mission-task {
+  font-size: 14px; font-weight: 600; color: #065f46;
+}
+.evo-mission-target {
+  font-size: 12px; color: var(--text-muted); margin-top: 2px;
+}
+.evo-loading {
+  text-align: center; padding: 24px;
+  color: var(--text-muted); font-size: 14px;
+}
+.evo-loading .evo-spinner {
+  display: inline-block; width: 20px; height: 20px;
+  border: 2px solid var(--border-subtle);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+  margin-right: 8px; vertical-align: middle;
+}
+@keyframes spin { to { transform: rotate(360deg); } }

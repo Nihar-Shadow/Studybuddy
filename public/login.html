@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>StudyBuddy — Login</title>
+  <link rel="manifest" href="/manifest.json">
+  <meta name="theme-color" content="#0a0a0f">
+  <!-- System font stack — no CDN, works offline. See /styles/variables.css. -->
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:          #0a0a0f;
+      --surface:     #141420;
+      --surface-2:   #1c1c2e;
+      --border:      #2a2a3d;
+      --text:        #e8e8f0;
+      --text-muted:  #8888a0;
+      --accent:      #6C63FF;
+      --accent-soft: rgba(108,99,255,0.12);
+      --success:     #10b981;
+      --warning:     #f59e0b;
+      --radius:      12px;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .login-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 40px 36px;
+      width: 100%;
+      max-width: 400px;
+      text-align: center;
+      animation: fadeIn 0.4s ease;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(12px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .login-icon { font-size: 48px; margin-bottom: 8px; }
+    .login-logo { width: 140px; height: 140px; margin: 0 auto 4px; display: block; }
+    .login-title { font-size: 22px; font-weight: 700; margin-bottom: 4px; }
+    .login-subtitle { font-size: 13px; color: var(--text-muted); margin-bottom: 28px; }
+
+    .form-group {
+      text-align: left;
+      margin-bottom: 16px;
+    }
+    .form-group label {
+      display: block;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 6px;
+    }
+    .form-group input {
+      width: 100%;
+      padding: 12px 14px;
+      font-size: 15px;
+      font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      color: var(--text);
+      outline: none;
+      transition: border-color 0.2s;
+      letter-spacing: 0.15em;
+    }
+    .form-group input:focus {
+      border-color: var(--accent);
+    }
+    .form-group input::placeholder {
+      color: var(--text-muted);
+      letter-spacing: normal;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+    }
+
+    .name-group {
+      overflow: hidden;
+      max-height: 0;
+      opacity: 0;
+      transition: max-height 0.3s ease, opacity 0.3s ease, margin 0.3s ease;
+      margin-bottom: 0;
+    }
+    .name-group.visible {
+      max-height: 80px;
+      opacity: 1;
+      margin-bottom: 16px;
+    }
+
+    .login-btn {
+      width: 100%;
+      padding: 13px;
+      font-size: 15px;
+      font-weight: 700;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+      color: #fff;
+      background: var(--accent);
+      border: none;
+      border-radius: var(--radius);
+      cursor: pointer;
+      transition: opacity 0.2s, transform 0.15s;
+    }
+    .login-btn:hover { opacity: 0.9; }
+    .login-btn:active { transform: scale(0.98); }
+    .login-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    .error-msg {
+      background: rgba(239,68,68,0.1);
+      color: #ef4444;
+      padding: 10px 14px;
+      border-radius: 8px;
+      font-size: 13px;
+      margin-bottom: 16px;
+      display: none;
+    }
+    .error-msg.visible { display: block; }
+
+    .role-hint {
+      margin-top: 20px;
+      font-size: 11px;
+      color: var(--text-muted);
+      line-height: 1.6;
+    }
+    .role-hint code {
+      font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+      background: var(--surface-2);
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-size: 11px;
+    }
+
+    /* ── Responsive ──────────────────────────── */
+    @media (max-width: 480px) {
+      body { padding: 16px; }
+      .login-card { padding: 28px 22px; border-radius: 14px; }
+      .login-icon { font-size: 40px; }
+      .login-title { font-size: 20px; }
+      .login-subtitle { font-size: 12px; margin-bottom: 22px; }
+      .form-group input { padding: 10px 12px; font-size: 14px; }
+      .login-btn { padding: 12px; font-size: 14px; }
+      .role-hint { font-size: 10px; }
+      .role-hint code { font-size: 10px; }
+    }
+
+    @media (max-width: 360px) {
+      body { padding: 12px; }
+      .login-card { padding: 22px 18px; }
+      .login-icon { font-size: 36px; margin-bottom: 4px; }
+      .login-title { font-size: 18px; }
+      .login-subtitle { font-size: 11px; margin-bottom: 18px; }
+      .form-group label { font-size: 11px; }
+      .form-group input { padding: 9px 10px; font-size: 13px; }
+      .login-btn { padding: 11px; font-size: 13px; }
+    }
+
+    /* Landscape phones — reduce vertical spacing */
+    @media (max-height: 500px) and (orientation: landscape) {
+      .login-card { padding: 20px 28px; }
+      .login-icon { font-size: 32px; margin-bottom: 4px; }
+      .login-subtitle { margin-bottom: 14px; }
+      .form-group { margin-bottom: 10px; }
+      .role-hint { margin-top: 12px; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="login-card">
+  <div class="login-icon">📚</div>
+  <div class="login-title">StudyBuddy</div>
+  <div class="login-subtitle">Enter your PIN to continue</div>
+
+  <div id="errorMsg" class="error-msg"></div>
+
+  <form id="loginForm" onsubmit="handleLogin(event)">
+    <div class="form-group">
+      <label for="pin">Access PIN</label>
+      <input type="password" id="pin" placeholder="Enter PIN" autocomplete="off" maxlength="20" required autofocus>
+    </div>
+
+    <div id="nameGroup" class="form-group name-group">
+      <label for="studentName">Your Name</label>
+      <input type="text" id="studentName" placeholder="e.g. Alex, Room 204" autocomplete="given-name" style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif; letter-spacing: normal;">
+    </div>
+
+    <button type="submit" class="login-btn" id="loginBtn">Sign In</button>
+  </form>
+
+  <div class="role-hint">
+    Enter your PIN to access StudyBuddy
+  </div>
+</div>
+
+<script>
+  const pinEl      = document.getElementById('pin');
+  const nameGroup  = document.getElementById('nameGroup');
+  const nameEl     = document.getElementById('studentName');
+  const errorMsg   = document.getElementById('errorMsg');
+  const loginBtn   = document.getElementById('loginBtn');
+
+  // Track whether we are in the "enter name" step
+  let awaitingName = false;
+  let verifiedPin  = '';
+
+  pinEl.addEventListener('input', () => {
+    errorMsg.classList.remove('visible');
+  });
+
+  async function handleLogin(e) {
+    e.preventDefault();
+    errorMsg.classList.remove('visible');
+
+    // Step 2: name was requested and user just filled it in
+    if (awaitingName) {
+      const name = nameEl.value.trim();
+      if (!name) {
+        errorMsg.textContent = 'Please enter your name to continue.';
+        errorMsg.classList.add('visible');
+        nameEl.focus();
+        return;
+      }
+      await doLogin(verifiedPin, name);
+      return;
+    }
+
+    // Step 1: validate PIN
+    const pin = pinEl.value.trim();
+    if (!pin) return;
+    await doLogin(pin, nameEl.value.trim());
+  }
+
+  async function doLogin(pin, name) {
+    loginBtn.disabled = true;
+    loginBtn.textContent = 'Signing in…';
+
+    try {
+      const res = await fetch('/auth/login', {
+        method:  'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ pin, studentName: name })
+      });
+      const data = await res.json();
+
+      if (!res.ok || !data.success) {
+        errorMsg.textContent = data.error || 'Invalid PIN';
+        errorMsg.classList.add('visible');
+        awaitingName = false;
+        loginBtn.disabled = false;
+        loginBtn.textContent = 'Sign In';
+        return;
+      }
+
+      // Server confirmed student PIN but wants a name first
+      if (data.needsName) {
+        awaitingName = true;
+        verifiedPin  = pin;
+        nameGroup.classList.add('visible');
+        nameEl.focus();
+        loginBtn.disabled = false;
+        loginBtn.textContent = 'Continue →';
+        return;
+      }
+
+      // Authenticated — redirect
+      window.location.href = data.redirect || '/';
+
+    } catch (err) {
+      errorMsg.textContent = 'Connection error — is the server running?';
+      errorMsg.classList.add('visible');
+      loginBtn.disabled = false;
+      loginBtn.textContent = 'Sign In';
+    }
+  }
+
+  // Already authenticated? Skip the login page.
+  fetch('/auth/me').then(r => r.json()).then(data => {
+    if (data.authenticated) {
+      window.location.href = data.role === 'teacher' ? '/teacher' : '/app';
+    }
+  }).catch(() => {});
+</script>
+
+</body>
+</html>

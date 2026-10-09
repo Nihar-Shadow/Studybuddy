@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>StudyBuddy — AI Tutor</title>
+  <meta name="description" content="Offline AI-powered tutoring powered by Gemma 4. Learn anything, anywhere — no internet needed.">
+
+  <!-- PWA Meta Tags -->
+  <link rel="manifest" href="/manifest.json">
+  <meta name="theme-color" content="#0a0a0f">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="StudyBuddy">
+  <link rel="apple-touch-icon" href="/assets/icon-192.png">
+  <meta name="msapplication-TileColor" content="#6C63FF">
+  <meta name="msapplication-TileImage" content="/assets/icon-192.png">
+  <!-- Typography is handled by CSS variables in /styles/variables.css using
+       a system font stack — no external font requests, works offline. -->
+  <script src="/vendor/d3.min.js"></script>
+
+  <!-- Stylesheets -->
+  <link rel="stylesheet" href="/styles/variables.css">
+  <link rel="stylesheet" href="/styles/base.css">
+  <link rel="stylesheet" href="/styles/layout.css">
+  <link rel="stylesheet" href="/styles/chat.css">
+  <link rel="stylesheet" href="/styles/input.css">
+  <link rel="stylesheet" href="/styles/voice.css">
+  <link rel="stylesheet" href="/styles/socratic.css">
+  <link rel="stylesheet" href="/styles/evaluation.css">
+  <link rel="stylesheet" href="/styles/quiz.css">
+  <link rel="stylesheet" href="/styles/concept-map.css">
+  <link rel="stylesheet" href="/styles/vision.css">
+  <link rel="stylesheet" href="/styles/agent.css">
+  <link rel="stylesheet" href="/styles/thinking.css">
+  <link rel="stylesheet" href="/styles/typewriter.css">
+  <link rel="stylesheet" href="/styles/progress.css">
+  <link rel="stylesheet" href="/styles/pwa.css">
+</head>
+<body data-theme="intermediate">
+  <!-- Screen Reader Announcer -->
+  <div id="sr-announcer" aria-live="polite" aria-atomic="true"
+       style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;"></div>
+
+  <!-- PWA Install Banner -->
+  <div id="pwa-install-banner" class="pwa-install-banner" role="dialog" aria-labelledby="pwa-title" aria-describedby="pwa-desc">
+    <div class="pwa-install-banner-icon">📚</div>
+    <div class="pwa-install-banner-title" id="pwa-title">Install StudyBuddy</div>
+    <div class="pwa-install-banner-text" id="pwa-desc">
+      Add StudyBuddy to your home screen for instant access, offline support, and a native app experience!
+    </div>
+    <div class="pwa-install-banner-buttons">
+      <button id="pwa-install-btn" class="pwa-banner-btn install">✨ Install App</button>
+      <button id="pwa-dismiss-btn" class="pwa-banner-btn dismiss">Maybe Later</button>
+    </div>
+  </div>
+
+  <!-- Header -->
+  <header>
+    <h1>📚 StudyBuddy</h1>
+    <div style="display:flex;align-items:center;gap:10px;">
+      <div class="status-badge" title="Response language">
+        🌐
+        <select id="languageSelector" style="background:transparent;color:inherit;border:none;font-size:inherit;font-family:inherit;font-weight:inherit;cursor:pointer;padding:0 2px;outline:none;-webkit-appearance:none;appearance:none;">
+          <option value="English">English</option>
+          <option value="Hindi">हिन्दी</option>
+          <option value="Spanish">Español</option>
+          <option value="Arabic">العربية</option>
+          <option value="Mandarin">中文</option>
+          <option value="French">Français</option>
+          <option value="Portuguese">Português</option>
+          <option value="Bengali">বাংলা</option>
+          <option value="Tamil">தமிழ்</option>
+          <option value="Swahili">Kiswahili</option>
+        </select>
+      </div>
+      <div id="streak-badge" class="streak-badge" title="Your learning streak" style="display:none;">
+        🔥 <span id="streak-count">0</span> day streak
+      </div>
+      <div class="status-badge">
+        <span class="status-dot"></span>
+        Local AI
+      </div>
+    </div>
+  </header>
+
+  <!-- Controls Bar -->
+  <div class="controls">
+    <label for="level">My level:</label>
+    <select id="level">
+      <option value="beginner">Beginner (age 8–12)</option>
+      <option value="intermediate" selected>Intermediate (high school)</option>
+      <option value="advanced">Advanced (university+)</option>
+    </select>
+    <button id="quizBtn" onclick="openQuizModal()">📝 Quiz Me</button>
+    <button id="concept-map-btn" onclick="openConceptMapModal()">🗺 Concept Map</button>
+    <button id="socratic-toggle" onclick="toggleSocraticMode()">🔍 Socratic Mode</button>
+    <button id="agent-toggle" onclick="toggleAgentMode()" style="display:none;">Agent mode: OFF</button>
+    <button id="progress-btn" onclick="showProgress()" style="display:none;">📊 My Progress</button>
+    <button id="evaluation-btn" onclick="showEvaluationReport()">📈 Evaluation Report</button>
+  </div>
+
+  <!-- Chat Area -->
+  <div id="chat">
+    <div class="bubble bot">👋 Hey — I'm StudyBuddy, your offline study partner. Ask, snap, or pick a starter below.</div>
+    <div id="quick-starts" class="quick-starts">
+      <button type="button" class="quick-start-chip" data-prompt="Explain photosynthesis simply">🌱 Explain photosynthesis</button>
+      <button type="button" class="quick-start-chip" data-prompt="Solve: 2x + 5 = 17">🧮 Solve an equation</button>
+      <button type="button" class="quick-start-chip" data-prompt="Snap a photo of my homework">📸 Snap homework photo</button>
+      <button type="button" class="quick-start-chip" data-prompt="Make a concept map of photosynthesis">🗺️ Show me a concept map</button>
+    </div>
+  </div>
+
+  <!-- Voice Status Bar -->
+  <div id="voice-status-bar">
+    <div class="voice-wave">
+      <span></span><span></span><span></span><span></span><span></span>
+    </div>
+    <div class="voice-status-content">
+      <span id="voice-status-text">Listening... speak your question</span>
+      <div id="voice-preview-bar"></div>
+    </div>
+    <button onclick="toggleVoice()" class="voice-send-btn" title="Send what was captured">✓</button>
+    <button onclick="stopVoice(); setMicState('idle'); hideVoiceStatusBar(); hideVoicePreview();" class="voice-stop-btn" title="Cancel">✕</button>
+  </div>
+
+  <!-- Input Area -->
+  <div class="input-row">
+    <div class="input-container">
+      <div id="imagePreviewContainer"></div>
+      <textarea id="input" rows="2" placeholder="Ask a question... e.g. What is gravity?"></textarea>
+    </div>
+    <div class="button-group">
+      <button id="mic-btn" onclick="toggleVoice()" title="Speak your question" aria-label="Voice input">
+        <svg id="mic-icon" width="18" height="18" viewBox="0 0 24 24" fill="none"
+             stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="9" y="2" width="6" height="12" rx="3"/>
+          <path d="M5 10a7 7 0 0 0 14 0"/>
+          <line x1="12" y1="19" x2="12" y2="22"/>
+          <line x1="9"  y1="22" x2="15" y2="22"/>
+        </svg>
+      </button>
+      <button class="attach-btn" id="attachBtn" onclick="triggerImageUpload()" title="Attach image">📎</button>
+      <button id="send">Send</button>
+    </div>
+  </div>
+
+  <!-- Hidden Image Input -->
+  <input type="file" id="imageInput" accept="image/*" onchange="handleImageSelected()">
+
+  <!-- Concept Map Modal -->
+  <div id="concept-map-modal" onclick="closeConceptMapModal(event)">
+    <div class="concept-map-panel" onclick="event.stopPropagation()">
+      <h2>🗺 Concept Map</h2>
+      <div class="modal-field" style="margin-bottom:12px;">
+        <label for="cmTopic" style="font-size:var(--font-size-sm);color:var(--text-secondary);display:block;margin-bottom:6px;">Topic</label>
+        <input type="text" id="cmTopic" placeholder="e.g. Photosynthesis, Newton's Laws">
+      </div>
+      <div style="display:flex;gap:10px;margin-bottom:16px;">
+        <button class="modal-btn secondary" onclick="closeConceptMapModal()">Cancel</button>
+        <button class="modal-btn primary" id="cm-generate-btn" onclick="generateConceptMap()">Generate Map</button>
+      </div>
+      <div id="cm-loading" style="display:none;text-align:center;color:var(--text-secondary);padding:20px;font-size:14px;">
+        ⏳ Gemma 4 is building your concept map...
+      </div>
+      <div class="concept-map-svg-wrap" id="cm-svg-wrap" style="display:none;"></div>
+      <div id="cm-legend" style="display:none;font-size:11px;color:var(--text-secondary);gap:16px;flex-wrap:wrap;">
+        <span>⬤ <span style="color:var(--primary)">Core concept</span></span>
+        <span>⬤ <span style="color:var(--accent)">Key idea</span></span>
+        <span>⬤ <span style="color:var(--success)">Example</span></span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Quiz Modal -->
+  <div class="modal-overlay" id="quizModal" onclick="closeQuizModal(event)">
+    <div class="modal-content" onclick="event.stopPropagation()">
+      <h2>Create a Quiz</h2>
+      <div class="modal-field">
+        <label for="quizTopic">Topic</label>
+        <input type="text" id="quizTopic" placeholder="e.g. Photosynthesis, World War II, Algebra">
+      </div>
+      <div class="modal-field">
+        <label for="quizCount">Number of Questions</label>
+        <input type="number" id="quizCount" min="3" max="10" value="5">
+      </div>
+      <div class="modal-buttons">
+        <button class="modal-btn secondary" onclick="closeQuizModal()">Cancel</button>
+        <button class="modal-btn primary" onclick="generateQuiz()">Generate Quiz</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Scripts (order matters: state → utils → features → init → pwa) -->
+  <script src="/scripts/state.js"></script>
+  <script src="/scripts/utils.js"></script>
+  <script src="/scripts/image.js"></script>
+  <script src="/scripts/chat.js"></script>
+  <script src="/scripts/quiz.js"></script>
+  <script src="/scripts/socratic.js"></script>
+  <script src="/scripts/concept-map.js"></script>
+  <script src="/scripts/theme.js"></script>
+  <script src="/scripts/loading.js"></script>
+  <script src="/scripts/render.js"></script>
+  <script src="/scripts/agent.js"></script>
+  <script src="/scripts/evaluation.js"></script>
+  <script src="/scripts/voice.js"></script>
+  <script src="/scripts/init.js"></script>
+  <script src="/scripts/pwa.js"></script>
+  <script src="/scripts/streak-animation.js"></script>
+  <script src="/scripts/shortcuts.js"></script>
+</body>
+</html>

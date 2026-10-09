@@ -1,0 +1,47 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400" width="400" height="400">
+  <!-- Background -->
+  <rect width="400" height="400" fill="#0f0f1a" rx="32"/>
+
+  <!-- Book pages (left) -->
+  <path d="M140 155 Q140 140 155 138 L198 134 L198 248 L155 252 Q140 254 140 240 Z"
+        fill="#7c6fe0" stroke="#5a4fcf" stroke-width="2"/>
+  <!-- Book pages (right) -->
+  <path d="M202 134 L245 138 Q260 140 260 155 L260 240 Q260 254 245 252 L202 248 Z"
+        fill="#9b8ff5" stroke="#7c6fe0" stroke-width="2"/>
+  <!-- Book spine crease -->
+  <line x1="200" y1="134" x2="200" y2="248" stroke="#5a4fcf" stroke-width="2"/>
+
+  <!-- Book bottom point -->
+  <polygon points="200,275 180,252 220,252" fill="#7c6fe0"/>
+
+  <!-- Face: eyes -->
+  <circle cx="182" cy="195" r="5" fill="#1a1a2e"/>
+  <circle cx="218" cy="195" r="5" fill="#1a1a2e"/>
+  <!-- Face: smile -->
+  <path d="M185 212 Q200 224 215 212" stroke="#1a1a2e" stroke-width="3" fill="none" stroke-linecap="round"/>
+
+  <!-- Sparkles top -->
+  <!-- Centre star -->
+  <g transform="translate(200,115)">
+    <polygon points="0,-10 2,-3 9,-3 4,2 6,9 0,5 -6,9 -4,2 -9,-3 -2,-3"
+             fill="#c8b4f8" opacity="0.95"/>
+  </g>
+  <!-- Left green dash -->
+  <line x1="172" y1="116" x2="165" y2="108" stroke="#34d399" stroke-width="3.5" stroke-linecap="round"/>
+  <!-- Right green dash -->
+  <line x1="228" y1="116" x2="235" y2="108" stroke="#34d399" stroke-width="3.5" stroke-linecap="round"/>
+
+  <!-- Wordmark -->
+  <!-- "Study" in white -->
+  <text x="95" y="326" font-family="'Inter','Helvetica Neue',Arial,sans-serif"
+        font-size="48" font-weight="700" fill="#ffffff" letter-spacing="-1">Study</text>
+  <!-- "Buddy" in purple gradient via linearGradient -->
+  <defs>
+    <linearGradient id="buddyGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#a78bfa"/>
+      <stop offset="100%" stop-color="#818cf8"/>
+    </linearGradient>
+  </defs>
+  <text x="207" y="326" font-family="'Inter','Helvetica Neue',Arial,sans-serif"
+        font-size="48" font-weight="700" fill="url(#buddyGrad)" letter-spacing="-1">Buddy</text>
+</svg>

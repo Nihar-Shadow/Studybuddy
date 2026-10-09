@@ -1,0 +1,95 @@
+/* ═══════════ PROGRESS MODAL ═══════════ */
+.progress-overlay {
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,0.6);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  display: flex; align-items: center; justify-content: center;
+  z-index: 1000;
+  animation: fadeIn 0.2s ease;
+}
+.progress-panel {
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  padding: 28px;
+  width: 90%;
+  max-width: 500px;
+  max-height: 80vh;
+  overflow-y: auto;
+  animation: scaleUp 0.3s ease;
+}
+.progress-panel h2 {
+  font-family: var(--font-display);
+  font-size: var(--font-size-xl);
+  color: var(--text-primary);
+  margin-bottom: 16px;
+}
+.progress-topic {
+  padding: 12px;
+  background: var(--glass);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--glass-border);
+  margin-bottom: 10px;
+}
+.progress-topic h3 {
+  font-size: var(--font-size-base);
+  color: var(--text-primary);
+  margin-bottom: 4px;
+}
+.progress-topic p {
+  font-size: var(--font-size-xs);
+  color: var(--text-secondary);
+}
+.progress-bar-wrap {
+  width: 100%; height: 6px;
+  background: var(--border-subtle);
+  border-radius: 4px;
+  margin-top: 8px;
+  overflow: hidden;
+}
+.progress-bar-fill {
+  height: 100%;
+  border-radius: 4px;
+  background: linear-gradient(90deg, var(--accent), color-mix(in srgb, var(--accent) 70%, var(--success)));
+  transition: width 0.5s ease;
+}
+
+/* Due reviews */
+.due-reviews-section {
+  margin-top: 20px;
+  padding-top: 16px;
+  border-top: 1px solid var(--border-subtle);
+}
+.due-reviews-section h3 {
+  font-size: var(--font-size-base);
+  color: var(--text-primary);
+  margin-bottom: 10px;
+}
+.due-review-item {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 10px 12px;
+  background: var(--glass);
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--glass-border);
+  margin-bottom: 8px;
+}
+.due-review-item span {
+  font-size: var(--font-size-sm);
+  color: var(--text-primary);
+}
+.due-review-btn {
+  background: var(--accent-soft);
+  color: var(--accent);
+  border: 1px solid var(--accent-glow);
+  border-radius: var(--radius-sm);
+  padding: 6px 12px;
+  font-size: var(--font-size-xs);
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.due-review-btn:hover {
+  background: var(--accent);
+  color: #fff;
+}

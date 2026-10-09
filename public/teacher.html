@@ -1,0 +1,1070 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>StudyBuddy — Teacher Dashboard</title>
+  <script src="/vendor/chart.umd.min.js"></script>
+  <!-- System font stack — no CDN, works offline. -->
+  <style>
+    /* ── Reset & Variables ─────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg:       #0a0a0f;
+      --card:     #141420;
+      --card-alt: #1c1c2e;
+      --border:   #2a2a3d;
+      --text:     #e8e8f0;
+      --muted:    #8888a0;
+      --accent:   #6C63FF;
+      --accent-soft: rgba(108,99,255,0.12);
+      --accent2:  #34d399;
+      --danger:   #f87171;
+      --warning:  #fbbf24;
+      --info:     #60a5fa;
+      --radius:   12px;
+      --shadow:   0 2px 12px rgba(0,0,0,.35);
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.5;
+      padding: 0;
+      min-height: 100vh;
+    }
+
+    /* ── Navigation Bar ────────────────────────── */
+    .navbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 28px;
+      background: var(--card);
+      border-bottom: 1px solid var(--border);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      height: 56px;
+    }
+    .navbar-brand {
+      display: flex; align-items: center; gap: 10px;
+      font-size: 1.15rem; font-weight: 700;
+      text-decoration: none; color: var(--text);
+    }
+    .navbar-brand span { color: var(--accent); }
+    .nav-tabs {
+      display: flex; align-items: center; gap: 0;
+      height: 100%;
+    }
+    .nav-tab {
+      display: flex; align-items: center; gap: 6px;
+      padding: 0 20px;
+      height: 100%;
+      font-size: .875rem; font-weight: 500;
+      color: var(--muted);
+      text-decoration: none;
+      border-bottom: 2px solid transparent;
+      transition: color .2s, border-color .2s;
+      cursor: pointer;
+      background: none; border-top: none; border-left: none; border-right: none;
+      border-radius: 0;
+    }
+    .nav-tab:hover { color: var(--text); }
+    .nav-tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+    .nav-tab.logout-tab { color: var(--danger); }
+    .nav-tab.logout-tab:hover { color: #fca5a5; }
+
+    /* Live SSE indicator */
+    .live-badge {
+      display: inline-flex; align-items: center; gap: 5px;
+      font-size: .72rem; font-weight: 600;
+      padding: 3px 10px;
+      border-radius: 20px;
+      background: rgba(52,211,153,.12);
+      color: var(--accent2);
+      margin-left: 14px;
+    }
+    .live-dot {
+      width: 7px; height: 7px;
+      border-radius: 50%;
+      background: var(--accent2);
+      animation: pulse-live 1.8s ease-in-out infinite;
+    }
+    @keyframes pulse-live {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50%      { opacity: .4; transform: scale(.75); }
+    }
+    .live-badge.disconnected { background: rgba(248,113,113,.12); color: var(--danger); }
+    .live-badge.disconnected .live-dot { background: var(--danger); animation: none; }
+
+    /* ── Toolbar (view mode / student picker) ── */
+    .toolbar {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 14px 28px;
+      background: var(--card-alt);
+      border-bottom: 1px solid var(--border);
+    }
+
+    select, button {
+      background: var(--card-alt);
+      color: var(--text);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 7px 14px;
+      font-size: .875rem;
+      cursor: pointer;
+      transition: border-color .2s;
+    }
+    select:focus, button:focus { outline: none; border-color: var(--accent); }
+    button:hover { border-color: var(--accent); }
+    .btn-logout { color: var(--danger); }
+    .btn-refresh { color: var(--accent2); }
+
+    /* ── Danger / Clear buttons ──────────────── */
+    .btn-danger {
+      background: rgba(248, 113, 113, .12);
+      color: var(--danger);
+      border-color: rgba(248, 113, 113, .3);
+      font-weight: 600;
+    }
+    .btn-danger:hover {
+      background: rgba(248, 113, 113, .25);
+      border-color: var(--danger);
+    }
+    .toolbar-spacer { flex: 1; }
+
+    /* ── Layout Grid ─────────────────────────── */
+    .dashboard { padding: 24px 28px 60px; max-width: 1440px; margin: 0 auto; }
+
+    /* Stat cards row */
+    .stats-row {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 16px;
+      margin-bottom: 28px;
+    }
+    .stat-card {
+      background: var(--card);
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+      padding: 18px 22px;
+      box-shadow: var(--shadow);
+    }
+    .stat-card .label { font-size: .78rem; color: var(--muted); text-transform: uppercase; letter-spacing: .05em; }
+    .stat-card .value { font-size: 2rem; font-weight: 700; margin-top: 4px; }
+
+    /* Judge Priority Panels */
+    .panels {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+      gap: 20px;
+      margin-bottom: 28px;
+    }
+    .panel {
+      background: var(--card);
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+    .panel-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 14px 20px;
+      border-bottom: 1px solid var(--border);
+      font-weight: 600;
+      font-size: .9rem;
+    }
+    .panel-header .icon { font-size: 1.2rem; }
+    .panel-body { padding: 16px 20px; }
+    .panel-body.empty { color: var(--muted); text-align: center; padding: 32px 20px; }
+
+    /* Color accents for panels */
+    .panel--risk .panel-header   { border-left: 4px solid var(--danger); }
+    .panel--confusion .panel-header { border-left: 4px solid var(--warning); }
+    .panel--dropout .panel-header   { border-left: 4px solid var(--info); }
+    .panel--curiosity .panel-header { border-left: 4px solid var(--accent2); }
+
+    /* Table inside panels */
+    .panel table { width: 100%; border-collapse: collapse; font-size: .82rem; }
+    .panel th { text-align: left; color: var(--muted); font-weight: 500; padding: 6px 0; border-bottom: 1px solid var(--border); }
+    .panel td { padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,.04); }
+    .panel tr:last-child td { border-bottom: none; }
+    .badge {
+      display: inline-block;
+      font-size: .72rem;
+      padding: 2px 8px;
+      border-radius: 20px;
+      font-weight: 600;
+    }
+    .badge--danger  { background: rgba(248,113,113,.15); color: var(--danger); }
+    .badge--warning { background: rgba(251,191,36,.15);  color: var(--warning); }
+    .badge--info    { background: rgba(96,165,250,.15);  color: var(--info); }
+    .badge--good    { background: rgba(52,211,153,.15);  color: var(--accent2); }
+
+    /* Charts row */
+    .charts-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+      margin-bottom: 28px;
+    }
+    .chart-card {
+      background: var(--card);
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+      padding: 20px;
+      box-shadow: var(--shadow);
+    }
+    .chart-card h3 { font-size: .9rem; margin-bottom: 14px; color: var(--muted); }
+    .chart-card canvas { max-height: 300px; }
+
+    /* SRS Data Table */
+    .srs-section {
+      background: var(--card);
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+      padding: 20px;
+      box-shadow: var(--shadow);
+    }
+    .srs-section h3 { font-size: .95rem; margin-bottom: 14px; }
+    .srs-table { width: 100%; border-collapse: collapse; font-size: .82rem; }
+    .srs-table th { text-align: left; color: var(--muted); font-weight: 500; padding: 8px 12px; border-bottom: 1px solid var(--border); }
+    .srs-table td { padding: 10px 12px; border-bottom: 1px solid rgba(255,255,255,.04); }
+    .srs-table tr:hover td { background: rgba(129,140,248,.05); }
+
+    /* Loading / Error */
+    .loading { text-align: center; color: var(--muted); padding: 80px 0; font-size: 1.1rem; }
+    .loading .spinner { display: inline-block; width: 24px; height: 24px; border: 3px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: spin .7s linear infinite; margin-right: 10px; vertical-align: middle; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .charts-row { grid-template-columns: 1fr; }
+      .panels { grid-template-columns: 1fr; }
+      .stats-row { grid-template-columns: repeat(2, 1fr); }
+      .navbar { padding: 0 16px; flex-wrap: wrap; height: auto; }
+      .nav-tabs { flex-wrap: wrap; gap: 0; }
+      .nav-tab { padding: 0 12px; font-size: .8rem; }
+      .toolbar { padding: 12px 16px; flex-wrap: wrap; }
+      .dashboard { padding: 16px; }
+      .srs-section { overflow-x: auto; }
+      .srs-table { min-width: 600px; }
+      .panel table { font-size: .78rem; }
+    }
+    @media (max-width: 480px) {
+      .stats-row { grid-template-columns: 1fr; gap: 10px; }
+      .stat-card { padding: 12px 16px; }
+      .stat-card .value { font-size: 1.5rem; }
+      .navbar-brand { font-size: 1rem; }
+      .nav-tab { padding: 0 8px; font-size: .75rem; }
+      .toolbar { gap: 8px; }
+      .toolbar select, .toolbar button { font-size: .8rem; padding: 6px 10px; }
+      .btn-danger { font-size: .75rem; padding: 6px 10px; }
+      .chart-card { padding: 14px; }
+      .chart-card h3 { font-size: .8rem; }
+      .panel-header { padding: 10px 14px; font-size: .82rem; }
+      .panel-body { padding: 10px 14px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ── Navigation Bar ──────────────────────────── -->
+<nav class="navbar">
+  <a class="navbar-brand" href="/teacher">📊 <span>StudyBuddy</span></a>
+
+  <div class="nav-tabs">
+    <a class="nav-tab active" href="/teacher" title="Live Dashboard">📈 Live Dashboard</a>
+    <a class="nav-tab" href="/taxonomy-admin" title="Taxonomy Admin">🏷️ Taxonomy Admin</a>
+    <a class="nav-tab" href="/teacher/reports" title="Student PDF Reports">📄 Reports</a>
+    <span class="live-badge" id="liveBadge"><span class="live-dot"></span> Live</span>
+    <button class="nav-tab logout-tab" onclick="logout()" title="Sign out">🚪 Logout</button>
+  </div>
+</nav>
+
+<!-- ── Toolbar (view switcher / student picker) ── -->
+<div class="toolbar">
+  <select id="viewMode">
+    <option value="class">🏫 Class Overview</option>
+    <option value="individual">👤 Individual Student</option>
+  </select>
+  <select id="studentPicker" style="display:none">
+    <option value="">Loading students…</option>
+  </select>
+  <button class="btn-refresh" onclick="refreshData()" title="Refresh data">🔄 Refresh</button>
+  <span class="toolbar-spacer"></span>
+  <button class="btn-danger" onclick="clearAllData()" title="Delete ALL student data">🗑️ Clear All Data</button>
+</div>
+
+<!-- ── Dashboard Content ───────────────────────── -->
+<div class="dashboard" id="dashboard">
+  <div class="loading" id="loadingState">
+    <span class="spinner"></span> Loading class data…
+  </div>
+</div>
+
+<script>
+// ─────────────────────────────────────────────
+// DATA LAYER
+// ─────────────────────────────────────────────
+let classData = null;
+let currentView = 'class';
+let selectedStudentId = null;
+
+async function fetchClassData() {
+  try {
+    const res = await fetch('/api/class-data');
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    classData = await res.json();
+    return classData;
+  } catch (err) {
+    console.error('Failed to fetch class data:', err);
+    return null;
+  }
+}
+
+async function refreshData() {
+  const el = document.getElementById('loadingState');
+  if (el) el.style.display = 'block';
+  await fetchClassData();
+  populateStudentDropdown();
+  render();
+}
+
+function populateStudentDropdown() {
+  const picker = document.getElementById('studentPicker');
+  picker.innerHTML = '<option value="">Select a student…</option>';
+  if (!classData?.students) return;
+  classData.students.forEach(s => {
+    const opt = document.createElement('option');
+    opt.value = s.id;
+    opt.textContent = `${s.name} (${s.totalSessions || 0} sessions)`;
+    picker.appendChild(opt);
+  });
+}
+
+// ─────────────────────────────────────────────
+// EVENT HANDLERS
+// ─────────────────────────────────────────────
+document.getElementById('viewMode').addEventListener('change', e => {
+  currentView = e.target.value;
+  document.getElementById('studentPicker').style.display =
+    currentView === 'individual' ? 'inline-block' : 'none';
+  render();
+});
+
+document.getElementById('studentPicker').addEventListener('change', e => {
+  selectedStudentId = e.target.value || null;
+  render();
+});
+
+async function logout() {
+  await fetch('/auth/logout', { method: 'POST' });
+  window.location.href = '/login';
+}
+
+// ─────────────────────────────────────────────
+// CLEAR / RESET ACTIONS
+// ─────────────────────────────────────────────
+
+/** Clear ALL student data (sessions, topics, SRS) */
+async function clearAllData() {
+  if (!confirm('⚠️ This will permanently delete ALL student progress, sessions, and SRS data.\n\nAre you sure?')) return;
+  if (!confirm('🔴 FINAL WARNING: This action cannot be undone.\n\nType OK to confirm.')) return;
+  try {
+    const res = await fetch('/progress?all=true', { method: 'DELETE' });
+    const data = await res.json();
+    if (data.success) {
+      alert('✅ All student data has been cleared.');
+      await refreshData();
+    } else {
+      alert('❌ Failed to clear data: ' + (data.error || 'Unknown error'));
+    }
+  } catch (err) {
+    alert('❌ Error: ' + err.message);
+  }
+}
+
+/** Clear a single student's data */
+async function clearStudentData(studentId, studentName) {
+  if (!confirm(`⚠️ Delete all data for "${studentName}"?\n\nThis removes their sessions, topics, and SRS data.`)) return;
+  try {
+    const res = await fetch(`/progress?studentId=${encodeURIComponent(studentId)}`, { method: 'DELETE' });
+    const data = await res.json();
+    if (data.success) {
+      alert(`✅ Data for "${studentName}" has been cleared.`);
+      selectedStudentId = null;
+      document.getElementById('studentPicker').value = '';
+      await refreshData();
+    } else {
+      alert('❌ Failed: ' + (data.error || 'Unknown error'));
+    }
+  } catch (err) {
+    alert('❌ Error: ' + err.message);
+  }
+}
+
+// ─────────────────────────────────────────────
+// ANALYTICS COMPUTATIONS
+// ─────────────────────────────────────────────
+
+// At-Risk: students with declining scores (most recent avg < previous avg)
+function computeAtRisk() {
+  if (!classData?.students) return [];
+  return classData.students
+    .filter(s => s.topics && s.topics.length > 0)
+    .map(s => {
+      const scored = s.topics.filter(t => t.avgScore !== null);
+      if (scored.length < 1) return null;
+      // Find topics with declining trend
+      const declining = scored.filter(t => t.avgScore < 60);
+      if (declining.length === 0) return null;
+      return {
+        name: s.name,
+        id: s.id,
+        weakTopics: declining.map(t => t.name),
+        lowestScore: Math.min(...declining.map(t => t.avgScore)),
+        totalTopics: s.topics.length,
+        weakCount: declining.length
+      };
+    })
+    .filter(Boolean)
+    .sort((a, b) => a.lowestScore - b.lowestScore);
+}
+
+// Collective Confusion: topics where class avg < 60%
+function computeCollectiveConfusion() {
+  if (!classData?.students) return [];
+  const topicScores = {};
+
+  classData.students.forEach(s => {
+    if (!s.topics) return;
+    s.topics.forEach(t => {
+      if (t.avgScore === null) return;
+      if (!topicScores[t.name]) topicScores[t.name] = [];
+      topicScores[t.name].push(t.avgScore);
+    });
+  });
+
+  return Object.entries(topicScores)
+    .map(([name, scores]) => ({
+      name,
+      classAvg: Math.round(scores.reduce((a, b) => a + b, 0) / scores.length),
+      studentCount: scores.length,
+      scores
+    }))
+    .filter(t => t.classAvg < 60)
+    .sort((a, b) => a.classAvg - b.classAvg);
+}
+
+// Engagement Drop-off: students inactive for 3+ days
+function computeDropoff() {
+  if (!classData?.students) return [];
+  const now = Date.now();
+  const DAY = 86400000;
+
+  return classData.students
+    .map(s => {
+      const lastSeen = s.lastSeen ? new Date(s.lastSeen).getTime() : 0;
+      const daysAgo = Math.floor((now - lastSeen) / DAY);
+      return { name: s.name, id: s.id, daysAgo, lastSeen: s.lastSeen, streak: s.streak };
+    })
+    .filter(s => s.daysAgo >= 3)
+    .sort((a, b) => b.daysAgo - a.daysAgo);
+}
+
+// Curiosity Tracking: topics most explored across all students
+function computeCuriosity() {
+  if (!classData?.students) return [];
+  const topicCounts = {};
+
+  classData.students.forEach(s => {
+    if (!s.topics) return;
+    s.topics.forEach(t => {
+      if (!topicCounts[t.name]) topicCounts[t.name] = { count: 0, students: [], totalStudied: 0 };
+      topicCounts[t.name].count++;
+      topicCounts[t.name].students.push(s.name);
+      topicCounts[t.name].totalStudied += (t.timesStudied || 0);
+    });
+  });
+
+  return Object.entries(topicCounts)
+    .map(([name, data]) => ({ name, ...data }))
+    .sort((a, b) => b.totalStudied - a.totalStudied)
+    .slice(0, 15);
+}
+
+// ─────────────────────────────────────────────
+// RENDER ENGINE
+// ─────────────────────────────────────────────
+let chartInstances = [];
+
+function destroyCharts() {
+  chartInstances.forEach(c => c.destroy());
+  chartInstances = [];
+}
+
+function render() {
+  destroyCharts();
+  const dash = document.getElementById('dashboard');
+  const loading = document.getElementById('loadingState');
+  if (loading) loading.style.display = 'none';
+
+  if (!classData || !classData.students) {
+    dash.innerHTML = '<div class="loading">⚠️ No class data available. Students need to log in and study first.</div>';
+    return;
+  }
+
+  if (currentView === 'individual') {
+    renderIndividual(dash);
+  } else {
+    renderClassOverview(dash);
+  }
+}
+
+// ─── CLASS OVERVIEW ─────────────────────────
+function renderClassOverview(dash) {
+  const students = classData.students;
+  const totalSessions = classData.allSessions?.length || 0;
+  const avgTopics = students.length > 0
+    ? Math.round(students.reduce((a, s) => a + (s.totalTopicsStudied || 0), 0) / students.length)
+    : 0;
+  const allScores = [];
+  students.forEach(s => s.topics?.forEach(t => { if (t.avgScore !== null) allScores.push(t.avgScore); }));
+  const hasScores = allScores.length > 0;
+  const classAvg = hasScores ? Math.round(allScores.reduce((a, b) => a + b, 0) / allScores.length) : null;
+
+  const atRisk = computeAtRisk();
+  const confusion = computeCollectiveConfusion();
+  const dropoff = computeDropoff();
+  const curiosity = computeCuriosity();
+
+  dash.innerHTML = `
+    <!-- Stat Cards -->
+    <div class="stats-row">
+      <div class="stat-card">
+        <div class="label">Total Students</div>
+        <div class="value" style="color:var(--accent)">${classData.classSize}</div>
+      </div>
+      <div class="stat-card">
+        <div class="label">Total Sessions</div>
+        <div class="value" style="color:var(--accent2)">${totalSessions}</div>
+      </div>
+      <div class="stat-card">
+        <div class="label">Avg Topics/Student</div>
+        <div class="value" style="color:var(--warning)">${avgTopics}</div>
+      </div>
+      <div class="stat-card">
+        <div class="label">Class Avg Score</div>
+        <div class="value" style="color:${hasScores && classAvg < 60 ? 'var(--danger)' : hasScores ? 'var(--accent2)' : 'var(--muted)'}; ${hasScores ? '' : 'font-size:1rem; font-weight:500;'}">${hasScores ? `${classAvg}%` : 'No quizzes yet'}</div>
+      </div>
+      <div class="stat-card">
+        <div class="label">At-Risk Students</div>
+        <div class="value" style="color:var(--danger)">${atRisk.length}</div>
+      </div>
+    </div>
+
+    <!-- Judge Priority Panels -->
+    <div class="panels">
+      <!-- 1. At-Risk Panel -->
+      <div class="panel panel--risk" id="panelRisk">
+        <div class="panel-header"><span class="icon">🚨</span> At-Risk Students <span class="badge badge--danger">${atRisk.length}</span></div>
+        <div class="panel-body ${atRisk.length === 0 ? 'empty' : ''}" id="panelRiskBody"></div>
+      </div>
+
+      <!-- 2. Curiosity Tracking -->
+      <div class="panel panel--curiosity" id="panelCuriosity">
+        <div class="panel-header"><span class="icon">🔍</span> Curiosity Tracking <span class="badge badge--good">${curiosity.length} topics</span></div>
+        <div class="panel-body ${curiosity.length === 0 ? 'empty' : ''}" id="panelCuriosityBody"></div>
+      </div>
+
+      <!-- 3. Collective Confusion -->
+      <div class="panel panel--confusion" id="panelConfusion">
+        <div class="panel-header"><span class="icon">🤔</span> Collective Confusion <span class="badge badge--warning">${confusion.length}</span></div>
+        <div class="panel-body ${confusion.length === 0 ? 'empty' : ''}" id="panelConfusionBody"></div>
+      </div>
+
+      <!-- 4. Engagement Drop-off -->
+      <div class="panel panel--dropout" id="panelDropoff">
+        <div class="panel-header"><span class="icon">📉</span> Engagement Drop-off <span class="badge badge--info">${dropoff.length}</span></div>
+        <div class="panel-body ${dropoff.length === 0 ? 'empty' : ''}" id="panelDropoffBody"></div>
+      </div>
+    </div>
+
+    <!-- Charts -->
+    <div class="charts-row">
+      <div class="chart-card">
+        <h3>📊 Topic Performance (Class Average)</h3>
+        <canvas id="chartTopicPerf"></canvas>
+      </div>
+      <div class="chart-card">
+        <h3>📈 Sessions Over Time</h3>
+        <canvas id="chartTimeline"></canvas>
+      </div>
+    </div>
+
+    <!-- SRS Data Table -->
+    <div class="srs-section">
+      <h3>🧠 SM-2 Spaced Repetition — All Students</h3>
+      <div id="srsTableContainer"></div>
+    </div>
+  `;
+
+  // Populate panels
+  populateAtRiskPanel(atRisk);
+  populateConfusionPanel(confusion);
+  populateDropoffPanel(dropoff);
+  populateCuriosityPanel(curiosity);
+
+  // Render charts
+  renderTopicPerfChart();
+  renderTimelineChart();
+
+  // Render SRS table
+  renderSRSTable();
+}
+
+// ─── INDIVIDUAL STUDENT VIEW ────────────────
+function renderIndividual(dash) {
+  if (!selectedStudentId) {
+    dash.innerHTML = '<div class="loading">👆 Select a student from the dropdown above</div>';
+    return;
+  }
+
+  const student = classData.students.find(s => s.id === selectedStudentId);
+  if (!student) {
+    dash.innerHTML = '<div class="loading">⚠️ Student not found</div>';
+    return;
+  }
+
+  const streak = student.streak || { current: 0, longest: 0 };
+
+  dash.innerHTML = `
+    <div class="stats-row">
+      <div class="stat-card">
+        <div class="label">Student</div>
+        <div class="value" style="font-size:1.4rem; color:var(--accent)">${student.name}</div>
+      </div>
+      <div class="stat-card">
+        <div class="label">Sessions</div>
+        <div class="value" style="color:var(--accent2)">${student.totalSessions || 0}</div>
+      </div>
+      <div class="stat-card">
+        <div class="label">Topics Studied</div>
+        <div class="value" style="color:var(--warning)">${student.totalTopicsStudied || 0}</div>
+      </div>
+      <div class="stat-card">
+        <div class="label">Current Streak</div>
+        <div class="value" style="color:var(--accent2)">${streak.current} 🔥</div>
+      </div>
+      <div class="stat-card">
+        <div class="label">Due Reviews</div>
+        <div class="value" style="color:var(--danger)">${student.dueReviews || 0}</div>
+      </div>
+    </div>
+
+    <!-- Clear student action -->
+    <div style="margin-bottom:20px; text-align:right;">
+      <button class="btn-danger" onclick="clearStudentData('${student.id}', '${student.name.replace(/'/g, "\\'")}')">🗑️ Clear ${student.name}'s Data</button>
+    </div>
+
+    <!-- Topic breakdown -->
+    <div class="panels">
+      <div class="panel panel--risk">
+        <div class="panel-header"><span class="icon">⚠️</span> Weak Areas</div>
+        <div class="panel-body ${!student.weakAreas?.length ? 'empty' : ''}">
+          ${student.weakAreas?.length
+            ? student.weakAreas.map(w => `<span class="badge badge--danger" style="margin:3px">${w}</span>`).join('')
+            : '✅ No weak areas — great work!'}
+        </div>
+      </div>
+      <div class="panel panel--curiosity">
+        <div class="panel-header"><span class="icon">💪</span> Strong Areas</div>
+        <div class="panel-body ${!student.strongAreas?.length ? 'empty' : ''}">
+          ${student.strongAreas?.length
+            ? student.strongAreas.map(s => `<span class="badge badge--good" style="margin:3px">${s}</span>`).join('')
+            : '📚 Keep studying to build strengths!'}
+        </div>
+      </div>
+    </div>
+
+    <div class="charts-row">
+      <div class="chart-card">
+        <h3>📊 ${student.name}'s Topic Scores</h3>
+        <canvas id="chartIndivScores"></canvas>
+      </div>
+      <div class="chart-card">
+        <h3>📈 Study History</h3>
+        <canvas id="chartIndivTimeline"></canvas>
+      </div>
+    </div>
+
+    <div class="srs-section">
+      <h3>🧠 ${student.name}'s SM-2 Review Schedule</h3>
+      <div id="srsTableContainer"></div>
+    </div>
+  `;
+
+  // Individual charts
+  renderIndividualScoresChart(student);
+  renderIndividualTimeline(student);
+  renderIndividualSRS(student);
+}
+
+// ─────────────────────────────────────────────
+// PANEL RENDERERS
+// ─────────────────────────────────────────────
+
+function populateAtRiskPanel(data) {
+  const body = document.getElementById('panelRiskBody');
+  if (!body) return;
+  if (data.length === 0) { body.textContent = '🎉 No at-risk students. Everyone is on track!'; return; }
+
+  body.innerHTML = `<table>
+    <tr><th>Student</th><th>Weak Topics</th><th>Lowest</th></tr>
+    ${data.map(d => `<tr>
+      <td><strong>${d.name}</strong></td>
+      <td>${d.weakTopics.map(t => `<span class="badge badge--danger">${t}</span>`).join(' ')}</td>
+      <td>${d.lowestScore}%</td>
+    </tr>`).join('')}
+  </table>`;
+}
+
+function populateConfusionPanel(data) {
+  const body = document.getElementById('panelConfusionBody');
+  if (!body) return;
+  if (data.length === 0) { body.textContent = '👍 No confusing topics. Class is performing well!'; return; }
+
+  body.innerHTML = `<table>
+    <tr><th>Topic</th><th>Class Avg</th><th>Students</th></tr>
+    ${data.map(d => `<tr>
+      <td><strong>${d.name}</strong></td>
+      <td><span class="badge badge--warning">${d.classAvg}%</span></td>
+      <td>${d.studentCount}</td>
+    </tr>`).join('')}
+  </table>`;
+}
+
+function populateDropoffPanel(data) {
+  const body = document.getElementById('panelDropoffBody');
+  if (!body) return;
+  if (data.length === 0) { body.textContent = '✅ All students are actively engaged!'; return; }
+
+  body.innerHTML = `<table>
+    <tr><th>Student</th><th>Days Inactive</th><th>Last Seen</th></tr>
+    ${data.map(d => `<tr>
+      <td><strong>${d.name}</strong></td>
+      <td><span class="badge badge--info">${d.daysAgo} days</span></td>
+      <td style="color:var(--muted)">${d.lastSeen ? new Date(d.lastSeen).toLocaleDateString() : 'Never'}</td>
+    </tr>`).join('')}
+  </table>`;
+}
+
+function populateCuriosityPanel(data) {
+  const body = document.getElementById('panelCuriosityBody');
+  if (!body) return;
+  if (data.length === 0) { body.textContent = '📚 No study data yet. Students need to start exploring!'; return; }
+
+  body.innerHTML = `<table>
+    <tr><th>Topic</th><th>Total Studies</th><th>Students</th></tr>
+    ${data.map(d => `<tr>
+      <td><strong>${d.name}</strong></td>
+      <td><span class="badge badge--good">${d.totalStudied}×</span></td>
+      <td>${d.count} student${d.count > 1 ? 's' : ''}</td>
+    </tr>`).join('')}
+  </table>`;
+}
+
+// ─────────────────────────────────────────────
+// CHART RENDERERS (Chart.js)
+// ─────────────────────────────────────────────
+
+const chartColors = {
+  accent:  'rgba(129,140,248,',
+  green:   'rgba(52,211,153,',
+  red:     'rgba(248,113,113,',
+  yellow:  'rgba(251,191,36,',
+  blue:    'rgba(96,165,250,',
+};
+
+function renderTopicPerfChart() {
+  const canvas = document.getElementById('chartTopicPerf');
+  if (!canvas) return;
+
+  // Aggregate per topic across all students
+  const topicScores = {};
+  classData.students.forEach(s => {
+    if (!s.topics) return;
+    s.topics.forEach(t => {
+      if (t.avgScore === null) return;
+      if (!topicScores[t.name]) topicScores[t.name] = [];
+      topicScores[t.name].push(t.avgScore);
+    });
+  });
+
+  const labels = Object.keys(topicScores);
+  const avgs = labels.map(l => Math.round(topicScores[l].reduce((a, b) => a + b, 0) / topicScores[l].length));
+  const colors = avgs.map(v => v < 60 ? chartColors.red + '0.7)' : v < 75 ? chartColors.yellow + '0.7)' : chartColors.green + '0.7)');
+
+  const chart = new Chart(canvas, {
+    type: 'bar',
+    data: {
+      labels,
+      datasets: [{
+        label: 'Class Avg Score %',
+        data: avgs,
+        backgroundColor: colors,
+        borderRadius: 6,
+        barThickness: 32,
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          callbacks: {
+            label: ctx => `${ctx.raw}% avg (${topicScores[ctx.label].length} students)`
+          }
+        }
+      },
+      scales: {
+        y: { beginAtZero: true, max: 100, ticks: { color: '#8b8fa3' }, grid: { color: 'rgba(255,255,255,.05)' } },
+        x: { ticks: { color: '#8b8fa3', maxRotation: 45 }, grid: { display: false } }
+      }
+    }
+  });
+  chartInstances.push(chart);
+}
+
+function renderTimelineChart() {
+  const canvas = document.getElementById('chartTimeline');
+  if (!canvas) return;
+
+  // Group sessions by day
+  const dayCounts = {};
+  (classData.allSessions || []).forEach(s => {
+    const day = s.timestamp?.slice(0, 10);
+    if (!day) return;
+    dayCounts[day] = (dayCounts[day] || 0) + 1;
+  });
+
+  const sorted = Object.entries(dayCounts).sort((a, b) => a[0].localeCompare(b[0]));
+  const labels = sorted.map(([d]) => d);
+  const data = sorted.map(([, c]) => c);
+
+  const chart = new Chart(canvas, {
+    type: 'line',
+    data: {
+      labels,
+      datasets: [{
+        label: 'Sessions',
+        data,
+        borderColor: chartColors.accent + '1)',
+        backgroundColor: chartColors.accent + '0.1)',
+        fill: true,
+        tension: 0.3,
+        pointRadius: 4,
+        pointHoverRadius: 6,
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: { legend: { display: false } },
+      scales: {
+        y: { beginAtZero: true, ticks: { color: '#8b8fa3', stepSize: 1 }, grid: { color: 'rgba(255,255,255,.05)' } },
+        x: { ticks: { color: '#8b8fa3' }, grid: { display: false } }
+      }
+    }
+  });
+  chartInstances.push(chart);
+}
+
+function renderSRSTable() {
+  const container = document.getElementById('srsTableContainer');
+  if (!container) return;
+
+  const rows = [];
+  classData.students.forEach(s => {
+    if (!s.topics) return;
+    s.topics.forEach(t => {
+      rows.push({
+        student: s.name,
+        topic: t.name,
+        avgScore: t.avgScore,
+        timesStudied: t.timesStudied,
+        lastStudied: t.lastStudied
+      });
+    });
+  });
+
+  if (rows.length === 0) {
+    container.innerHTML = '<p style="color:var(--muted);text-align:center;padding:20px">No study data available yet.</p>';
+    return;
+  }
+
+  container.innerHTML = `<table class="srs-table">
+    <tr><th>Student</th><th>Topic</th><th>Avg Score</th><th>Times Studied</th><th>Last Studied</th></tr>
+    ${rows.map(r => `<tr>
+      <td>${r.student}</td>
+      <td><strong>${r.topic}</strong></td>
+      <td>${r.avgScore !== null
+        ? `<span class="badge ${r.avgScore < 60 ? 'badge--danger' : r.avgScore < 75 ? 'badge--warning' : 'badge--good'}">${r.avgScore}%</span>`
+        : '<span style="color:var(--muted)">—</span>'}</td>
+      <td>${r.timesStudied || 0}</td>
+      <td style="color:var(--muted)">${r.lastStudied ? new Date(r.lastStudied).toLocaleDateString() : '—'}</td>
+    </tr>`).join('')}
+  </table>`;
+}
+
+// ─── INDIVIDUAL CHARTS ──────────────────────
+function renderIndividualScoresChart(student) {
+  const canvas = document.getElementById('chartIndivScores');
+  if (!canvas || !student.topics?.length) return;
+
+  const scored = student.topics.filter(t => t.avgScore !== null);
+  const labels = scored.map(t => t.name);
+  const data = scored.map(t => t.avgScore);
+  const colors = data.map(v => v < 60 ? chartColors.red + '0.7)' : v < 75 ? chartColors.yellow + '0.7)' : chartColors.green + '0.7)');
+
+  const chart = new Chart(canvas, {
+    type: 'bar',
+    data: { labels, datasets: [{ label: 'Score %', data, backgroundColor: colors, borderRadius: 6 }] },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display: false } },
+      scales: {
+        y: { beginAtZero: true, max: 100, ticks: { color: '#8b8fa3' }, grid: { color: 'rgba(255,255,255,.05)' } },
+        x: { ticks: { color: '#8b8fa3' }, grid: { display: false } }
+      }
+    }
+  });
+  chartInstances.push(chart);
+}
+
+function renderIndividualTimeline(student) {
+  const canvas = document.getElementById('chartIndivTimeline');
+  if (!canvas) return;
+
+  const studentSessions = (classData.allSessions || []).filter(s => s.studentId === student.id);
+  const dayCounts = {};
+  studentSessions.forEach(s => {
+    const day = s.timestamp?.slice(0, 10);
+    if (!day) return;
+    dayCounts[day] = (dayCounts[day] || 0) + 1;
+  });
+
+  const sorted = Object.entries(dayCounts).sort((a, b) => a[0].localeCompare(b[0]));
+
+  const chart = new Chart(canvas, {
+    type: 'line',
+    data: {
+      labels: sorted.map(([d]) => d),
+      datasets: [{ label: 'Sessions', data: sorted.map(([, c]) => c), borderColor: chartColors.green + '1)', backgroundColor: chartColors.green + '0.1)', fill: true, tension: 0.3, pointRadius: 4 }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display: false } },
+      scales: {
+        y: { beginAtZero: true, ticks: { color: '#8b8fa3', stepSize: 1 }, grid: { color: 'rgba(255,255,255,.05)' } },
+        x: { ticks: { color: '#8b8fa3' }, grid: { display: false } }
+      }
+    }
+  });
+  chartInstances.push(chart);
+}
+
+function renderIndividualSRS(student) {
+  const container = document.getElementById('srsTableContainer');
+  if (!container || !student.topics?.length) {
+    if (container) container.innerHTML = '<p style="color:var(--muted);text-align:center;padding:20px">No study data for this student yet.</p>';
+    return;
+  }
+
+  container.innerHTML = `<table class="srs-table">
+    <tr><th>Topic</th><th>Avg Score</th><th>Times Studied</th><th>Last Studied</th></tr>
+    ${student.topics.map(t => `<tr>
+      <td><strong>${t.name}</strong></td>
+      <td>${t.avgScore !== null
+        ? `<span class="badge ${t.avgScore < 60 ? 'badge--danger' : t.avgScore < 75 ? 'badge--warning' : 'badge--good'}">${t.avgScore}%</span>`
+        : '<span style="color:var(--muted)">—</span>'}</td>
+      <td>${t.timesStudied || 0}</td>
+      <td style="color:var(--muted)">${t.lastStudied ? new Date(t.lastStudied).toLocaleDateString() : '—'}</td>
+    </tr>`).join('')}
+  </table>`;
+}
+
+// ─────────────────────────────────────────────
+// INIT — check auth, then load data, start SSE
+// ─────────────────────────────────────────────
+(async function init() {
+  // Verify teacher session
+  try {
+    const me = await fetch('/auth/me');
+    const user = await me.json();
+    if (!user.authenticated || user.role !== 'teacher') {
+      window.location.href = '/login';
+      return;
+    }
+  } catch {
+    window.location.href = '/login';
+    return;
+  }
+
+  await fetchClassData();
+  populateStudentDropdown();
+  render();
+
+  // ── SSE — live real-time updates ──
+  connectSSE();
+})();
+
+// ─────────────────────────────────────────────
+// SSE — Server-Sent Events connection
+// ─────────────────────────────────────────────
+function connectSSE() {
+  const badge = document.getElementById('liveBadge');
+  let es;
+  let sseOk = false;
+
+  // Polling fallback — refreshes every 15 s in case SSE is blocked
+  setInterval(() => { if (!sseOk) refreshData(); }, 15000);
+
+  function open() {
+    es = new EventSource('/api/events');
+
+    es.onopen = () => {
+      sseOk = true;
+      badge.classList.remove('disconnected');
+      badge.innerHTML = '<span class="live-dot"></span> Live';
+      console.log('[SSE] Connected');
+    };
+
+    es.addEventListener('data_updated', (e) => {
+      console.log('[SSE] data_updated', e.data);
+      refreshData();              // re-fetch and re-render
+    });
+
+    es.onerror = () => {
+      sseOk = false;
+      badge.classList.add('disconnected');
+      badge.innerHTML = '<span class="live-dot"></span> Reconnecting…';
+      console.warn('[SSE] Disconnected — will retry in 5 s');
+      es.close();
+      setTimeout(open, 5000);     // retry after 5 s
+    };
+  }
+
+  open();
+}
+</script>
+</body>
+</html>
