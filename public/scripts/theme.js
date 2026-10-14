@@ -22,6 +22,24 @@ async function loadStreak() {
       const eBtn = document.getElementById('evaluation-btn');
       if (pBtn) pBtn.style.display = '';
       if (eBtn) eBtn.style.display = '';
+
+      // Proactive persistent memory greeting
+      const firstBotBubble = document.querySelector('#chat .bubble.bot');
+      if (firstBotBubble) {
+        let memoryNote = `👋 Welcome back!`;
+        const strong = data.strongAreas && data.strongAreas.length > 0 ? data.strongAreas[0] : null;
+        const weak = data.weakAreas && data.weakAreas.length > 0 ? data.weakAreas[0] : null;
+        if (strong && weak) {
+          memoryNote += ` You previously understood <strong>${escapeHtml(strong)}</strong>, but struggled with <strong>${escapeHtml(weak)}</strong>. What would you like to explore today?`;
+        } else if (weak) {
+          memoryNote += ` Last time, you were working on <strong>${escapeHtml(weak)}</strong>. Ready to practice?`;
+        } else if (strong) {
+          memoryNote += ` Great job mastering <strong>${escapeHtml(strong)}</strong>! What topic shall we tackle next?`;
+        } else if (data.recentTopics && data.recentTopics.length > 0) {
+          memoryNote += ` Pick up where you left off with <strong>${escapeHtml(data.recentTopics[0])}</strong>, or ask anything new!`;
+        }
+        firstBotBubble.innerHTML = memoryNote;
+      }
     }
   } catch (e) { /* non-critical */ }
 }
