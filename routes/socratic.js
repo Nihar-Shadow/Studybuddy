@@ -6,6 +6,7 @@ const router  = express.Router();
 
 const { runSocraticAgent } = require('../agent/agentLoop');
 const { flowTraces }       = require('../middleware/devTiming');
+const { saveChatMessage }  = require('../agent/progressStore');
 const { requireAuth }      = require('./auth');
 
 router.use(requireAuth);
@@ -22,8 +23,19 @@ router.post('/socratic', async (req, res) => {
   mark('Received request', `level=${level || 'intermediate'}, lang=${language || 'English'}, turn=${turn || '?'}, history=${(history || []).length} msgs`);
 
   try {
-    const result = await runSocraticAgent(message, level || 'intermediate', history || [], turn, language, req.session?.studentId || null, req.session?.studentName || null);
+    const studentId   = req.session?.studentId   || null;
+    const studentName = req.session?.studentName || null;
+    const result = await runSocraticAgent(message, level || 'intermediate', history || [], turn, language, studentId, studentName);
     mark('Socratic agent done', `turn=${result?.structured?.agentSummary || '?'}`);
+
+    if (result && result.rawReply && studentId) {
+      try {
+        saveChatMessage(studentId, { role: 'user', content: message });
+        saveChatMessage(studentId, { role: 'assistant', content: result.rawReply });
+      } catch (e) {
+        console.warn('[/socratic] Failed to save chat history:', e.message);
+      }
+    }
 
     const socMs = Date.now() - socStart;
     console.log(`✅ [/socratic] Done in ${(socMs / 1000).toFixed(2)}s`);

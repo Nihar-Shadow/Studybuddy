@@ -46,6 +46,7 @@ const {
   isStructuredExplanationRequested
 } = require('../lib/structuredTutor');
 const { llmProvider, getProviderStatus } = require('../lib/llmProvider');
+const { saveChatMessage } = require('../agent/progressStore');
 const { requireAuth } = require('./auth');
 
 // ============ GET /api/provider-status — Live AI provider status ============
@@ -457,6 +458,15 @@ router.post('/chat', async (req, res) => {
     res.end();
     mark('Send [DONE]', `structured=${!!structured}`);
 
+    // Persist to user's chat history
+    const studentId = req.session?.studentId || 'default';
+    try {
+      saveChatMessage(studentId, { role: 'user', content: message, topic: identifiedTopic || null });
+      saveChatMessage(studentId, { role: 'assistant', content: rawReply, topic: identifiedTopic || null });
+    } catch (e) {
+      console.warn('[/chat] Failed to save chat history:', e.message);
+    }
+
     const chatMs = Date.now() - chatStart;
     console.log(`✅ [/chat] Done in ${(chatMs / 1000).toFixed(2)}s — reply length: ${rawReply.length} chars`);
 
@@ -669,6 +679,14 @@ Strict Rule: Keep your <think> section extremely brief, under 30 words. Do not s
     fs.unlink(file.path, (err) => {
       if (err) console.warn('[image] cleanup failed:', err.message);
     });
+
+    const studentId = req.session?.studentId || 'default';
+    try {
+      saveChatMessage(studentId, { role: 'user', content: message || '[Image uploaded]' });
+      saveChatMessage(studentId, { role: 'assistant', content: rawReply });
+    } catch (e) {
+      console.warn('[/chat-with-image] Failed to save chat history:', e.message);
+    }
 
     // Return vision-specific response format
     res.json({

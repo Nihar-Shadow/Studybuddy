@@ -687,3 +687,42 @@
   margin: 0;
   color: var(--text-secondary);
 }
+
+/* ── Chat History UI ── */
+.chat-history-divider {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin: 16px 0 8px;
+  padding: 6px 12px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px dashed var(--glass-border);
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-xs, 12px);
+  color: var(--text-secondary);
+}
+.chat-history-divider-label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+.chat-history-clear-btn {
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: var(--radius-sm, 6px);
+  color: var(--text-secondary);
+  font-size: 11px;
+  padding: 3px 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+.chat-history-clear-btn:hover {
+  background: rgba(248, 113, 113, 0.15);
+  border-color: rgba(248, 113, 113, 0.4);
+  color: #f87171;
+}
+.bubble.history-item {
+  opacity: 0.92;
+}

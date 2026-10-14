@@ -6,6 +6,7 @@ const router  = express.Router();
 
 const { runAgentLoop, runParallelAgent } = require('../agent/agentLoop');
 const { isOdia, containsOdiaScript } = require('../lib/languagePolicy');
+const { saveChatMessage } = require('../agent/progressStore');
 const { requireAuth } = require('./auth');
 
 router.use(requireAuth);
@@ -29,6 +30,16 @@ router.post('/agent', async (req, res) => {
     const result = fast === false
       ? await runAgentLoop(message, level || 'intermediate', history || [], null, effectiveLanguage, studentId, studentName)
       : await runParallelAgent(message, level || 'intermediate', history || [], effectiveLanguage, studentId, studentName);
+
+    if (result && result.rawReply && studentId) {
+      try {
+        saveChatMessage(studentId, { role: 'user', content: message });
+        saveChatMessage(studentId, { role: 'assistant', content: result.rawReply });
+      } catch (e) {
+        console.warn('[/agent] Failed to save chat message:', e.message);
+      }
+    }
+
     res.json(result);
   } catch (err) {
     res.status(500).json({

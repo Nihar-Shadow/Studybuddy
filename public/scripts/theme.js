@@ -42,6 +42,67 @@ async function loadStreak() {
       }
     }
   } catch (e) { /* non-critical */ }
+
+  // Load and render persistent chat history for the logged-in student
+  await loadChatHistory();
+}
+
+async function loadChatHistory() {
+  try {
+    const res = await fetch('/chat-history?limit=30');
+    if (!res.ok) return;
+    const data = await res.json();
+    const list = data.history || [];
+    if (!list || list.length === 0) return;
+
+    // Seed client-side conversational history so multi-turn context carries over
+    if (typeof history !== 'undefined' && Array.isArray(history)) {
+      list.forEach(m => {
+        history.push({ role: m.role || 'user', content: m.content });
+      });
+    }
+
+    // Hide quick-starts since student has an existing learning conversation
+    const qs = document.getElementById('quick-starts');
+    if (qs) qs.classList.add('hidden');
+
+    // Create session history divider
+    const divider = document.createElement('div');
+    divider.className = 'chat-history-divider';
+    divider.innerHTML = `
+      <span class="chat-history-divider-label">🕒 Previous Learning History (${list.length} message${list.length > 1 ? 's' : ''})</span>
+      <button class="chat-history-clear-btn" onclick="clearUserChatHistory(this.closest('.chat-history-divider'))" title="Clear your chat history">Clear History</button>
+    `;
+    chatEl.appendChild(divider);
+
+    // Render past messages into chat area
+    list.forEach(item => {
+      const bubble = addBubble(item.content, item.role === 'user' ? 'user' : 'bot', false, false);
+      bubble.classList.add('history-item');
+    });
+
+    scrollToBottom();
+  } catch (err) {
+    console.warn('[chat-history] Failed to load history:', err);
+  }
+}
+
+async function clearUserChatHistory(dividerEl) {
+  if (!confirm('Are you sure you want to clear your previous chat history?')) return;
+  try {
+    const res = await fetch('/chat-history', { method: 'DELETE' });
+    if (res.ok) {
+      // Remove all history bubbles and divider from DOM
+      document.querySelectorAll('.bubble.history-item').forEach(el => el.remove());
+      if (dividerEl) dividerEl.remove();
+      if (typeof history !== 'undefined' && Array.isArray(history)) {
+        history.length = 0;
+      }
+      toast('Chat history cleared', 'info');
+    }
+  } catch (e) {
+    toast('Failed to clear chat history', 'error');
+  }
 }
 
 async function loadDueReviews() {

@@ -80,6 +80,7 @@ function readStore() {
   // Ensure structure
   if (!raw.students) raw.students = {};
   if (!raw.topics)   raw.topics   = {};
+  if (!raw.chats)    raw.chats    = {};
 
   return raw;
 }
@@ -90,6 +91,48 @@ function writeStore(data) {
   fs.writeFileSync(STORE_PATH, JSON.stringify(data, null, 2));
   // Notify SSE listeners that data changed
   emitter.emit('data_updated', { ts: Date.now() });
+}
+
+// ─────────────────────────────────────────────────────────────
+// CHAT HISTORY STORAGE (Per-Student, capped at 60 messages)
+// ─────────────────────────────────────────────────────────────
+function saveChatMessage(studentId, message) {
+  if (!studentId || !message || !message.content) return;
+  const store = readStore();
+  if (!store.chats) store.chats = {};
+  if (!Array.isArray(store.chats[studentId])) {
+    store.chats[studentId] = [];
+  }
+
+  store.chats[studentId].push({
+    role:      message.role || 'user',
+    content:   message.content,
+    topic:     message.topic || null,
+    timestamp: message.timestamp || new Date().toISOString()
+  });
+
+  // Keep last 60 messages to balance history depth with JSON payload size
+  if (store.chats[studentId].length > 60) {
+    store.chats[studentId] = store.chats[studentId].slice(-60);
+  }
+
+  writeStore(store);
+}
+
+function getChatHistory(studentId, limit = 50) {
+  if (!studentId) return [];
+  const store = readStore();
+  const list = (store.chats && store.chats[studentId]) || [];
+  return list.slice(-limit);
+}
+
+function clearChatHistory(studentId) {
+  if (!studentId) return;
+  const store = readStore();
+  if (store.chats && store.chats[studentId]) {
+    delete store.chats[studentId];
+    writeStore(store);
+  }
 }
 
 // Ensure a student profile exists in the store
@@ -399,9 +442,10 @@ function clearProgress(studentId) {
     store.sessions = store.sessions.filter(s => (s.studentId || DEFAULT_STUDENT) !== studentId);
     delete store.topics[studentId];
     delete store.students[studentId];
+    if (store.chats) delete store.chats[studentId];
     writeStore(store);
   } else {
-    writeStore({ sessions: [], topics: {}, students: {} });
+    writeStore({ sessions: [], topics: {}, students: {}, chats: {} });
   }
 }
 
@@ -412,6 +456,10 @@ module.exports = {
   updateSRS,
   getDueReviews,
   getLearningStreak,
+  // Chat history per student
+  saveChatMessage,
+  getChatHistory,
+  clearChatHistory,
   // Multi-student / teacher helpers
   listStudents,
   getFullClassData,

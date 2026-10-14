@@ -5,7 +5,18 @@ const router  = express.Router();
 // ── Progress Routes ──────────────────────────────
 // /progress, /progress-report, /due-reviews, /srs/:topic, /streak
 
-const { getProgressSummary, clearProgress, updateSRS, getDueReviews, getLearningStreak, listStudents, getFullClassData, DEFAULT_STUDENT } = require('../agent/progressStore');
+const {
+  getProgressSummary,
+  clearProgress,
+  updateSRS,
+  getDueReviews,
+  getLearningStreak,
+  listStudents,
+  getFullClassData,
+  DEFAULT_STUDENT,
+  getChatHistory,
+  clearChatHistory
+} = require('../agent/progressStore');
 const { saveProgress } = require('../agent/progressStore');
 const { toolImplementations } = require('../agent/tools');
 const { flowTraces }          = require('../middleware/devTiming');
@@ -23,6 +34,29 @@ function resolveStudent(req) {
   }
   return req.session?.studentId || DEFAULT_STUDENT;
 }
+
+// GET student's chat history
+router.get('/chat-history', (req, res) => {
+  try {
+    const studentId = resolveStudent(req);
+    const limit = parseInt(req.query.limit, 10) || 50;
+    const history = getChatHistory(studentId, limit);
+    res.json({ success: true, studentId, history });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// DELETE student's chat history
+router.delete('/chat-history', (req, res) => {
+  try {
+    const studentId = resolveStudent(req);
+    clearChatHistory(studentId);
+    res.json({ success: true, message: `Chat history cleared for ${studentId}` });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
 
 // GET student's full progress summary
 router.get('/progress', (req, res) => {
