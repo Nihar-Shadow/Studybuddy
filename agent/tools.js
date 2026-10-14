@@ -486,7 +486,7 @@ Respond ONLY with valid JSON (no markdown fences):
 
   const socLang = (isOdia(language || _activeLanguage) || containsOdiaScript(studentResponse) || containsOdiaScript(topic)) ? 'Odia' : (language || _activeLanguage || 'English');
   const socModel = getModelForLanguage(socLang);
-  console.log(`[LLM]\nlanguage=${socLang}\nmodel=${socModel}\ntask=socratic`);
+  console.log(`[Socratic] Starting turn ${turn} for "${topic}" (${socLang}) via Hybrid Provider...`);
 
   const startMs = Date.now();
   let rawText = '';
