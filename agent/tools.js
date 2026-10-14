@@ -587,27 +587,54 @@ Rules:
 
   const mapLang = (isOdia(language || _activeLanguage) || containsOdiaScript(topic)) ? 'Odia' : (language || _activeLanguage || 'English');
   const mapModel = getModelForLanguage(mapLang);
-  console.log(`[LLM]\nlanguage=${mapLang}\nmodel=${mapModel}\ntask=concept-map`);
+  console.log(`[ConceptMap] Generating concept map for "${topic}" (${mapLang}) via Hybrid Provider...`);
 
-  const { res: response, ms: fetchMs } = await timedFetch('http://localhost:11434/api/chat', {
-    method:  'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      ...reasoningWithDraft(mapModel),
+  const startMs = Date.now();
+  let rawText = '';
+  let providerUsed = 'ollama';
+  let fallbackOccurred = false;
+
+  try {
+    const llmRes = await defaultProvider.generate({
+      language: mapLang,
+      task: 'concept-map',
       model: mapModel,
       messages: [
         { role: 'system', content: systemPrompt },
         { role: 'user',   content: `Generate a concept map for "${topic}" at ${level} level.${enforceJSON}` }
       ],
+      temperature: 0.2,
       stream: false,
       format: 'json',
-      think: false,
       options: { ...ollamaOptions('json'), num_ctx: 4096 }
-    })
-  });
-
-  const data    = await response.json();
-  const rawText = data.message?.content || '';
+    });
+    rawText = llmRes.text || '';
+    providerUsed = llmRes.provider || 'ollama';
+    fallbackOccurred = Boolean(llmRes.fallback);
+  } catch (err) {
+    console.warn(`[ConceptMap] Hybrid provider failed: ${err.message}. Falling back directly to local Ollama...`);
+    const { res: response } = await timedFetch('http://localhost:11434/api/chat', {
+      method:  'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        ...reasoningWithDraft(mapModel),
+        model: mapModel,
+        format: 'json',
+        think: false,
+        messages: [
+          { role: 'system', content: systemPrompt },
+          { role: 'user',   content: `Generate a concept map for "${topic}" at ${level} level.${enforceJSON}` }
+        ],
+        stream: false,
+        options: { ...ollamaOptions('json'), num_ctx: 4096 }
+      })
+    });
+    const data = await response.json();
+    rawText = data.message?.content || '';
+    providerUsed = 'ollama';
+    fallbackOccurred = true;
+  }
+  const fetchMs = Date.now() - startMs;
 
   // Strip <think> blocks (both closed and unclosed trailing blocks)
   const cleaned = rawText
@@ -617,9 +644,9 @@ Rules:
   const { central, nodes, edges } = parseConceptMapResponse(cleaned);
 
   if (nodes.length > 0) {
-    return { success: true, central: central || topic, nodes, edges, topic, level, _ms: fetchMs };
+    return { success: true, central: central || topic, nodes, edges, topic, level, provider: providerUsed, fallback: fallbackOccurred, _ms: fetchMs };
   } else {
-    return { success: false, error: 'Concept map generation failed', topic, level, _ms: fetchMs };
+    return { success: false, error: 'Concept map generation failed', topic, level, provider: providerUsed, fallback: fallbackOccurred, _ms: fetchMs };
   }
 }
 
