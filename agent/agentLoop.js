@@ -506,10 +506,11 @@ async function runSocraticAgent(studentMessage, level, conversationHistory, expl
       topic,
       level,
       studentResponse,
-      turnNumber
+      turnNumber,
+      language
     });
 
-    toolCallLog.push({ tool: 'ask_socratic_question', args: { topic, level, turnNumber }, result: socrResult });
+    toolCallLog.push({ tool: 'ask_socratic_question', args: { topic, level, turnNumber, language }, result: socrResult });
 
     // Track that the student is engaging with this topic
     const trackResult = toolImplementations.track_progress({ topic, level, quizScore: null, studentId, studentName });
@@ -527,6 +528,8 @@ async function runSocraticAgent(studentMessage, level, conversationHistory, expl
       summary:         socrResult.summary || '',
       topic,
       turn:            turnNumber,
+      provider:        socrResult.provider || 'ollama',
+      fallback:        socrResult.fallback || false,
       progressNote:    generateProgressNote(getProgressSummary(), toolCallLog.length)
     };
 

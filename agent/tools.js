@@ -10,6 +10,7 @@ const {
 } = require('../lib/parseJSON');
 const { ollamaOptions } = require('../lib/helpers');
 const { reasoningWithDraft, getModelForLanguage } = require('./models');
+const { defaultProvider } = require('../lib/llmProvider');
 
 const enforceJSON = '\n\nIMPORTANT: Return ONLY raw JSON. No markdown. No backticks. Start with { end with }.';
 const enforceJSONArray = '\n\nIMPORTANT: Return ONLY raw JSON array. No markdown. No backticks. Start with [ end with ].';
@@ -487,23 +488,49 @@ Respond ONLY with valid JSON (no markdown fences):
   const socModel = getModelForLanguage(socLang);
   console.log(`[LLM]\nlanguage=${socLang}\nmodel=${socModel}\ntask=socratic`);
 
-  const { res: response, ms: fetchMs } = await timedFetch('http://localhost:11434/api/chat', {
-    method:  'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      ...reasoningWithDraft(socModel),
+  const startMs = Date.now();
+  let rawText = '';
+  let providerUsed = 'ollama';
+  let fallbackOccurred = false;
+
+  try {
+    const llmRes = await defaultProvider.generate({
+      language: socLang,
+      task: 'socratic',
       model: socModel,
       messages: [
         { role: 'system', content: systemPrompt },
         { role: 'user',   content: `${userMsg}${enforceJSON}` }
       ],
+      temperature: 0.2,
       stream: false,
       options: { ...ollamaOptions(isFinalTurn ? 'json' : 'fast'), num_ctx: 4096 }
-    })
-  });
-
-  const data    = await response.json();
-  const rawText = data.message.content;
+    });
+    rawText = llmRes.text || '';
+    providerUsed = llmRes.provider || 'ollama';
+    fallbackOccurred = Boolean(llmRes.fallback);
+  } catch (err) {
+    console.warn(`[Socratic] Hybrid provider failed: ${err.message}. Falling back directly to local Ollama...`);
+    const { res: response } = await timedFetch('http://localhost:11434/api/chat', {
+      method:  'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        ...reasoningWithDraft(socModel),
+        model: socModel,
+        messages: [
+          { role: 'system', content: systemPrompt },
+          { role: 'user',   content: `${userMsg}${enforceJSON}` }
+        ],
+        stream: false,
+        options: { ...ollamaOptions(isFinalTurn ? 'json' : 'fast'), num_ctx: 4096 }
+      })
+    });
+    const data = await response.json();
+    rawText = data.message?.content || '';
+    providerUsed = 'ollama';
+    fallbackOccurred = true;
+  }
+  const fetchMs = Date.now() - startMs;
 
   // Strip <think> blocks and parse with robust Socratic parser
   const cleaned = rawText.replace(/<think>[\s\S]*?<\/think>/gi, '').trim();
@@ -519,6 +546,8 @@ Respond ONLY with valid JSON (no markdown fences):
     topic,
     turn,
     isFinalTurn,
+    provider:        providerUsed,
+    fallback:        fallbackOccurred,
     _ms: fetchMs
   };
 }
