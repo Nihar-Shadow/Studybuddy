@@ -471,7 +471,7 @@ RESPONSE STYLE BY TURN:
 
 ${isFinalTurn ? `THIS IS TURN 5 — THE FINALE! You MUST include a "summary" field with the Big Picture. Make it clear, simple, and memorable. Tie together what the student discovered across all 5 questions.` : ''}
 
-Respond ONLY with valid JSON (no markdown fences):
+CRITICAL: Output ONLY a valid JSON object. Do NOT think out loud. Do NOT write any introduction or explanation before or after the JSON. Your response must begin immediately with "{" and end with "}".
 {
   "acknowledgement": "Your witty, warm reaction to the student's answer (empty string on turn 1)",
   "question": "Your Socratic question for this turn${isFinalTurn ? ' (can be a final reflective question like \\"So putting it all together, what is [topic] really about?\\")' : ''}",
@@ -481,8 +481,8 @@ Respond ONLY with valid JSON (no markdown fences):
 }`;
 
   const userMsg = turn === 1
-    ? `Topic: "${topic}". Student level: ${level}. This is Turn 1 — start the Socratic dialogue with energy!`
-    : `Topic: "${topic}". Student level: ${level}. Student's answer: "${studentResponse}". This is Turn ${turn} of 5.${isFinalTurn ? ' THIS IS THE FINAL TURN — include the Big Picture summary!' : ''}`;
+    ? `Topic: "${topic}". Student level: ${level}. This is Turn 1 — start the Socratic dialogue with energy! Return ONLY JSON starting with { and ending with }.`
+    : `Topic: "${topic}". Student level: ${level}. Student's answer: "${studentResponse}". This is Turn ${turn} of 5.${isFinalTurn ? ' THIS IS THE FINAL TURN — include the Big Picture summary!' : ''} Return ONLY JSON starting with { and ending with }.`;
 
   const socLang = (isOdia(language || _activeLanguage) || containsOdiaScript(studentResponse) || containsOdiaScript(topic)) ? 'Odia' : (language || _activeLanguage || 'English');
   const socModel = getModelForLanguage(socLang);
@@ -504,7 +504,8 @@ Respond ONLY with valid JSON (no markdown fences):
       ],
       temperature: 0.2,
       stream: false,
-      options: { ...ollamaOptions(isFinalTurn ? 'json' : 'fast'), num_ctx: 4096 }
+      format: 'json',
+      options: { ...ollamaOptions('json'), num_ctx: 4096 }
     });
     rawText = llmRes.text || '';
     providerUsed = llmRes.provider || 'ollama';
@@ -517,12 +518,14 @@ Respond ONLY with valid JSON (no markdown fences):
       body: JSON.stringify({
         ...reasoningWithDraft(socModel),
         model: socModel,
+        format: 'json',
+        think: false,
         messages: [
           { role: 'system', content: systemPrompt },
           { role: 'user',   content: `${userMsg}${enforceJSON}` }
         ],
         stream: false,
-        options: { ...ollamaOptions(isFinalTurn ? 'json' : 'fast'), num_ctx: 4096 }
+        options: { ...ollamaOptions('json'), num_ctx: 4096 }
       })
     });
     const data = await response.json();
