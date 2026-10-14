@@ -140,5 +140,21 @@
     "confidence": "high",
     "source": "manual",
     "examples": []
+  },
+  "cell structure and function": {
+    "keywords": [
+      "cell",
+      "structure",
+      "function"
+    ],
+    "subject": "biology",
+    "addedAt": "2026-10-09T21:51:06.395Z",
+    "askCount": 2,
+    "confidence": "high",
+    "source": "auto",
+    "examples": [
+      "cell structure and function",
+      "cell structure and function"
+    ]
   }
 }

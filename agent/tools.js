@@ -9,23 +9,30 @@ const {
   parseEvaluationReportResponse,
 } = require('../lib/parseJSON');
 const { ollamaOptions } = require('../lib/helpers');
-const { reasoningWithDraft } = require('./models');
+const { reasoningWithDraft, getModelForLanguage } = require('./models');
 
 const enforceJSON = '\n\nIMPORTANT: Return ONLY raw JSON. No markdown. No backticks. Start with { end with }.';
+const enforceJSONArray = '\n\nIMPORTANT: Return ONLY raw JSON array. No markdown. No backticks. Start with [ end with ].';
+
+const { getLanguageDirective, isOdia, validateOdiaQuiz, containsOdiaScript, validateQuizQuality, getTopicCoveragePlan, formatQuizValidationFailures } = require('../lib/languagePolicy');
 
 // ─────────────────────────────────────────────
 // LANGUAGE HELPER
 // Returns a high-priority directive that is prepended to every
 // tool system prompt when the student selects a non-English language.
-// Gemma 4 handles 140+ languages natively — zero extra latency.
 // ─────────────────────────────────────────────
 let _activeLanguage = 'English';
 
-function setActiveLanguage(lang) { _activeLanguage = lang || 'English'; }
+function setActiveLanguage(lang) {
+  if (lang && (isOdia(lang) || containsOdiaScript(lang))) {
+    _activeLanguage = 'Odia';
+  } else {
+    _activeLanguage = lang || 'English';
+  }
+}
 
-function langPrefix() {
-  if (!_activeLanguage || _activeLanguage.toLowerCase() === 'english') return '';
-  return `CRITICAL: Respond ENTIRELY in ${_activeLanguage}. All text fields (explanations, questions, hints, answers, follow-ups) MUST be in ${_activeLanguage}. Do not use English unless translating a specific term.\n\n`;
+function langPrefix(context = 'tutor') {
+  return getLanguageDirective(_activeLanguage, context);
 }
 
 
@@ -147,9 +154,13 @@ const toolDefinitions = [
 
 // Tool 1: explain_topic
 // 4-layer smart cache + builds the structured explanation prompt and calls Ollama
-async function explain_topic({ topic, level, context }) {
+async function explain_topic({ topic, level, context, language }) {
+  if (language) setActiveLanguage(language);
+  if (containsOdiaScript(topic) || containsOdiaScript(context)) setActiveLanguage('Odia');
+  const langKey = _activeLanguage || 'English';
+  console.log(`[Diagnostic: Tool Call] explain_topic called for topic: "${topic}", language: "${langKey}"`);
   // ── Smart cache lookup (4-layer) ──
-  const lookup = smartGet('explain', topic, level);
+  const lookup = smartGet('explain', topic, level, langKey);
   if (lookup.value)    return lookup.value;
   if (lookup.inFlight) return lookup.inFlight;  // deduplicated wait
 
@@ -179,11 +190,16 @@ Strict Rule: Keep your <think> section extremely brief, under 30 words. Do not s
       ? `Explain "${topic}" to a ${level} student. Extra context: ${context}${enforceJSON}`
       : `Explain "${topic}" to a ${level} student.${enforceJSON}`;
 
+    const explainLang = (isOdia(language || _activeLanguage) || containsOdiaScript(topic)) ? 'Odia' : (language || _activeLanguage || 'English');
+    const explainModel = getModelForLanguage(explainLang);
+    console.log(`[LLM]\nlanguage=${explainLang}\nmodel=${explainModel}\ntask=explain`);
+
     const { res: response, ms: fetchMs } = await timedFetch('http://localhost:11434/api/chat', {
       method:  'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        ...reasoningWithDraft(),
+        ...reasoningWithDraft(explainModel),
+        model: explainModel,
         messages: [
           { role: 'system', content: systemPrompt },
           { role: 'user',   content: userMsg }
@@ -201,7 +217,7 @@ Strict Rule: Keep your <think> section extremely brief, under 30 words. Do not s
     const explanation = parseTutorResponse(cleaned);
 
     const result = { success: true, explanation, topic, level, _ms: fetchMs };
-    smartSet('explain', topic, level, result);  // store in 4-layer cache
+    smartSet('explain', topic, level, result, langKey);  // store in 4-layer cache
     return result;
   })();
 
@@ -211,59 +227,146 @@ Strict Rule: Keep your <think> section extremely brief, under 30 words. Do not s
 
 // Tool 2: generate_quiz
 // 4-layer smart cache + generates N multiple choice questions
-async function generate_quiz({ topic, level, numQuestions }) {
+async function generate_quiz({ topic, level, numQuestions, language }) {
+  if (language) setActiveLanguage(language);
+  if (containsOdiaScript(topic)) setActiveLanguage('Odia');
+  const langKey = _activeLanguage || 'English';
+  console.log(`[Diagnostic: Tool Call] generate_quiz called for topic: "${topic}", language: "${langKey}"`);
   const n      = Math.min(Math.max(Math.round(numQuestions), 2), 5);
 
   // Scale token limit: advanced needs more explanation per question
   const tokenMultiplier = level === 'advanced' ? 220 : 180;
   const numPredict      = Math.min(n * tokenMultiplier + 100, 1200);
 
-  const lookup = smartGet('quiz', `${topic}::${n}`, level);
+  const lookup = smartGet('quiz', `${topic}::${n}`, level, langKey);
   if (lookup.value)    return lookup.value;
   if (lookup.inFlight) return lookup.inFlight;
 
   const promise = (async () => {
-    const systemPrompt = `${langPrefix()}You are a quiz generator.
-Respond ONLY with a valid JSON array. No markdown. No explanation. Just the raw JSON.
+    const coveragePlan = getTopicCoveragePlan(topic, n, langKey);
+    const planText = coveragePlan.concepts.map(c => `Q${c.index}: Test "${c.description}"`).join('\n');
+
+    const systemPrompt = `${langPrefix('quiz')}You are a quiz generator.
+TOPIC COVERAGE PLAN (Each question must test a different concept):
+${planText}
+
+FACTUAL SCIENCE RULES:
+- Photosynthesis requires CO2 and water. Plants absorb CO2 and release oxygen.
+- Sunlight provides the energy. Chlorophyll absorbs light.
+- Stomata are pores for gas exchange (not water transport).
+- Xylem transports water and minerals (not CO2).
+- Phloem transports prepared food.
+- Chloroplast is the site of photosynthesis (not direct source of oxygen).
+
+Respond ONLY with a valid JSON array. No markdown. No option letters inside options array.
 Format:
 [
   {
     "question": "Question text?",
-    "options":  ["A) ...", "B) ...", "C) ...", "D) ..."],
-    "answer":   "A) ...",
+    "options":  ["Option 1", "Option 2", "Option 3", "Option 4"],
+    "answer":   0,
     "explanation": "Brief reason why correct."
   }
 ]`;
+
+    const quizModel = getModelForLanguage(langKey);
+    console.log(`[LLM]\nlanguage=${langKey}\nmodel=${quizModel}\ntask=quiz`);
 
     const { res: response, ms: fetchMs } = await timedFetch('http://localhost:11434/api/chat', {
       method:  'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        ...reasoningWithDraft(),
+        ...reasoningWithDraft(quizModel),
+        model: quizModel,
         messages: [
           { role: 'system', content: systemPrompt },
-          { role: 'user',   content: `Generate exactly ${n} multiple choice questions about "${topic}" for a ${level} level student.${enforceJSON}` }
+          { role: 'user',   content: `Generate exactly ${n} multiple choice questions about "${topic}" for a ${level} level student, covering the assigned distinct concepts.${enforceJSONArray}` }
         ],
         stream: false,
+        format: 'json',
         options: { ...ollamaOptions('quiz'), num_predict: numPredict, num_ctx: 4096 }
       })
     });
 
+
     const data    = await response.json();
-    const rawText = data.message.content;
+    const rawText = data.message?.content || '';
 
     // Strip <think> blocks and parse with robust parser
     const cleaned   = rawText.replace(/<think>[\s\S]*?<\/think>/gi, '').trim();
-    const questions = parseQuizResponse(cleaned);
+    let questions = parseQuizResponse(cleaned);
+
+    // Validate Odia and educational quality compliance
+    let qualityCheck = validateQuizQuality(questions, topic, langKey);
+    if (!qualityCheck.valid || questions.length === 0) {
+      const failures = formatQuizValidationFailures(questions, qualityCheck, topic);
+      const issueDetail = failures.join('; ');
+      console.warn(`[quiz] Quiz quality validation failed (${issueDetail}) — attempting 1 corrective retry...`);
+      try {
+        const retryInstruction = `FAILED GENERATION:
+${failures.join('\n')}
+
+RETRY REQUIREMENTS:
+- Replace ALL failed questions rather than merely rewriting the same question.
+- Assigned concepts:
+${planText}
+- Each question must test a DIFFERENT concept.
+- Correct every listed factual error.
+- Return exactly ${n} multiple choice questions as a raw JSON array.
+- Return options without A/B/C/D prefixes.
+- Return "answer" as a zero-based integer index (0-3).${enforceJSONArray}`;
+
+        const { res: retryRes } = await timedFetch('http://localhost:11434/api/chat', {
+          method:  'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            ...reasoningWithDraft(quizModel),
+            model: quizModel,
+            messages: [
+              { role: 'system', content: systemPrompt },
+              { role: 'user',   content: `Generate exactly ${n} multiple choice questions about "${topic}" for a ${level} level student.${enforceJSONArray}` },
+              { role: 'assistant', content: rawText },
+              { role: 'user',   content: retryInstruction }
+            ],
+            stream: false,
+            format: 'json',
+            options: { ...ollamaOptions('quiz'), num_predict: numPredict, num_ctx: 4096 }
+          })
+        });
+        const retryData = await retryRes.json();
+        const retryCleaned = (retryData.message?.content || '').replace(/<think>[\s\S]*?<\/think>/gi, '').trim();
+        const retryQuestions = parseQuizResponse(retryCleaned);
+        const retryQuality = validateQuizQuality(retryQuestions, topic, langKey);
+        if (retryQuestions.length > 0 && retryQuality.valid) {
+          questions = retryQuestions;
+          qualityCheck = retryQuality;
+          console.log('[quiz] Corrective retry produced quality-validated questions');
+        } else {
+          console.warn('[quiz] Corrective retry still did not pass quality validation:', retryQuality.reason);
+          qualityCheck = retryQuality;
+        }
+      } catch (retryErr) {
+        console.warn('[quiz] Corrective retry failed:', retryErr.message);
+      }
+    }
+
+    // If still invalid, do not falsely claim success
+    if (!qualityCheck.valid || questions.length === 0) {
+      return {
+        success: false,
+        needsReview: true,
+        error: `Quiz quality validation failed: ${qualityCheck.detail || qualityCheck.reason}`,
+        questions: [],
+        _ms: fetchMs
+      };
+    }
 
     if (questions.length > 0) {
       const result = { success: true, questions, topic, numQuestions: questions.length, _ms: fetchMs };
-      smartSet('quiz', `${topic}::${n}`, level, result);
+      smartSet('quiz', `${topic}::${n}`, level, result, langKey);
       return result;
     } else {
-      const result = { success: false, error: 'Quiz generation failed', questions: [], _ms: fetchMs };
-      smartSet('quiz', `${topic}::${n}`, level, result);
-      return result;
+      return { success: false, needsReview: true, error: 'Quiz generation failed', questions: [], _ms: fetchMs };
     }
   })();
 
@@ -291,7 +394,9 @@ function track_progress({ topic, level, quizScore, studentId, studentName }) {
 
 // Tool 4: suggest_next_topic
 // Reads progress store and asks Gemma for a smart next-topic recommendation
-async function suggest_next_topic({ currentTopic, subject }) {
+async function suggest_next_topic({ currentTopic, subject, language }) {
+  if (language) setActiveLanguage(language);
+  if (containsOdiaScript(currentTopic) || containsOdiaScript(subject)) setActiveLanguage('Odia');
   const summary = getProgressSummary();
 
   const context = `
@@ -302,11 +407,16 @@ Weak areas (low scores): ${summary.weakAreas.join(', ') || 'none identified yet'
 Strong areas: ${summary.strongAreas.join(', ') || 'none yet'}
   `.trim();
 
+  const suggestLang = (isOdia(_activeLanguage) || containsOdiaScript(currentTopic) || containsOdiaScript(subject)) ? 'Odia' : (_activeLanguage || 'English');
+  const suggestModel = getModelForLanguage(suggestLang);
+  console.log(`[LLM]\nlanguage=${suggestLang}\nmodel=${suggestModel}\ntask=suggest-topic`);
+
   const { res: response, ms: fetchMs } = await timedFetch('http://localhost:11434/api/chat', {
     method:  'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
-      ...reasoningWithDraft(),
+      ...reasoningWithDraft(suggestModel),
+      model: suggestModel,
       messages: [
         { role: 'system', content: `${langPrefix()}You are a curriculum advisor. Based on the student's progress, suggest the SINGLE most beneficial next topic to study. Respond ONLY with valid JSON: { "nextTopic": "topic name", "reason": "one sentence why", "relatedTo": "how it connects to what they just studied" }` },
         { role: 'user',   content: `${context}${enforceJSON}` }
@@ -336,7 +446,8 @@ Strong areas: ${summary.strongAreas.join(', ') || 'none yet'}
 // TOOL 5: ask_socratic_question
 // Witty, high-energy Socratic tutor — exactly 5 questions then Big Picture
 // ─────────────────────────────────────────────
-async function ask_socratic_question({ topic, level, studentResponse, turnNumber }) {
+async function ask_socratic_question({ topic, level, studentResponse, turnNumber, language }) {
+  if (language) setActiveLanguage(language);
   const turn = turnNumber || 1;
   const isFinalTurn = turn >= 5;
 
@@ -372,11 +483,16 @@ Respond ONLY with valid JSON (no markdown fences):
     ? `Topic: "${topic}". Student level: ${level}. This is Turn 1 — start the Socratic dialogue with energy!`
     : `Topic: "${topic}". Student level: ${level}. Student's answer: "${studentResponse}". This is Turn ${turn} of 5.${isFinalTurn ? ' THIS IS THE FINAL TURN — include the Big Picture summary!' : ''}`;
 
+  const socLang = (isOdia(language || _activeLanguage) || containsOdiaScript(studentResponse) || containsOdiaScript(topic)) ? 'Odia' : (language || _activeLanguage || 'English');
+  const socModel = getModelForLanguage(socLang);
+  console.log(`[LLM]\nlanguage=${socLang}\nmodel=${socModel}\ntask=socratic`);
+
   const { res: response, ms: fetchMs } = await timedFetch('http://localhost:11434/api/chat', {
     method:  'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
-      ...reasoningWithDraft(),
+      ...reasoningWithDraft(socModel),
+      model: socModel,
       messages: [
         { role: 'system', content: systemPrompt },
         { role: 'user',   content: `${userMsg}${enforceJSON}` }
@@ -411,8 +527,10 @@ Respond ONLY with valid JSON (no markdown fences):
 // TOOL 6: generate_concept_map
 // Returns nodes and edges representing how concepts relate
 // ─────────────────────────────────────────────
-async function generate_concept_map({ topic, level }) {
-  const systemPrompt = `${langPrefix()}You are a knowledge graph builder. Given a topic, generate a concept map showing how key ideas connect.
+async function generate_concept_map({ topic, level, language }) {
+  if (language) setActiveLanguage(language);
+  if (containsOdiaScript(topic)) setActiveLanguage('Odia');
+  const systemPrompt = `${langPrefix('concept_map')}You are a knowledge graph builder. Given a topic, generate a concept map showing how key ideas connect.
 
 Respond ONLY with valid JSON in exactly this format — no markdown, no extra text:
 {
@@ -435,29 +553,39 @@ Rules:
 - Beginner: simple concrete concepts. Advanced: technical, nuanced concepts.
 - Edge labels: short verbs like "causes", "requires", "produces", "is part of", "leads to"`;
 
+  const mapLang = (isOdia(language || _activeLanguage) || containsOdiaScript(topic)) ? 'Odia' : (language || _activeLanguage || 'English');
+  const mapModel = getModelForLanguage(mapLang);
+  console.log(`[LLM]\nlanguage=${mapLang}\nmodel=${mapModel}\ntask=concept-map`);
+
   const { res: response, ms: fetchMs } = await timedFetch('http://localhost:11434/api/chat', {
     method:  'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
-      ...reasoningWithDraft(),
+      ...reasoningWithDraft(mapModel),
+      model: mapModel,
       messages: [
         { role: 'system', content: systemPrompt },
         { role: 'user',   content: `Generate a concept map for "${topic}" at ${level} level.${enforceJSON}` }
       ],
       stream: false,
+      format: 'json',
+      think: false,
       options: { ...ollamaOptions('json'), num_ctx: 4096 }
     })
   });
 
   const data    = await response.json();
-  const rawText = data.message.content;
+  const rawText = data.message?.content || '';
 
-  // Strip <think> blocks and parse with robust concept map parser
-  const cleaned = rawText.replace(/<think>[\s\S]*?<\/think>/gi, '').trim();
+  // Strip <think> blocks (both closed and unclosed trailing blocks)
+  const cleaned = rawText
+    .replace(/<think>[\s\S]*?<\/think>/gi, '')
+    .replace(/<think>[\s\S]*$/gi, '')
+    .trim();
   const { central, nodes, edges } = parseConceptMapResponse(cleaned);
 
   if (nodes.length > 0) {
-    return { success: true, central, nodes, edges, topic, level, _ms: fetchMs };
+    return { success: true, central: central || topic, nodes, edges, topic, level, _ms: fetchMs };
   } else {
     return { success: false, error: 'Concept map generation failed', topic, level, _ms: fetchMs };
   }
@@ -538,11 +666,16 @@ RESPOND ONLY with valid JSON (no markdown fences, no extra text):
     };
   }
 
+  const evalLang = isOdia(_activeLanguage) ? 'Odia' : (_activeLanguage || 'English');
+  const evalModel = getModelForLanguage(evalLang);
+  console.log(`[LLM]\nlanguage=${evalLang}\nmodel=${evalModel}\ntask=evaluation`);
+
   const { res: response, ms: fetchMs } = await timedFetch('http://localhost:11434/api/chat', {
     method:  'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
-      ...reasoningWithDraft(),
+      ...reasoningWithDraft(evalModel),
+      model: evalModel,
       messages: [
         { role: 'system', content: systemPrompt },
         { role: 'user',   content: `Generate the Dynamic Progress Evaluation Report based on the data provided.${enforceJSON}` }
@@ -573,4 +706,4 @@ const toolImplementations = {
   generate_evaluation_report
 };
 
-module.exports = { toolDefinitions, toolImplementations, setActiveLanguage };
+module.exports = { toolDefinitions, toolImplementations, setActiveLanguage, langPrefix };

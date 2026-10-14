@@ -15,15 +15,16 @@ router.post('/concept-map', async (req, res) => {
   const steps = [];
   const mark = (name, detail) => steps.push({ name, ms: Date.now() - mapStart, detail });
 
-  const { topic, level } = req.body;
-  console.log(`\n⏱  [/concept-map] Started — topic: "${topic}", level: ${level || 'intermediate'}`);
+  const { topic, level, language } = req.body;
+  console.log(`\n⏱  [/concept-map] Started — topic: "${topic}", level: ${level || 'intermediate'}, lang: ${language || 'English'}`);
   if (!topic) return res.status(400).json({ error: 'topic is required' });
   mark('Validate input', `topic="${topic}", level=${level || 'intermediate'}`);
 
   try {
     const result = await toolImplementations.generate_concept_map({
       topic,
-      level: level || 'intermediate'
+      level: level || 'intermediate',
+      language
     });
     mark('generate_concept_map tool', `nodes=${result?.nodes?.length || 0}, edges=${result?.edges?.length || 0}`);
 

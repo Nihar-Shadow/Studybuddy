@@ -52,7 +52,7 @@ class ShortcutManager {
           <div class="shortcut-section">General</div>
           <div class="shortcut-row"><span>Show shortcuts</span><span class="shortcut-keys"><kbd>?</kbd></span></div>
           <div class="shortcut-row"><span>Focus chat input</span><span class="shortcut-keys"><kbd>${mod}</kbd><span>+</span><kbd>K</kbd></span></div>
-          <div class="shortcut-row"><span>Cycle level (Beginner → Intermediate → Advanced)</span><span class="shortcut-keys"><kbd>${mod}</kbd><span>+</span><kbd>/</kbd></span></div>
+          <div class="shortcut-row"><span>Cycle level (Beginner → Class 9 → Advanced)</span><span class="shortcut-keys"><kbd>${mod}</kbd><span>+</span><kbd>/</kbd></span></div>
           <div class="shortcut-section">Learning</div>
           <div class="shortcut-row"><span>Send message</span><span class="shortcut-keys"><kbd>Enter</kbd></span></div>
           <div class="shortcut-row"><span>New line</span><span class="shortcut-keys"><kbd>Shift</kbd><span>+</span><kbd>Enter</kbd></span></div>

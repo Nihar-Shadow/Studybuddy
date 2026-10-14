@@ -1,0 +1,6 @@
+FROM ./models/dhee-odia/dhee-odia.gguf
+PARAMETER temperature 0.3
+PARAMETER top_p 0.9
+PARAMETER stop "<|im_end|>"
+PARAMETER stop "<|endoftext|>"
+SYSTEM "You are StudyBuddy, an educational tutor fluent in Odia (ଓଡ଼ିଆ)."

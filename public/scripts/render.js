@@ -28,23 +28,87 @@ function typewriterEffect(element, text, speed = 30) {
  * Accepts a structured JSON object (steps, answer, etc) and renders cards/answer block.
  * Handles missing/partial data gracefully. Uses theme colors.
  */
+// Helper to safely strip and extract human-readable text if JSON was accidentally passed
+function extractCleanReadableText(text) {
+  if (!text || typeof text !== 'string') return text || '';
+  const trimmed = text.trim();
+  if (trimmed.startsWith('{') && (trimmed.includes('"') || trimmed.includes(':'))) {
+    try {
+      const parsed = JSON.parse(trimmed.match(/\{[\s\S]*\}/)?.[0] || trimmed);
+      return parsed.answer || parsed.text || parsed.intro || parsed.summary || '';
+    } catch (_) {
+      const match = trimmed.match(/"answer"\s*:\s*"((?:[^"\\]|\\.)*)"/) ||
+                    trimmed.match(/"text"\s*:\s*"((?:[^"\\]|\\.)*)"/) ||
+                    trimmed.match(/"intro"\s*:\s*"((?:[^"\\]|\\.)*)"/);
+      if (match && match[1]) return match[1].replace(/\\"/g, '"');
+    }
+  }
+  return text;
+}
+
+/**
+ * Strips unnecessary English parentheticals in Odia text (e.g. "(Oxygen)", "(Stomata)")
+ * while strictly preserving chemical formulas and scientific notation (e.g. CO2, H2O, ATP).
+ */
+function cleanOdiaEnglishParentheticals(text) {
+  if (!text || typeof text !== 'string') return text;
+  if (/[\u0b00-\u0b7f]/.test(text)) {
+    return text.replace(/\(\s*([A-Za-z0-9_ -]+)\s*\)/g, (match, inner) => {
+      const trimmed = inner.trim();
+      // Keep chemical formulas & notation
+      if (/^(?:CO[2₂]|H[2₂]O|ATP|DNA|RNA|O[2₂3₃]|C[6₆]H[1₁][2₂]O[6₆]|N[2₂])$/i.test(trimmed)) {
+        return match;
+      }
+      return '';
+    }).replace(/[ ]{2,}/g, ' ').replace(/\s+([।,?.])/g, '$1').trim();
+  }
+  return text;
+}
+
+/**
+ * Splits dense walls of text into short, readable 2–3 sentence paragraphs
+ * for easier scanning by Class 9 students.
+ */
+function formatStudentFriendlyParagraphs(text) {
+  if (!text || typeof text !== 'string') return text;
+  if (text.includes('\n\n')) return text;
+
+  const isOdia = /[\u0b00-\u0b7f]/.test(text);
+  const delimiter = isOdia ? /(?<=[।?!])\s+/ : /(?<=[.?!])\s+/;
+  const sentences = text.split(delimiter).filter(s => s.trim().length > 0);
+
+  if (sentences.length <= 3) return text;
+
+  const chunks = [];
+  for (let i = 0; i < sentences.length; i += 3) {
+    chunks.push(sentences.slice(i, i + 3).join(' '));
+  }
+  return chunks.join('\n\n');
+}
+
 function renderResponse(jsonData) {
+  console.log('[Diagnostic: Final Rendering] renderResponse called with language:', typeof currentLanguage !== 'undefined' ? currentLanguage : 'unknown');
+
   if (!jsonData || typeof jsonData !== 'object') {
     renderFormattedFallback('⚠️ No response data.');
     return;
   }
   // Defensive: allow both {steps, answer, ...} and {structured: {...}}
   const s = jsonData.structured && jsonData.structured.steps ? jsonData.structured : jsonData;
-  if (s.steps && Array.isArray(s.steps)) {
+  if (s.steps && Array.isArray(s.steps) && s.steps.length > 0) {
     const converted = {
-      intro: convertLatexToReadable(s.intro || ''),
+      language: s.language || jsonData.language,
+      intro: convertLatexToReadable(cleanOdiaEnglishParentheticals(extractCleanReadableText(s.intro || ''))),
       steps: s.steps.map(step => ({
-        title: convertLatexToReadable(step.title || ''),
-        text: convertLatexToReadable(step.text || ''),
+        title: convertLatexToReadable(cleanOdiaEnglishParentheticals(extractCleanReadableText(step.title || ''))),
+        text: convertLatexToReadable(cleanOdiaEnglishParentheticals(extractCleanReadableText(step.text || step.explanation || ''))),
+        explanation: convertLatexToReadable(cleanOdiaEnglishParentheticals(extractCleanReadableText(step.explanation || step.text || ''))),
         emoji: step.emoji || ''
       })),
-      answer: convertLatexToReadable(s.answer || ''),
-      followup: convertLatexToReadable(s.followup || '')
+      answer: convertLatexToReadable(cleanOdiaEnglishParentheticals(extractCleanReadableText(s.answer || s.summary || ''))),
+      summary: convertLatexToReadable(cleanOdiaEnglishParentheticals(extractCleanReadableText(s.summary || s.answer || ''))),
+      followup: convertLatexToReadable(cleanOdiaEnglishParentheticals(extractCleanReadableText(s.followup || s.followUp || ''))),
+      followUp: convertLatexToReadable(cleanOdiaEnglishParentheticals(extractCleanReadableText(s.followUp || s.followup || '')))
     };
     renderStructuredResponse(converted);
   } else if (s.socraticQuestion) {
@@ -57,10 +121,21 @@ function renderResponse(jsonData) {
     twSpan.className = 'typewriter-text';
     qEl.appendChild(twSpan);
     container.appendChild(qEl);
+    if (typeof speechController !== 'undefined' && typeof speechController.createSpeechControl === 'function') {
+      const speechWrap = speechController.createSpeechControl({
+        getText: () => convertLatexToReadable(extractCleanReadableText(s.socraticQuestion)),
+        getLanguage: () => (typeof currentLanguage !== 'undefined' ? currentLanguage : 'English')
+      });
+      if (speechWrap) container.appendChild(speechWrap);
+    }
     chatEl.appendChild(container);
     scrollToBottom();
-    typewriterEffect(twSpan, convertLatexToReadable(s.socraticQuestion), 22);
-  } else if (s.answer) {
+    const cleanQ = convertLatexToReadable(extractCleanReadableText(s.socraticQuestion));
+    typewriterEffect(twSpan, cleanQ, 22);
+    if (typeof isAutoTTSEnabled === 'function' && isAutoTTSEnabled() && typeof speechController !== 'undefined') {
+      speechController.speak(cleanQ, typeof currentLanguage !== 'undefined' ? currentLanguage : 'English');
+    }
+  } else if (s.answer || s.summary) {
     // No steps, but has an answer — show as a single answer card with typewriter
     const container = document.createElement('div');
     container.className = 'structured-response';
@@ -69,13 +144,40 @@ function renderResponse(jsonData) {
     const twSpan = document.createElement('span');
     twSpan.className = 'typewriter-text';
     answerEl.appendChild(twSpan);
+    const cleanAns = convertLatexToReadable(extractCleanReadableText(s.answer || s.summary));
+    if (typeof speechController !== 'undefined' && typeof speechController.createSpeechControl === 'function') {
+      const answerLang = s.language || jsonData.language || (typeof currentLanguage !== 'undefined' ? currentLanguage : 'English');
+      const speechWrap = speechController.createSpeechControl({
+        getText: () => cleanAns,
+        getLanguage: () => answerLang,
+        ariaPrefix: 'answer',
+        containerClass: 'speech-controls--answer'
+      });
+      if (speechWrap) answerEl.appendChild(speechWrap);
+    }
     container.appendChild(answerEl);
     chatEl.appendChild(container);
     scrollToBottom();
-    typewriterEffect(twSpan, convertLatexToReadable(s.answer), 22);
+    typewriterEffect(twSpan, cleanAns, 22);
+    if (typeof isAutoTTSEnabled === 'function' && isAutoTTSEnabled() && typeof speechController !== 'undefined') {
+      const answerLang = s.language || jsonData.language || (typeof currentLanguage !== 'undefined' ? currentLanguage : 'English');
+      speechController.speak(cleanAns, answerLang);
+    }
   } else {
     renderFormattedFallback('⚠️ No structured response.');
   }
+}
+
+/**
+ * Universal language-independent structured tutor renderer entrypoint.
+ * Renders both English and Odia structured explanations using the identical UI components.
+ */
+function renderStructuredTutorResponse(response) {
+  return renderResponse(response);
+}
+
+if (typeof window !== 'undefined') {
+  window.renderStructuredTutorResponse = renderStructuredTutorResponse;
 }
 /* LaTeX conversion, structured response rendering, vision rendering, fallback rendering */
 // ============ LaTeX to Readable Conversion ============
@@ -187,22 +289,27 @@ function renderFormattedFallback(raw) {
 
   // 3. Try one last shot at parsing JSON — the server might have missed it
   try {
-    const parsed = JSON.parse(text.match(/\{[\s\S]*\}/)?.[0] || text);
-    if (parsed && parsed.steps) {
-      const converted = {
-        intro: convertLatexToReadable(parsed.intro || ''),
-        steps: (parsed.steps || []).map(step => ({
-          title: convertLatexToReadable(step.title || ''),
-          text: convertLatexToReadable(step.text || ''),
-          emoji: step.emoji || ''
-        })),
-        answer: convertLatexToReadable(parsed.answer || ''),
-        followup: convertLatexToReadable(parsed.followup || '')
-      };
-      renderStructuredResponse(converted);
-      return;
+    const jsonMatch = text.match(/\{[\s\S]*\}/);
+    if (jsonMatch) {
+      const parsed = JSON.parse(jsonMatch[0]);
+      if (parsed && (parsed.steps || parsed.answer || parsed.intro || parsed.explanation)) {
+        renderResponse(parsed);
+        return;
+      }
     }
-  } catch (_) { /* not JSON — render as formatted text */ }
+  } catch (_) { /* not JSON */ }
+
+  // 3b. Safety: if string is still serialized JSON, extract clean text rather than showing JSON
+  if (text.startsWith('{') && (text.includes('"') || text.includes(':'))) {
+    const extracted = extractCleanReadableText(text);
+    if (extracted && extracted !== text) {
+      text = extracted;
+    }
+  }
+
+  // 3c. Clean unnecessary English parentheticals & break dense text into 2-3 short sentences for Class 9 scanning
+  text = cleanOdiaEnglishParentheticals(text);
+  text = formatStudentFriendlyParagraphs(text);
 
   // 4. Convert lightweight markdown → HTML
   let html = escapeHtml(text);
@@ -548,7 +655,7 @@ function renderStructuredResponse(s) {
     if (s.intro) {
       const introEl = document.createElement('div');
       introEl.className = 'resp-intro animate-greeting';
-      introEl.textContent = s.intro;
+      introEl.textContent = extractCleanReadableText(s.intro);
       introEl.style.setProperty('--delay', '0s');
       contentElements.push(introEl);
     }
@@ -571,11 +678,11 @@ function renderStructuredResponse(s) {
 
         const titleEl = document.createElement('div');
         titleEl.className = 'resp-step-title';
-        titleEl.textContent = step.title;
+        titleEl.textContent = extractCleanReadableText(step.title);
 
         const textEl = document.createElement('div');
         textEl.className = 'resp-step-text';
-        textEl.textContent = step.text;
+        textEl.textContent = extractCleanReadableText(step.text);
 
         bodyEl.appendChild(titleEl);
         bodyEl.appendChild(textEl);
@@ -595,19 +702,35 @@ function renderStructuredResponse(s) {
     }
 
     // 3. ANSWER pill/card — final element with bounce scale and typewriter effect
-    if (s.answer) {
+    const cleanAnswer = extractCleanReadableText(s.answer || s.summary || '');
+    if (cleanAnswer) {
       const answerEl = document.createElement('div');
       answerEl.className = 'resp-answer animate-bounce-scale';
       // Add typewriter-text span
       const twSpan = document.createElement('span');
       twSpan.className = 'typewriter-text';
       answerEl.appendChild(twSpan);
+
+      // Attach speaker control directly underneath the final validated tutor answer
+      if (typeof speechController !== 'undefined' && typeof speechController.createSpeechControl === 'function') {
+        const answerLang = s.language || (typeof currentLanguage !== 'undefined' ? currentLanguage : 'English');
+        const speechWrap = speechController.createSpeechControl({
+          getText: () => cleanAnswer,
+          getLanguage: () => answerLang,
+          ariaPrefix: 'answer',
+          containerClass: 'speech-controls--answer'
+        });
+        if (speechWrap) {
+          answerEl.appendChild(speechWrap);
+        }
+      }
+
       // Answer appears after all steps, with bounce effect
       const delay = (s.steps ? s.steps.length : 0) * 0.1 + 0.2;
       answerEl.style.animationDelay = `${delay}s`;
       // Start typewriter after skeleton fade
       setTimeout(() => {
-        typewriterEffect(twSpan, s.answer, 22);
+        typewriterEffect(twSpan, cleanAnswer, 22);
       }, 350 + delay * 1000); // 350ms skeleton + animation delay
       contentElements.push(answerEl);
     }
@@ -616,7 +739,7 @@ function renderStructuredResponse(s) {
     if (s.followup) {
       const followupEl = document.createElement('div');
       followupEl.className = 'resp-followup animate-in';
-      followupEl.textContent = s.followup;
+      followupEl.textContent = extractCleanReadableText(s.followup);
       const delay = (s.steps ? s.steps.length : 0) * 0.1 + 0.3;
       followupEl.style.animationDelay = `${delay}s`;
       contentElements.push(followupEl);
@@ -628,6 +751,12 @@ function renderStructuredResponse(s) {
     // Add all content elements to container
     contentElements.forEach(el => container.appendChild(el));
     
+    // Auto read aloud if preference enabled
+    if (typeof isAutoTTSEnabled === 'function' && isAutoTTSEnabled() && typeof speechController !== 'undefined' && cleanAnswer) {
+      const answerLang = s.language || (typeof currentLanguage !== 'undefined' ? currentLanguage : 'English');
+      speechController.speak(cleanAnswer, answerLang);
+    }
+
     // Scroll to bottom
     scrollToBottom();
   }, 300); // Let skeleton shimmer for 300ms

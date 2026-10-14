@@ -59,10 +59,11 @@
   <header>
     <h1>📚 StudyBuddy</h1>
     <div style="display:flex;align-items:center;gap:10px;">
-      <div class="status-badge" title="Response language">
+      <div class="status-badge" id="languageBadge" title="Response language">
         🌐
-        <select id="languageSelector" style="background:transparent;color:inherit;border:none;font-size:inherit;font-family:inherit;font-weight:inherit;cursor:pointer;padding:0 2px;outline:none;-webkit-appearance:none;appearance:none;">
+        <select id="languageSelector" aria-label="Select Response Language" style="background:transparent;color:inherit;border:none;font-size:inherit;font-family:inherit;font-weight:inherit;cursor:pointer;padding:0 2px;outline:none;-webkit-appearance:none;appearance:none;">
           <option value="English">English</option>
+          <option value="Odia">ଓଡ଼ିଆ (Odia)</option>
           <option value="Hindi">हिन्दी</option>
           <option value="Spanish">Español</option>
           <option value="Arabic">العربية</option>
@@ -77,9 +78,9 @@
       <div id="streak-badge" class="streak-badge" title="Your learning streak" style="display:none;">
         🔥 <span id="streak-count">0</span> day streak
       </div>
-      <div class="status-badge">
-        <span class="status-dot"></span>
-        Local AI
+      <div class="status-badge" id="aiStatusBadge" title="AI Provider Status">
+        <span class="status-dot" id="aiStatusDot"></span>
+        <span id="aiStatusText">Local AI</span>
       </div>
     </div>
   </header>
@@ -89,7 +90,7 @@
     <label for="level">My level:</label>
     <select id="level">
       <option value="beginner">Beginner (age 8–12)</option>
-      <option value="intermediate" selected>Intermediate (high school)</option>
+      <option value="intermediate" selected>Class 9</option>
       <option value="advanced">Advanced (university+)</option>
     </select>
     <button id="quizBtn" onclick="openQuizModal()">📝 Quiz Me</button>
@@ -98,6 +99,7 @@
     <button id="agent-toggle" onclick="toggleAgentMode()" style="display:none;">Agent mode: OFF</button>
     <button id="progress-btn" onclick="showProgress()" style="display:none;">📊 My Progress</button>
     <button id="evaluation-btn" onclick="showEvaluationReport()">📈 Evaluation Report</button>
+    <button id="auto-tts-toggle" onclick="toggleAutoTTS()" aria-label="Auto read answers aloud: OFF" title="Read answers aloud: OFF">🔊 Read aloud: OFF</button>
   </div>
 
   <!-- Chat Area -->
@@ -169,6 +171,7 @@
         <span>⬤ <span style="color:var(--accent)">Key idea</span></span>
         <span>⬤ <span style="color:var(--success)">Example</span></span>
       </div>
+      <div id="cm-node-detail" style="display:none;margin-top:12px;padding:10px 14px;background:var(--bg-elevated);border-radius:var(--radius-sm);border:1px solid var(--border-subtle);align-items:center;justify-content:space-between;gap:10px;"></div>
     </div>
   </div>
 
@@ -182,7 +185,7 @@
       </div>
       <div class="modal-field">
         <label for="quizCount">Number of Questions</label>
-        <input type="number" id="quizCount" min="3" max="10" value="5">
+        <input type="number" id="quizCount" min="1" max="10" value="3">
       </div>
       <div class="modal-buttons">
         <button class="modal-btn secondary" onclick="closeQuizModal()">Cancel</button>
@@ -194,6 +197,7 @@
   <!-- Scripts (order matters: state → utils → features → init → pwa) -->
   <script src="/scripts/state.js"></script>
   <script src="/scripts/utils.js"></script>
+  <script src="/scripts/speech.js"></script>
   <script src="/scripts/image.js"></script>
   <script src="/scripts/chat.js"></script>
   <script src="/scripts/quiz.js"></script>

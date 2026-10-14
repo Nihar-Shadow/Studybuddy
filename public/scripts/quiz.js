@@ -89,7 +89,7 @@ function hideQuizLoading() {
     </div>
     <div class="modal-field">
       <label for="quizCount">Number of Questions</label>
-      <input type="number" id="quizCount" min="3" max="10" value="5">
+      <input type="number" id="quizCount" min="1" max="10" value="3">
     </div>
     <div class="modal-buttons">
       <button class="modal-btn secondary" onclick="closeQuizModal()">Cancel</button>
@@ -100,7 +100,41 @@ function hideQuizLoading() {
 
 async function generateQuiz() {
   const topic = document.getElementById('quizTopic').value.trim();
-  const numQuestions = parseInt(document.getElementById('quizCount').value, 10);
+  let numQuestions = parseInt(document.getElementById('quizCount').value, 10) || 3;
+
+  // Extract explicit question count without confusing with option count (FIX 1, FIX 8)
+  const extractClientQuestionCount = (text) => {
+    if (!text || typeof text !== 'string') return null;
+    const odiaDigits = { '୦': 0, '୧': 1, '୨': 2, '୩': 3, '୪': 4, '୫': 5, '୬': 6, '୭': 7, '୮': 8, '୯': 9 };
+    const toNum = (s) => {
+      let res = '';
+      for (const c of String(s).trim()) {
+        if (odiaDigits[c] !== undefined) res += odiaDigits[c];
+        else if (/\d/.test(c)) res += c;
+      }
+      const n = parseInt(res, 10);
+      return isNaN(n) ? null : n;
+    };
+    const qKeywords = '(?:mcqs?|mcq|ପ୍ରଶ୍ନ(?:ର)?|questions?|quiz\\s+questions?)';
+    const m1 = text.match(new RegExp(`([୧-୯୦-୯\\d]+)\\s*(?:ଟି|ta|ti)?\\s*(?:(?:ସହଜ|କଠିନ|କ୍ଷୁଦ୍ର|ନୂଆ|ସରଳ)\\s+)?${qKeywords}`, 'i'));
+    if (m1) {
+      const val = toNum(m1[1]);
+      if (val && val >= 1 && val <= 10) return val;
+    }
+    const m2 = text.match(new RegExp(`${qKeywords}\\s*(?:ସଂଖ୍ୟା\\s*[:=]?\\s*|[:=]\\s*)?([୧-୯୦-୯\\d]+)`, 'i'));
+    if (m2) {
+      const val = toNum(m2[1]);
+      if (val && val >= 1 && val <= 10) return val;
+    }
+    return null;
+  };
+
+  const explicitQCount = extractClientQuestionCount(topic);
+  if (explicitQCount) {
+    numQuestions = explicitQCount;
+    const countEl = document.getElementById('quizCount');
+    if (countEl) countEl.value = numQuestions;
+  }
 
   if (!topic) {
     alert('Please enter a topic');
@@ -111,12 +145,25 @@ async function generateQuiz() {
   showQuizLoading(topic);
 
   try {
+    const isOdiaTopic = /[\u0b00-\u0b7f]/.test(topic);
+    const selectedLang = typeof currentLanguage !== 'undefined' ? currentLanguage : (localStorage.getItem('studybuddy-language') || 'English');
+    const effectiveLang = isOdiaTopic ? 'Odia' : selectedLang;
+
+    if (isOdiaTopic && currentLanguage !== 'Odia') {
+      currentLanguage = 'Odia';
+      const langSel = document.getElementById('languageSelector');
+      if (langSel) langSel.value = 'Odia';
+      try { localStorage.setItem('studybuddy-language', 'Odia'); } catch (_) {}
+      if (typeof updateLanguageIndicator === 'function') updateLanguageIndicator('Odia');
+    }
+
     const res = await fetch('/quiz', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         topic,
         level: levelEl.value,
+        language: effectiveLang,
         numQuestions
       })
     });
@@ -215,6 +262,37 @@ function renderQuizCard() {
   }
 
   addBubble(quizHTML, 'bot', true, false);
+
+  // Attach speech controls to individual quiz questions and explanations
+  if (typeof speechController !== 'undefined' && typeof speechController.createSpeechControl === 'function') {
+    currentQuiz.forEach((q, idx) => {
+      const qContainer = chatEl.querySelector(`#quiz-q-${idx}`);
+      if (!qContainer) return;
+
+      const qTextEl = qContainer.querySelector('.quiz-question');
+      if (qTextEl && !qContainer.querySelector('.speech-controls')) {
+        const speechWrap = speechController.createSpeechControl({
+          getText: () => q.question,
+          getLanguage: () => (typeof currentLanguage !== 'undefined' ? currentLanguage : 'English'),
+          ariaPrefix: 'question'
+        });
+        if (speechWrap) {
+          qTextEl.insertAdjacentElement('afterend', speechWrap);
+        }
+      }
+
+      const expEl = qContainer.querySelector('.quiz-explanation');
+      if (expEl && !expEl.querySelector('.speech-controls')) {
+        const expSpeechWrap = speechController.createSpeechControl({
+          getText: () => q.explanation,
+          getLanguage: () => (typeof currentLanguage !== 'undefined' ? currentLanguage : 'English')
+        });
+        if (expSpeechWrap) {
+          expEl.appendChild(expSpeechWrap);
+        }
+      }
+    });
+  }
 
   // ── Save score to server when quiz is fully completed ──
   if (allAnswered && !renderQuizCard._scoreSaved) {

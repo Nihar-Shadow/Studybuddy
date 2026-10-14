@@ -31,6 +31,21 @@ function addBubble(content, role, isHTML = false, autoScroll = true) {
   } else {
     div.textContent = content;
   }
+  if (role === 'bot' && typeof speechController !== 'undefined' && typeof speechController.createSpeechControl === 'function') {
+    const rawText = div.textContent || '';
+    const isQuiz = div.querySelector('.quiz-card') !== null;
+    const isSkip = !rawText.trim() || rawText.includes('⏳') || rawText.startsWith('👋');
+    if (!isQuiz && !isSkip && !div.querySelector('.speech-controls')) {
+      const speechWrap = speechController.createSpeechControl({
+        getText: () => div.textContent || '',
+        getLanguage: () => (typeof currentLanguage !== 'undefined' ? currentLanguage : 'English')
+      });
+      if (speechWrap) div.appendChild(speechWrap);
+      if (typeof isAutoTTSEnabled === 'function' && isAutoTTSEnabled()) {
+        speechController.speak(rawText, typeof currentLanguage !== 'undefined' ? currentLanguage : 'English');
+      }
+    }
+  }
   chatEl.appendChild(div);
   if (autoScroll) scrollToBottom();
   return div;

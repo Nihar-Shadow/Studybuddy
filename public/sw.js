@@ -1,4 +1,4 @@
-const CACHE_VERSION   = 'studybuddy-v6';
+const CACHE_VERSION   = 'studybuddy-v7';
 const SHELL_CACHE     = `${CACHE_VERSION}-shell`;
 const RUNTIME_CACHE   = `${CACHE_VERSION}-runtime`;
 
@@ -30,6 +30,7 @@ const SHELL_ASSETS = [
   // Scripts
   '/scripts/state.js',
   '/scripts/utils.js',
+  '/scripts/speech.js',
   '/scripts/image.js',
   '/scripts/chat.js',
   '/scripts/quiz.js',

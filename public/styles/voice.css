@@ -55,3 +55,95 @@
 .voice-send-btn:hover { background: var(--accent-soft); }
 .voice-stop-btn { color: var(--error, #EF4444); }
 .voice-stop-btn:hover { background: rgba(239,68,68,0.1); }
+
+/* ═══════════ READ ANSWERS ALOUD (TTS) CONTROLS ═══════════ */
+.speech-controls {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 8px;
+  flex-wrap: wrap;
+}
+.speech-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: var(--bg-surface, #f8fafc);
+  border: 1px solid var(--border-subtle, #e2e8f0);
+  color: var(--text-secondary, #64748b);
+  border-radius: var(--radius-sm, 6px);
+  padding: 4px 10px;
+  font-size: var(--font-size-xs, 12px);
+  font-weight: 500;
+  font-family: inherit;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  line-height: 1.4;
+  user-select: none;
+}
+.speech-btn:hover {
+  background: var(--accent-soft, rgba(99, 102, 241, 0.1));
+  color: var(--accent, #6366f1);
+  border-color: var(--accent, #6366f1);
+}
+.speech-btn:focus-visible {
+  outline: 2px solid var(--accent, #6366f1);
+  outline-offset: 2px;
+}
+.speech-btn-stop {
+  color: var(--error, #EF4444);
+}
+.speech-btn-stop:hover {
+  background: rgba(239, 68, 68, 0.1);
+  border-color: var(--error, #EF4444);
+}
+.speech-btn-icon {
+  font-size: 13px;
+  line-height: 1;
+}
+.speech-btn-label {
+  font-size: var(--font-size-xs, 12px);
+}
+#auto-tts-toggle.active {
+  background: var(--accent-soft);
+  color: var(--accent);
+  border-color: var(--accent);
+}
+
+/* ── Final Validated Answer Card (.resp-answer) TTS Style ── */
+.resp-answer {
+  display: flex;
+  flex-direction: column;
+}
+.speech-controls--answer {
+  margin-top: 10px;
+  padding-top: 8px;
+  border-top: 1px dashed var(--border-subtle, rgba(0, 0, 0, 0.08));
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  align-self: flex-start;
+}
+.speech-controls--answer .speech-btn {
+  background: var(--bg-surface, #ffffff);
+  border: 1px solid var(--accent, #6366f1);
+  color: var(--accent, #6366f1);
+  font-weight: 600;
+  font-size: var(--font-size-xs, 12px);
+  padding: 5px 12px;
+  border-radius: var(--radius-sm, 6px);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+}
+.speech-controls--answer .speech-btn:hover {
+  background: var(--accent, #6366f1);
+  color: #ffffff;
+}
+.speech-controls--answer .speech-btn-stop {
+  border-color: var(--error, #ef4444);
+  color: var(--error, #ef4444);
+}
+.speech-controls--answer .speech-btn-stop:hover {
+  background: var(--error, #ef4444);
+  color: #ffffff;
+}
+

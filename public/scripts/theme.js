@@ -33,11 +33,31 @@ async function loadDueReviews() {
     if (data.reviews && data.reviews.length > 0) {
       const banner = document.createElement('div');
       banner.className = 'due-reviews-banner';
-      const names = data.reviews.slice(0, 3).map(r => r.name).join(', ');
-      const extra = data.reviews.length > 3 ? ` +${data.reviews.length - 3} more` : '';
+      const topReviews = data.reviews.slice(0, 3);
+      const extraCount = data.reviews.length > 3 ? data.reviews.length - 3 : 0;
+
+      const formatReviewItem = (r) => {
+        let label = r.name || r.topic || 'General Science';
+        label = label.charAt(0).toUpperCase() + label.slice(1);
+        if (r.concept && r.concept !== r.topic && r.concept !== r.name) {
+          const conceptClean = r.concept.replace(/_/g, ' ');
+          label += ` — ${conceptClean}`;
+        }
+        return label;
+      };
+
+      const itemsHtml = topReviews.map(r => `<li>• ${formatReviewItem(r)}</li>`).join('');
+      const extraHtml = extraCount > 0 ? `<li class="due-reviews-more">+${extraCount} more</li>` : '';
+
       banner.innerHTML = `
-        <span>📅 <strong>${data.reviews.length} topic${data.reviews.length > 1 ? 's' : ''} due for review:</strong> ${names}${extra}</span>
-        <button onclick="startDueReview(this.parentElement)">Review now →</button>
+        <div class="due-reviews-header">
+          <div class="due-reviews-title">📚 <strong>${data.reviews.length} topic${data.reviews.length > 1 ? 's' : ''} due for review</strong></div>
+          <button onclick="startDueReview(this.closest('.due-reviews-banner'))">Review now →</button>
+        </div>
+        <ul class="due-reviews-list">
+          ${itemsHtml}
+          ${extraHtml}
+        </ul>
       `;
       chatEl.appendChild(banner);
     }

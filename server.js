@@ -256,52 +256,15 @@ progressStore.on('data_updated', (info) => {
   broadcastSSE('data_updated', info || { ts: Date.now() });
 });
 
-// ─── Warm up models on startup ───────────────────
-async function warmUpModels() {
-  try {
-    const tagsRes = await fetch('http://localhost:11434/api/tags');
-    const tagsData = await tagsRes.json();
-    const installedModels = tagsData.models.map(m => m.name);
-
-    const modelsToWarmup = installedModels.filter(m =>
-      m.includes('gemma4:e4b') || m.includes('gemma4:e2b') || m.includes('gemma3')
-    ).slice(0, 2);
-
-    for (const model of modelsToWarmup) {
-      try {
-        await fetch('http://localhost:11434/api/generate', {
-          method:  'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            model,
-            prompt:    'hi',
-            stream:    false,
-            options:   { num_predict: 1 }
-          })
-        });
-        console.log(`[warmup] ${model} loaded into RAM`);
-      } catch (err) {
-        console.warn(`[warmup] Could not warm up ${model}:`, err.message);
-      }
-    }
-
-    if (modelsToWarmup.length === 0) {
-      console.warn('[warmup] No suitable models found for warmup. Available models:', installedModels);
-    }
-  } catch (err) {
-    console.warn('[warmup] Could not check available models:', err.message);
-  }
-}
-
+const { warmUpModels } = require('./lib/helpers');
 
 const PORT = process.env.PORT || 3000;
 
-app.listen(PORT, async () => {
+app.listen(PORT, '0.0.0.0', async () => {
   console.log(`\n  StudyBuddy server running at http://localhost:${PORT}`);
   console.log(`  Mode: ${process.env.NODE_ENV || 'production'}`);
   console.log(`  Keep-alive: ${process.env.OLLAMA_KEEP_ALIVE || 'default'}\n`);
 
-  // Warm up the model immediately so first user request is fast
-  const { warmUpModels } = require('./lib/helpers');
+  // Warm up the configured model immediately so first user request is fast
   await warmUpModels();
 });

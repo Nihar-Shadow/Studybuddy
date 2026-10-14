@@ -1,2025 +1,324 @@
 {
-  "generated": "2026-04-12T14:50:23.100Z",
-  "target": "http://localhost:3000",
-  "total": 26,
-  "passed": 25,
-  "failed": 1,
-  "avgMs": 17109,
-  "results": [
+  "qwen3:4b": [
     {
-      "id": "health-progress",
-      "category": "Health checks",
-      "name": "GET /progress",
-      "method": "GET",
-      "path": "/progress",
-      "note": null,
-      "ms": 2,
-      "status": 200,
-      "ok": true,
-      "valid": true,
-      "error": null,
-      "body": {
-        "studentId": "default",
-        "totalTopicsStudied": 10,
-        "totalSessions": 32,
-        "topics": [
-          {
-            "name": "gravity",
-            "timesStudied": 5,
-            "avgScore": null,
-            "lastStudied": "2026-04-11T17:11:08.794Z"
-          },
-          {
-            "name": "because the phone",
-            "timesStudied": 1,
-            "avgScore": null,
-            "lastStudied": "2026-04-09T12:30:48.220Z"
-          },
-          {
-            "name": "gravity is a",
-            "timesStudied": 1,
-            "avgScore": null,
-            "lastStudied": "2026-04-09T12:32:32.543Z"
-          },
-          {
-            "name": "yes its a",
-            "timesStudied": 1,
-            "avgScore": null,
-            "lastStudied": "2026-04-09T12:34:22.961Z"
-          },
-          {
-            "name": "a push comes",
-            "timesStudied": 1,
-            "avgScore": null,
-            "lastStudied": "2026-04-09T12:36:15.098Z"
-          },
-          {
-            "name": "who invented pi",
-            "timesStudied": 1,
-            "avgScore": null,
-            "lastStudied": "2026-04-09T19:28:49.377Z"
-          },
-          {
-            "name": "photosynthesis",
-            "timesStudied": 10,
-            "avgScore": null,
-            "lastStudied": "2026-04-12T05:36:15.481Z"
-          },
-          {
-            "name": "french revolution",
-            "timesStudied": 6,
-            "avgScore": null,
-            "lastStudied": "2026-04-12T05:38:03.753Z"
-          },
-          {
-            "name": "Schrödinger equation",
-            "timesStudied": 3,
-            "avgScore": null,
-            "lastStudied": "2026-04-11T17:10:30.867Z"
-          },
-          {
-            "name": "entropy",
-            "timesStudied": 3,
-            "avgScore": null,
-            "lastStudied": "2026-04-11T17:11:19.683Z"
-          }
-        ],
-        "weakAreas": [
-          "gravity",
-          "because the phone",
-          "gravity is a",
-          "yes its a",
-          "a push comes",
-          "who invented pi",
-          "photosynthesis",
-          "french revolution",
-          "Schrödinger equation",
-          "entropy"
-        ],
-        "strongAreas": [],
-        "recentTopics": [
-          "french revolution",
-          "photosynthesis",
-          "entropy",
-          "gravity",
-          "photosynthesis"
-        ],
-        "streak": {
-          "current": 2,
-          "longest": 2,
-          "lastStudied": "2026-04-12",
-          "studiedToday": true
-        },
-        "dueReviews": 9
-      },
-      "timestamp": "2026-04-12T14:42:26.924Z"
+      "success": true,
+      "model": "qwen3:4b",
+      "caseId": 1,
+      "caseName": "Photosynthesis 3 MCQs",
+      "targetCount": 3,
+      "generatedCount": 3,
+      "validJSON": true,
+      "completeQuestions": "3/3",
+      "fourOptions": "3/3",
+      "validAnswerIndex": "3/3",
+      "odiaScriptRatio": "3/3",
+      "sentenceFragments": [],
+      "factualValid": false,
+      "factualIssues": [],
+      "diversityValid": true,
+      "qualityValid": false,
+      "qualityReason": "explanation_too_short",
+      "canonicalTermsCount": 7,
+      "canonicalTerms": [
+        "ସୂର୍ଯ୍ୟାଲୋକ",
+        "ଅଙ୍ଗାରକାମ୍ଳ",
+        "ପତ୍ରରନ୍ଧ୍ର",
+        "ଅମ୍ଳଜାନ",
+        "ଆଲୋକ ସଂଶ୍ଳେଷଣ",
+        "ପତ୍ରହରିତ",
+        "ହରିତକଣିକା"
+      ],
+      "corruptedTermsFound": [],
+      "latencyMs": 84518,
+      "promptTokens": 1072,
+      "evalTokens": 1200,
+      "tokensPerSec": "17.4",
+      "sampleQ1": "ଆଲୋକ ସଂଶ୍ଳେଷଣ ପାଇଁ ପ୍ରାଥମିକ ଶକ୍ତିର ���ତ୍ସ କିଛି?",
+      "sampleAns1": "C) ସୂର୍ଯ୍ୟାଲୋକ"
     },
     {
-      "id": "health-streak",
-      "category": "Health checks",
-      "name": "GET /streak",
-      "method": "GET",
-      "path": "/streak",
-      "note": null,
-      "ms": 9,
-      "status": 200,
-      "ok": true,
-      "valid": true,
-      "error": null,
-      "body": {
-        "current": 2,
-        "longest": 2,
-        "lastStudied": "2026-04-12",
-        "studiedToday": true
-      },
-      "timestamp": "2026-04-12T14:42:28.136Z"
+      "success": true,
+      "model": "qwen3:4b",
+      "caseId": 2,
+      "caseName": "Photosynthesis 5 MCQs",
+      "targetCount": 5,
+      "generatedCount": 2,
+      "validJSON": true,
+      "completeQuestions": "2/2",
+      "fourOptions": "2/2",
+      "validAnswerIndex": "2/2",
+      "odiaScriptRatio": "2/2",
+      "sentenceFragments": [],
+      "factualValid": true,
+      "factualIssues": [],
+      "diversityValid": true,
+      "qualityValid": true,
+      "qualityReason": "PASS",
+      "canonicalTermsCount": 6,
+      "canonicalTerms": [
+        "ସୂର୍ଯ୍ୟାଲୋକ",
+        "ଅଙ୍ଗାରକାମ୍ଳ",
+        "ପତ୍ରରନ୍ଧ୍ର",
+        "ଅମ୍ଳଜାନ",
+        "ଆଲୋକ ସଂଶ୍ଳେଷଣ",
+        "ପତ୍ରହରିତ"
+      ],
+      "corruptedTermsFound": [],
+      "latencyMs": 73501,
+      "promptTokens": 1301,
+      "evalTokens": 1200,
+      "tokensPerSec": "16.6",
+      "sampleQ1": "ଆଲୋକ ସଂଶ୍ଳେଷଣ ପାଇଁ ପ୍ରାଥମିକ ଶକ୍ତିର ���ତ୍ସ କି?",
+      "sampleAns1": "C) ସୂର୍ଯ୍ୟାଲୋକ"
     },
     {
-      "id": "health-due-reviews",
-      "category": "Health checks",
-      "name": "GET /due-reviews",
-      "method": "GET",
-      "path": "/due-reviews",
-      "note": null,
-      "ms": 4,
-      "status": 200,
-      "ok": true,
-      "valid": true,
-      "error": null,
-      "body": {
-        "reviews": [
-          {
-            "name": "because the phone",
-            "level": "beginner",
-            "nextReview": "2026-04-10T04:00:00.000Z",
-            "interval": 1,
-            "repetitions": 0,
-            "easeFactor": 2.5,
-            "avgScore": null
-          },
-          {
-            "name": "gravity is a",
-            "level": "beginner",
-            "nextReview": "2026-04-10T04:00:00.000Z",
-            "interval": 1,
-            "repetitions": 0,
-            "easeFactor": 2.5,
-            "avgScore": null
-          },
-          {
-            "name": "yes its a",
-            "level": "beginner",
-            "nextReview": "2026-04-10T04:00:00.000Z",
-            "interval": 1,
-            "repetitions": 0,
-            "easeFactor": 2.5,
-            "avgScore": null
-          },
-          {
-            "name": "a push comes",
-            "level": "beginner",
-            "nextReview": "2026-04-10T04:00:00.000Z",
-            "interval": 1,
-            "repetitions": 0,
-            "easeFactor": 2.5,
-            "avgScore": null
-          },
-          {
-            "name": "who invented pi",
-            "level": "beginner",
-            "nextReview": "2026-04-10T04:00:00.000Z",
-            "interval": 1,
-            "repetitions": 0,
-            "easeFactor": 2.5,
-            "avgScore": null
-          },
-          {
-            "name": "photosynthesis",
-            "level": "beginner",
-            "nextReview": "2026-04-10T04:00:00.000Z",
-            "interval": 1,
-            "repetitions": 0,
-            "easeFactor": 2.5,
-            "avgScore": null
-          },
-          {
-            "name": "french revolution",
-            "level": "intermediate",
-            "nextReview": "2026-04-10T04:00:00.000Z",
-            "interval": 1,
-            "repetitions": 0,
-            "easeFactor": 2.5,
-            "avgScore": null
-          },
-          {
-            "name": "Schrödinger equation",
-            "level": "advanced",
-            "nextReview": "2026-04-10T04:00:00.000Z",
-            "interval": 1,
-            "repetitions": 0,
-            "easeFactor": 2.5,
-            "avgScore": null
-          },
-          {
-            "name": "entropy",
-            "level": "advanced",
-            "nextReview": "2026-04-10T04:00:00.000Z",
-            "interval": 1,
-            "repetitions": 0,
-            "easeFactor": 2.5,
-            "avgScore": null
-          }
-        ]
-      },
-      "timestamp": "2026-04-12T14:42:29.340Z"
+      "success": true,
+      "model": "qwen3:4b",
+      "caseId": 3,
+      "caseName": "Water Cycle 3 MCQs",
+      "targetCount": 3,
+      "generatedCount": 2,
+      "validJSON": true,
+      "completeQuestions": "2/2",
+      "fourOptions": "2/2",
+      "validAnswerIndex": "2/2",
+      "odiaScriptRatio": "2/2",
+      "sentenceFragments": [],
+      "factualValid": false,
+      "factualIssues": [],
+      "diversityValid": false,
+      "qualityValid": false,
+      "qualityReason": "duplicate_options",
+      "canonicalTermsCount": 1,
+      "canonicalTerms": [
+        "ଜଳ"
+      ],
+      "corruptedTermsFound": [],
+      "latencyMs": 67386,
+      "promptTokens": 618,
+      "evalTokens": 1200,
+      "tokensPerSec": "18.0",
+      "sampleQ1": "ପାଣିର ଚକ୍ର ର ମୌଳିକ ସଂଜ୍ଞା ଓ ଧାରଣା କିପାଠି ହୋଇଥାଏ?",
+      "sampleAns1": "A) ପାଣି ସମ୍ପନ୍ନ ଅଞ୍ଚଳରୁ ଉଠିଲେ ପାଣି ଜଳରୁ ଆକୃତି କରିଥାଏ"
     },
     {
-      "id": "health-cache-stats",
-      "category": "Health checks",
-      "name": "GET /cache-stats",
-      "method": "GET",
-      "path": "/cache-stats",
-      "note": null,
-      "ms": 12,
-      "status": 200,
-      "ok": true,
-      "valid": true,
-      "error": null,
-      "body": {
-        "memEntries": 0,
-        "inFlight": 0,
-        "taxonomySize": 1206,
-        "trieTopics": 76,
-        "diskPath": "/Users/christyvarghese/Documents/studybuddy/data/cache.json",
-        "liveKeywords": 1223,
-        "pendingTopics": 0,
-        "learnedTopics": 10,
-        "topics": []
-      },
-      "timestamp": "2026-04-12T14:42:30.556Z"
+      "success": true,
+      "model": "qwen3:4b",
+      "caseId": 4,
+      "caseName": "Plant Parts 3 MCQs",
+      "targetCount": 3,
+      "generatedCount": 1,
+      "validJSON": true,
+      "completeQuestions": "1/1",
+      "fourOptions": "1/1",
+      "validAnswerIndex": "1/1",
+      "odiaScriptRatio": "1/1",
+      "sentenceFragments": [],
+      "factualValid": true,
+      "factualIssues": [],
+      "diversityValid": true,
+      "qualityValid": true,
+      "qualityReason": "PASS",
+      "canonicalTermsCount": 0,
+      "canonicalTerms": [],
+      "corruptedTermsFound": [],
+      "latencyMs": 66689,
+      "promptTokens": 622,
+      "evalTokens": 1200,
+      "tokensPerSec": "18.2",
+      "sampleQ1": "ଉଦ୍ଭିଦର ଅଂଶ ର ମୌଳିକ ସଂଜ୍ଞା ଓ ଧାରଣା କି?",
+      "sampleAns1": "B) ଉଦ୍ଭିଦର ଅଂଶ ହେଉଛି ସୃଷ୍ଟି କରିଥିବା ଜୀବନର ପ୍ରଧାନ ଅଂଶ"
     },
     {
-      "id": "health-topics-search",
-      "category": "Health checks",
-      "name": "GET /topics/search?q=photo",
-      "method": "GET",
-      "path": "/topics/search?q=photo",
-      "note": null,
-      "ms": 16,
-      "status": 200,
-      "ok": true,
-      "valid": true,
-      "error": null,
-      "body": {
-        "prefix": "photo",
-        "results": [
-          "photosynthesis"
-        ],
-        "count": 1
-      },
-      "timestamp": "2026-04-12T14:42:31.774Z"
+      "success": true,
+      "model": "qwen3:4b",
+      "caseId": 5,
+      "caseName": "Part 15 Constrained Test",
+      "targetCount": 3,
+      "generatedCount": 3,
+      "validJSON": true,
+      "completeQuestions": "3/3",
+      "fourOptions": "3/3",
+      "validAnswerIndex": "3/3",
+      "odiaScriptRatio": "3/3",
+      "sentenceFragments": [],
+      "factualValid": true,
+      "factualIssues": [],
+      "diversityValid": true,
+      "qualityValid": true,
+      "qualityReason": "PASS",
+      "canonicalTermsCount": 6,
+      "canonicalTerms": [
+        "ସୂର୍ଯ୍ୟାଲୋକ",
+        "ଅଙ୍ଗାରକାମ୍ଳ",
+        "ପତ୍ରରନ୍ଧ୍ର",
+        "ଅମ୍ଳଜାନ",
+        "ଜଳ",
+        "ଆଲୋକ ସଂଶ୍ଳେଷଣ"
+      ],
+      "corruptedTermsFound": [],
+      "latencyMs": 64902,
+      "promptTokens": 1545,
+      "evalTokens": 911,
+      "tokensPerSec": "14.4",
+      "sampleQ1": "ଆଲୋକ ସଂଶ୍ଳେଷଣ ପାଇଁ ପ୍ରାଥମିକ ଶକ୍ତିର ଉତ୍ସ କଣ?",
+      "sampleAns1": "D) ସୂର୍ଯ୍ୟାଲୋକ"
+    }
+  ],
+  "dhee-odia": [
+    {
+      "success": true,
+      "model": "dhee-odia",
+      "caseId": 1,
+      "caseName": "Photosynthesis 3 MCQs",
+      "targetCount": 3,
+      "generatedCount": 2,
+      "validJSON": true,
+      "completeQuestions": "2/2",
+      "fourOptions": "1/2",
+      "validAnswerIndex": "2/2",
+      "odiaScriptRatio": "2/2",
+      "sentenceFragments": [],
+      "factualValid": false,
+      "factualIssues": [],
+      "diversityValid": true,
+      "qualityValid": false,
+      "qualityReason": "options_count_not_four",
+      "canonicalTermsCount": 2,
+      "canonicalTerms": [
+        "ଆଲୋକ ସଂଶ୍ଳେଷଣ",
+        "ହରିତକଣିକା"
+      ],
+      "corruptedTermsFound": [],
+      "latencyMs": 38119,
+      "promptTokens": 1073,
+      "evalTokens": 1200,
+      "tokensPerSec": "44.4",
+      "sampleQ1": "ସୂର୍ଯ୍ଯ଼ାଲୋକ ଶକ୍ତିର ଉତ୍ସ (ଆଲୋକ ସଂଶ୍ଳେଷଣ ପାଇଁ ପ୍ରାଥମିକ ଶକ୍ତିର ଉତ୍ସ) ହେଉଛି?",
+      "sampleAns1": "B) ସୂର୍ଯ୍ଯ଼ାଲୋକ"
     },
     {
-      "id": "health-session",
-      "category": "Health checks",
-      "name": "GET /session",
-      "method": "GET",
-      "path": "/session",
-      "note": null,
-      "ms": 5,
-      "status": 401,
-      "ok": true,
-      "valid": true,
-      "error": null,
-      "body": {
-        "authenticated": false
-      },
-      "timestamp": "2026-04-12T14:42:32.980Z"
+      "success": true,
+      "model": "dhee-odia",
+      "caseId": 2,
+      "caseName": "Photosynthesis 5 MCQs",
+      "targetCount": 5,
+      "generatedCount": 1,
+      "validJSON": true,
+      "completeQuestions": "1/1",
+      "fourOptions": "1/1",
+      "validAnswerIndex": "1/1",
+      "odiaScriptRatio": "1/1",
+      "sentenceFragments": [],
+      "factualValid": true,
+      "factualIssues": [],
+      "diversityValid": true,
+      "qualityValid": true,
+      "qualityReason": "PASS",
+      "canonicalTermsCount": 2,
+      "canonicalTerms": [
+        "ଅଙ୍ଗାରକାମ୍ଳ",
+        "ଆଲୋକ ସଂଶ୍ଳେଷଣ"
+      ],
+      "corruptedTermsFound": [],
+      "latencyMs": 8042,
+      "promptTokens": 1302,
+      "evalTokens": 340,
+      "tokensPerSec": "45.3",
+      "sampleQ1": "ସୂର୍ଯ୍ଯ଼ାଲୋକ (ଉଦ୍ଭିନୀଯ଼ ଶକ୍ତି) ଆଲୋକ ସଂଶ୍ଳେଷଣ ପାଇଁ କ'ଣ ଉତ୍ସ?",
+      "sampleAns1": "A) ଉଦ୍ଭିନୀଯ଼"
     },
     {
-      "id": "health-pwa-status",
-      "category": "Health checks",
-      "name": "GET /pwa-status",
-      "method": "GET",
-      "path": "/pwa-status",
-      "note": null,
-      "ms": 4,
-      "status": 200,
-      "ok": true,
-      "valid": true,
-      "error": null,
-      "body": {
-        "pwaReady": true,
-        "serviceWorkerUrl": "/sw.js",
-        "manifestUrl": "/manifest.json",
-        "icons": {
-          "192": "/assets/icon-192.png",
-          "512": "/assets/icon-512.png",
-          "maskable": "/assets/icon-maskable.png"
-        },
-        "cacheVersion": "studybuddy-v2",
-        "timestamp": "2026-04-12T14:42:34.185Z",
-        "environment": "development",
-        "message": "PWA assets are ready. Service Worker can be registered."
-      },
-      "timestamp": "2026-04-12T14:42:34.186Z"
+      "success": true,
+      "model": "dhee-odia",
+      "caseId": 3,
+      "caseName": "Water Cycle 3 MCQs",
+      "targetCount": 3,
+      "generatedCount": 1,
+      "validJSON": true,
+      "completeQuestions": "0/1",
+      "fourOptions": "0/1",
+      "validAnswerIndex": "1/1",
+      "odiaScriptRatio": "1/1",
+      "sentenceFragments": [
+        "ଓଡ଼ିଆଃ ପାଣିର ଚକ୍ର ସଂଜ୍ଞା"
+      ],
+      "factualValid": false,
+      "factualIssues": [],
+      "diversityValid": true,
+      "qualityValid": false,
+      "qualityReason": "Question \"ଓଡ଼ିଆଃ ପାଣିର ଚକ୍ର ସଂଜ୍ଞା\" appears to be an incomplete sentence fragment or missing interrogative structure.",
+      "canonicalTermsCount": 0,
+      "canonicalTerms": [],
+      "corruptedTermsFound": [],
+      "latencyMs": 17620,
+      "promptTokens": 619,
+      "evalTokens": 770,
+      "tokensPerSec": "44.8",
+      "sampleQ1": "ଓଡ଼ିଆଃ ପାଣିର ଚକ୍ର ସଂଜ୍ଞା",
+      "sampleAns1": "A) ପାଣିର ଚକ୍ର ହେଉଛି ଏକ ଘଟଣା"
     },
     {
-      "id": "health-taxonomy",
-      "category": "Health checks",
-      "name": "GET /admin/taxonomy",
-      "method": "GET",
-      "path": "/admin/taxonomy",
-      "note": null,
-      "ms": 9,
-      "status": 200,
-      "ok": true,
-      "valid": true,
-      "error": null,
-      "body": {
-        "learned": [
-          {
-            "topic": "organic chemistry",
-            "subject": "chemistry",
-            "askCount": 0,
-            "keywords": 3,
-            "source": "manual",
-            "addedAt": "2026-04-08T22:09:52.282Z",
-            "confidence": "high"
-          },
-          {
-            "topic": "cellular respiration",
-            "subject": "biology",
-            "askCount": 0,
-            "keywords": 4,
-            "source": "manual",
-            "addedAt": "2026-04-08T22:32:08.839Z",
-            "confidence": "high"
-          },
-          {
-            "topic": "french revolution",
-            "subject": "history",
-            "askCount": 0,
-            "keywords": 4,
-            "source": "manual",
-            "addedAt": "2026-04-08T22:32:08.843Z",
-            "confidence": "high"
-          },
-          {
-            "topic": "trigonometry",
-            "subject": "mathematics",
-            "askCount": 0,
-            "keywords": 5,
-            "source": "manual",
-            "addedAt": "2026-04-08T22:32:08.843Z",
-            "confidence": "high"
-          },
-          {
-            "topic": "dna replication",
-            "subject": "biology",
-            "askCount": 0,
-            "keywords": 4,
-            "source": "manual",
-            "addedAt": "2026-04-08T22:32:08.847Z",
-            "confidence": "high"
-          },
-          {
-            "topic": "electric circuits",
-            "subject": "physics",
-            "askCount": 0,
-            "keywords": 5,
-            "source": "manual",
-            "addedAt": "2026-04-08T22:32:08.847Z",
-            "confidence": "high"
-          },
-          {
-            "topic": "photosynthesis",
-            "subject": "biology",
-            "askCount": 0,
-            "keywords": 4,
-            "source": "manual",
-            "addedAt": "2026-04-08T22:37:24.528Z",
-            "confidence": "high"
-          },
-          {
-            "topic": "newtons laws",
-            "subject": "physics",
-            "askCount": 0,
-            "keywords": 5,
-            "source": "manual",
-            "addedAt": "2026-04-08T22:37:24.528Z",
-            "confidence": "high"
-          },
-          {
-            "topic": "quadratic equations",
-            "subject": "mathematics",
-            "askCount": 0,
-            "keywords": 4,
-            "source": "manual",
-            "addedAt": "2026-04-08T22:37:24.529Z",
-            "confidence": "high"
-          },
-          {
-            "topic": "world war ii",
-            "subject": "history",
-            "askCount": 0,
-            "keywords": 4,
-            "source": "manual",
-            "addedAt": "2026-04-08T22:37:24.530Z",
-            "confidence": "high"
-          }
-        ],
-        "pending": [],
-        "learnedCount": 10,
-        "pendingCount": 0,
-        "liveKeywords": 1223,
-        "threshold": 2
-      },
-      "timestamp": "2026-04-12T14:42:35.396Z"
+      "success": true,
+      "model": "dhee-odia",
+      "caseId": 4,
+      "caseName": "Plant Parts 3 MCQs",
+      "targetCount": 3,
+      "generatedCount": 3,
+      "validJSON": true,
+      "completeQuestions": "3/3",
+      "fourOptions": "3/3",
+      "validAnswerIndex": "3/3",
+      "odiaScriptRatio": "3/3",
+      "sentenceFragments": [],
+      "factualValid": true,
+      "factualIssues": [],
+      "diversityValid": true,
+      "qualityValid": true,
+      "qualityReason": "PASS",
+      "canonicalTermsCount": 0,
+      "canonicalTerms": [],
+      "corruptedTermsFound": [],
+      "latencyMs": 14346,
+      "promptTokens": 623,
+      "evalTokens": 641,
+      "tokensPerSec": "45.8",
+      "sampleQ1": "ଉଦ୍ଭିଦର ସବୁଠାରୁ ଛୋଟ ଅଂଶ କ'ଣ?",
+      "sampleAns1": "A) ପତ୍ର"
     },
     {
-      "id": "estimate-beginner",
-      "category": "Estimate (no LLM)",
-      "name": "POST /estimate — beginner, no image",
-      "method": "POST",
-      "path": "/estimate",
-      "note": null,
-      "ms": 31,
-      "status": 200,
-      "ok": true,
-      "valid": true,
-      "error": null,
-      "body": {
-        "seconds": 15,
-        "label": "~15 seconds",
-        "complexity": "detailed"
-      },
-      "timestamp": "2026-04-12T14:42:36.630Z"
-    },
-    {
-      "id": "estimate-advanced",
-      "category": "Estimate (no LLM)",
-      "name": "POST /estimate — advanced, with image",
-      "method": "POST",
-      "path": "/estimate",
-      "note": null,
-      "ms": 2,
-      "status": 200,
-      "ok": true,
-      "valid": true,
-      "error": null,
-      "body": {
-        "seconds": 47,
-        "label": "about 50 seconds",
-        "complexity": "detailed"
-      },
-      "timestamp": "2026-04-12T14:42:37.833Z"
-    },
-    {
-      "id": "chat-beginner-simple",
-      "category": "Direct chat (/chat)",
-      "name": "POST /chat — beginner, simple topic",
-      "method": "POST",
-      "path": "/chat",
-      "note": null,
-      "ms": 20806,
-      "status": 200,
-      "ok": true,
-      "valid": true,
-      "error": null,
-      "body": null,
-      "timestamp": "2026-04-12T14:42:59.840Z"
-    },
-    {
-      "id": "chat-intermediate-medium",
-      "category": "Direct chat (/chat)",
-      "name": "POST /chat — intermediate, medium topic",
-      "method": "POST",
-      "path": "/chat",
-      "note": null,
-      "ms": 24477,
-      "status": 200,
-      "ok": true,
-      "valid": true,
-      "error": null,
-      "body": null,
-      "timestamp": "2026-04-12T14:43:25.538Z"
-    },
-    {
-      "id": "chat-advanced-complex",
-      "category": "Direct chat (/chat)",
-      "name": "POST /chat — advanced, complex topic",
-      "method": "POST",
-      "path": "/chat",
-      "note": null,
-      "ms": 28807,
-      "status": 200,
-      "ok": true,
-      "valid": true,
-      "error": null,
-      "body": null,
-      "timestamp": "2026-04-12T14:43:55.558Z"
-    },
-    {
-      "id": "quiz-3q-beginner",
-      "category": "Quiz generation (/quiz)",
-      "name": "POST /quiz — 3 questions, beginner",
-      "method": "POST",
-      "path": "/quiz",
-      "note": null,
-      "ms": 38516,
-      "status": 200,
-      "ok": true,
-      "valid": true,
-      "error": null,
-      "body": {
-        "questions": [
-          {
-            "question": "What is the primary energy source that plants use to power the process of photosynthesis?",
-            "options": [
-              "A) Heat from the ground",
-              "B) Moonlight",
-              "C) Sunlight",
-              "D) Chemical batteries"
-            ],
-            "answer": "C) Sunlight",
-            "explanation": "Photosynthesis requires light energy, which plants capture from the sun."
-          },
-          {
-            "question": "Which gas do plants take in from the atmosphere to use as an ingredient for photosynthesis?",
-            "options": [
-              "A) Oxygen",
-              "B) Nitrogen",
-              "C) Carbon Dioxide",
-              "D) Hydrogen"
-            ],
-            "answer": "C) Carbon Dioxide",
-            "explanation": "Plants absorb carbon dioxide (CO2) from the air to build their food."
-          },
-          {
-            "question": "What green pigment found in plant leaves is responsible for capturing sunlight energy?",
-            "options": [
-              "A) Melanin",
-              "B) Hemoglobin",
-              "C) Chlorophyll",
-              "D) Carotene"
-            ],
-            "answer": "C) Chlorophyll",
-            "explanation": "Chlorophyll is the substance that gives plants their green color and traps light energy."
-          }
-        ]
-      },
-      "timestamp": "2026-04-12T14:44:35.281Z"
-    },
-    {
-      "id": "quiz-3q-intermediate",
-      "category": "Quiz generation (/quiz)",
-      "name": "POST /quiz — 3 questions, intermediate",
-      "method": "POST",
-      "path": "/quiz",
-      "note": null,
-      "ms": 20922,
-      "status": 200,
-      "ok": true,
-      "valid": true,
-      "error": null,
-      "body": {
-        "questions": [
-          {
-            "question": "According to Newton's First Law of Motion, an object at rest will remain at rest, and an object in motion will remain in motion with constant velocity, unless acted upon by:",
-            "options": [
-              "A) gravity",
-              "B) friction",
-              "C) an unbalanced external force",
-              "D) inertia"
-            ],
-            "answer": "C) an unbalanced external force",
-            "explanation": "Newton's First Law states that an object's state of motion (rest or constant velocity) only changes when a net external force acts upon it."
-          },
-          {
-            "question": "Newton's Second Law of Motion is mathematically represented by which equation, where F is force, m is mass, and a is acceleration?",
-            "options": [
-              "A) F = m/a",
-              "B) F = m + a",
-              "C) F = ma",
-              "D) F = a/m"
-            ],
-            "answer": "C) F = ma",
-            "explanation": "The Second Law quantifies the relationship between force, mass, and acceleration, stating that the net force acting on an object is equal to the object's mass times its acceleration."
-          },
-          {
-            "question": "Newton's Third Law of Motion describes the interaction between two objects. If object A exerts a force on object B, what is the nature of the force object B exerts back on object A?",
-            "options": [
-              "A) It must be equal in magnitude but opposite in direction to the force from A.",
-              "B) It must be greater in magnitude than the force from A.",
-              "C) It must be perpendicular to the force from A.",
-              "D) It only acts when object B is accelerating."
-            ],
-            "answer": "A) It must be equal in magnitude but opposite in direction to the force from A.",
-            "explanation": "Newton's Third Law states that for every action force, there is an equal and opposite reaction force. These forces act on different objects."
-          }
-        ]
-      },
-      "timestamp": "2026-04-12T14:44:57.420Z"
-    },
-    {
-      "id": "quiz-5q-advanced",
-      "category": "Quiz generation (/quiz)",
-      "name": "POST /quiz — 5 questions, advanced",
-      "method": "POST",
-      "path": "/quiz",
-      "note": null,
-      "ms": 40955,
-      "status": 500,
-      "ok": false,
-      "valid": false,
-      "error": null,
-      "body": {
-        "error": "No valid questions could be generated. Please try again."
-      },
-      "timestamp": "2026-04-12T14:45:39.578Z"
-    },
-    {
-      "id": "agent-beginner-simple",
-      "category": "Agent mode (/agent)",
-      "name": "POST /agent — beginner, simple topic",
-      "method": "POST",
-      "path": "/agent",
-      "note": null,
-      "ms": 38515,
-      "status": 200,
-      "ok": true,
-      "valid": true,
-      "error": null,
-      "body": {
-        "success": true,
-        "rawReply": "Your question has been processed.",
-        "structured": {
-          "agentSummary": "Your question has been processed.",
-          "toolsUsed": [
-            "explain_topic",
-            "generate_quiz",
-            "suggest_next_topic",
-            "track_progress"
-          ],
-          "explanation": {
-            "intro": "Photosynthesis is the amazing process plants use to create their own food using sunlight, water, and air.",
-            "steps": [
-              {
-                "title": "Ingredients Needed",
-                "text": "Plants take in sunlight energy, water through their roots, and carbon dioxide from the air.",
-                "emoji": "☀️💧💨"
-              },
-              {
-                "title": "The Chloroplasts",
-                "text": "Inside the leaves are chloroplasts, which contain chlorophyll, the green pigment that captures sunlight.",
-                "emoji": "🌿"
-              },
-              {
-                "title": "The Chemical Reaction",
-                "text": "Using the captured energy, plants convert carbon dioxide and water into glucose (sugar) and oxygen.",
-                "emoji": "🧪"
-              },
-              {
-                "title": "What's Made",
-                "text": "The glucose provides the plant with energy to grow, and oxygen is released back into the atmosphere for us to breathe.",
-                "emoji": "🍬🌬️"
-              }
-            ],
-            "answer": "In simple terms, photosynthesis is how plants use light energy to turn water and carbon dioxide into sugar for food and oxygen for us.",
-            "followup": "What gas do plants take from the air that they need for photosynthesis?",
-            "_parseMethod": "direct"
-          },
-          "quiz": [
-            {
-              "question": "What is the primary source of energy that powers photosynthesis?",
-              "options": [
-                "A) Oxygen",
-                "B) Water",
-                "C) Sunlight",
-                "D) Carbon Dioxide"
-              ],
-              "correct": 0,
-              "answer": "C) Sunlight",
-              "explanation": "Photosynthesis requires energy, which plants capture from sunlight using chlorophyll."
-            },
-            {
-              "question": "What gas do plants take in from the atmosphere for photosynthesis?",
-              "options": [
-                "A) Oxygen",
-                "B) Nitrogen",
-                "C) Carbon Dioxide",
-                "D) Hydrogen"
-              ],
-              "correct": 0,
-              "answer": "C) Carbon Dioxide",
-              "explanation": "Plants use carbon dioxide (CO2) from the air, which is necessary to build glucose."
-            },
-            {
-              "question": "What type of sugar is produced by plants as food during photosynthesis?",
-              "options": [
-                "A) Starch",
-                "B) Protein",
-                "C) Glucose",
-                "D) Fat"
-              ],
-              "correct": 0,
-              "answer": "C) Glucose",
-              "explanation": "Glucose is a simple sugar (food) that the plant uses for energy and growth."
-            }
-          ],
-          "nextTopic": {
-            "success": true,
-            "nextTopic": "Cellular Respiration",
-            "reason": "It is the direct counterpart to photosynthesis, completing the core energy cycle study.",
-            "relatedTo": "Photosynthesis is the process that creates the glucose used in cellular respiration.",
-            "_ms": 15202
-          },
-          "progressNote": "Great work studying!"
-        },
-        "toolCallLog": [
-          {
-            "tool": "generate_quiz",
-            "args": {
-              "topic": "photosynthesis",
-              "level": "beginner",
-              "numQuestions": 3
-            },
-            "result": {
-              "success": true,
-              "questions": [
-                {
-                  "question": "What is the primary source of energy that powers photosynthesis?",
-                  "options": [
-                    "A) Oxygen",
-                    "B) Water",
-                    "C) Sunlight",
-                    "D) Carbon Dioxide"
-                  ],
-                  "correct": 0,
-                  "answer": "C) Sunlight",
-                  "explanation": "Photosynthesis requires energy, which plants capture from sunlight using chlorophyll."
-                },
-                {
-                  "question": "What gas do plants take in from the atmosphere for photosynthesis?",
-                  "options": [
-                    "A) Oxygen",
-                    "B) Nitrogen",
-                    "C) Carbon Dioxide",
-                    "D) Hydrogen"
-                  ],
-                  "correct": 0,
-                  "answer": "C) Carbon Dioxide",
-                  "explanation": "Plants use carbon dioxide (CO2) from the air, which is necessary to build glucose."
-                },
-                {
-                  "question": "What type of sugar is produced by plants as food during photosynthesis?",
-                  "options": [
-                    "A) Starch",
-                    "B) Protein",
-                    "C) Glucose",
-                    "D) Fat"
-                  ],
-                  "correct": 0,
-                  "answer": "C) Glucose",
-                  "explanation": "Glucose is a simple sugar (food) that the plant uses for energy and growth."
-                }
-              ],
-              "topic": "photosynthesis",
-              "numQuestions": 3,
-              "_ms": 12171
-            }
-          },
-          {
-            "tool": "suggest_next_topic",
-            "args": {
-              "currentTopic": "photosynthesis",
-              "subject": "biology"
-            },
-            "result": {
-              "success": true,
-              "nextTopic": "Cellular Respiration",
-              "reason": "It is the direct counterpart to photosynthesis, completing the core energy cycle study.",
-              "relatedTo": "Photosynthesis is the process that creates the glucose used in cellular respiration.",
-              "_ms": 15202
-            }
-          },
-          {
-            "tool": "explain_topic",
-            "args": {
-              "topic": "photosynthesis",
-              "level": "beginner",
-              "context": ""
-            },
-            "result": {
-              "success": true,
-              "explanation": {
-                "intro": "Photosynthesis is the amazing process plants use to create their own food using sunlight, water, and air.",
-                "steps": [
-                  {
-                    "title": "Ingredients Needed",
-                    "text": "Plants take in sunlight energy, water through their roots, and carbon dioxide from the air.",
-                    "emoji": "☀️💧💨"
-                  },
-                  {
-                    "title": "The Chloroplasts",
-                    "text": "Inside the leaves are chloroplasts, which contain chlorophyll, the green pigment that captures sunlight.",
-                    "emoji": "🌿"
-                  },
-                  {
-                    "title": "The Chemical Reaction",
-                    "text": "Using the captured energy, plants convert carbon dioxide and water into glucose (sugar) and oxygen.",
-                    "emoji": "🧪"
-                  },
-                  {
-                    "title": "What's Made",
-                    "text": "The glucose provides the plant with energy to grow, and oxygen is released back into the atmosphere for us to breathe.",
-                    "emoji": "🍬🌬️"
-                  }
-                ],
-                "answer": "In simple terms, photosynthesis is how plants use light energy to turn water and carbon dioxide into sugar for food and oxygen for us.",
-                "followup": "What gas do plants take from the air that they need for photosynthesis?",
-                "_parseMethod": "direct"
-              },
-              "topic": "photosynthesis",
-              "level": "beginner",
-              "_ms": 28007
-            }
-          },
-          {
-            "tool": "track_progress",
-            "args": {
-              "topic": "photosynthesis",
-              "level": "beginner"
-            },
-            "result": {
-              "success": true,
-              "saved": {
-                "topic": "photosynthesis",
-                "level": "beginner"
-              },
-              "topicRecord": {
-                "timesStudied": 11,
-                "scores": [],
-                "level": "beginner",
-                "lastStudied": "2026-04-12T14:46:19.254Z",
-                "srs": {
-                  "repetitions": 0,
-                  "easeFactor": 2.5,
-                  "interval": 1,
-                  "nextReview": "2026-04-10T04:00:00.000Z"
-                }
-              },
-              "weakAreas": [
-                "gravity",
-                "because the phone",
-                "gravity is a",
-                "yes its a",
-                "a push comes",
-                "who invented pi",
-                "photosynthesis",
-                "french revolution",
-                "Schrödinger equation",
-                "entropy"
-              ],
-              "totalStudied": 10
-            }
-          }
-        ],
-        "iterations": 2
-      },
-      "timestamp": "2026-04-12T14:46:19.298Z"
-    },
-    {
-      "id": "agent-intermediate-medium",
-      "category": "Agent mode (/agent)",
-      "name": "POST /agent — intermediate, medium topic",
-      "method": "POST",
-      "path": "/agent",
-      "note": null,
-      "ms": 62684,
-      "status": 200,
-      "ok": true,
-      "valid": true,
-      "error": null,
-      "body": {
-        "success": true,
-        "rawReply": "Your question has been processed.",
-        "structured": {
-          "agentSummary": "Your question has been processed.",
-          "toolsUsed": [
-            "explain_topic",
-            "generate_quiz",
-            "suggest_next_topic",
-            "track_progress"
-          ],
-          "explanation": {
-            "intro": "The French Revolution was a period of massive upheaval in France that fundamentally changed its government and social structure. It marked a shift from absolute monarchy to republican ideals.",
-            "steps": [
-              {
-                "title": "Causes: Social Inequality",
-                "text": "French society was rigidly divided into three estates, with the nobility and clergy enjoying privileges while the common people bore the tax burden.",
-                "emoji": "👑"
-              },
-              {
-                "title": "Causes: Economic Crisis",
-                "text": "Years of expensive wars and poor harvests led to massive debt and widespread starvation among the populace.",
-                "emoji": "🥖"
-              },
-              {
-                "title": "Key Event: Storming of the Bastille",
-                "text": "In 1789, Parisian citizens stormed the Bastille prison, symbolizing the start of the popular uprising against royal authority.",
-                "emoji": "🏰"
-              },
-              {
-                "title": "Ideological Shift",
-                "text": "The revolution championed Enlightenment ideals like liberty, equality, and fraternity, challenging the divine right of kings.",
-                "emoji": "💡"
-              },
-              {
-                "title": "The Reign of Terror",
-                "text": "A radical phase where revolutionary leaders, fearing counter-revolutionaries, executed thousands of perceived enemies of the state.",
-                "emoji": "🔪"
-              }
-            ],
-            "answer": "The French Revolution was a complex period driven by social inequality and economic distress that dismantled the old monarchical order in favor of revolutionary ideals.",
-            "followup": "Which core Enlightenment ideal—liberty, equality, or fraternity—do you think was the most powerful motivator for the common people?",
-            "_parseMethod": "direct"
-          },
-          "quiz": [
-            {
-              "question": "Which social class, known as the Third Estate, comprised the vast majority of the population during the French Revolution?",
-              "options": [
-                "A) The nobility (Noblesse",
-                "B) The clergy (Clergy)",
-                "C) The bourgeoisie and peasants",
-                "D) The monarchy"
-              ],
-              "correct": 0,
-              "answer": "C) The bourgeoisie and peasants",
-              "explanation": "The Third Estate was a diverse group that included everyone from wealthy middle-class members (bourgeoisie) to poor peasants, and they bore the brunt of taxation."
-            },
-            {
-              "question": "The storming of which Parisian fortress in July 1789 is traditionally considered the symbolic start of the French Revolution?",
-              "options": [
-                "A) The Louvre Palace",
-                "B) The Tuileries Palace",
-                "C) The Bastille",
-                "D) Notre Dame Cathedral"
-              ],
-              "correct": 0,
-              "answer": "C) The Bastille",
-              "explanation": "The fall of the Bastille on July 14, 1789, symbolized the people's defiance against royal authority and oppression."
-            },
-            {
-              "question": "What radical governing period, marked by mass executions of perceived enemies of the revolution, followed the overthrow of the monarchy?",
-              "options": [
-                "A) The Great Fear",
-                "B) The Directory",
-                "C) The Reign of Terror",
-                "D) The Consulate"
-              ],
-              "correct": 0,
-              "answer": "C) The Reign of Terror",
-              "explanation": "The Reign of Terror (1793-1794) was the most violent phase, dominated by the Committee of Public Safety and led by Robespierre."
-            }
-          ],
-          "nextTopic": {
-            "success": true,
-            "nextTopic": "Enlightenment Philosophy",
-            "reason": "This topic provides the intellectual and philosophical context necessary to deepen the understanding of the French Revolution.",
-            "relatedTo": "The Enlightenment ideas directly fueled the political and social changes that characterized the French Revolution.",
-            "_ms": 38527
-          },
-          "progressNote": "Great work studying!"
-        },
-        "toolCallLog": [
-          {
-            "tool": "generate_quiz",
-            "args": {
-              "topic": "french revolution",
-              "level": "intermediate",
-              "numQuestions": 3
-            },
-            "result": {
-              "success": true,
-              "questions": [
-                {
-                  "question": "Which social class, known as the Third Estate, comprised the vast majority of the population during the French Revolution?",
-                  "options": [
-                    "A) The nobility (Noblesse",
-                    "B) The clergy (Clergy)",
-                    "C) The bourgeoisie and peasants",
-                    "D) The monarchy"
-                  ],
-                  "correct": 0,
-                  "answer": "C) The bourgeoisie and peasants",
-                  "explanation": "The Third Estate was a diverse group that included everyone from wealthy middle-class members (bourgeoisie) to poor peasants, and they bore the brunt of taxation."
-                },
-                {
-                  "question": "The storming of which Parisian fortress in July 1789 is traditionally considered the symbolic start of the French Revolution?",
-                  "options": [
-                    "A) The Louvre Palace",
-                    "B) The Tuileries Palace",
-                    "C) The Bastille",
-                    "D) Notre Dame Cathedral"
-                  ],
-                  "correct": 0,
-                  "answer": "C) The Bastille",
-                  "explanation": "The fall of the Bastille on July 14, 1789, symbolized the people's defiance against royal authority and oppression."
-                },
-                {
-                  "question": "What radical governing period, marked by mass executions of perceived enemies of the revolution, followed the overthrow of the monarchy?",
-                  "options": [
-                    "A) The Great Fear",
-                    "B) The Directory",
-                    "C) The Reign of Terror",
-                    "D) The Consulate"
-                  ],
-                  "correct": 0,
-                  "answer": "C) The Reign of Terror",
-                  "explanation": "The Reign of Terror (1793-1794) was the most violent phase, dominated by the Committee of Public Safety and led by Robespierre."
-                }
-              ],
-              "topic": "french revolution",
-              "numQuestions": 3,
-              "_ms": 18870
-            }
-          },
-          {
-            "tool": "explain_topic",
-            "args": {
-              "topic": "french revolution",
-              "level": "intermediate",
-              "context": ""
-            },
-            "result": {
-              "success": true,
-              "explanation": {
-                "intro": "The French Revolution was a period of massive upheaval in France that fundamentally changed its government and social structure. It marked a shift from absolute monarchy to republican ideals.",
-                "steps": [
-                  {
-                    "title": "Causes: Social Inequality",
-                    "text": "French society was rigidly divided into three estates, with the nobility and clergy enjoying privileges while the common people bore the tax burden.",
-                    "emoji": "👑"
-                  },
-                  {
-                    "title": "Causes: Economic Crisis",
-                    "text": "Years of expensive wars and poor harvests led to massive debt and widespread starvation among the populace.",
-                    "emoji": "🥖"
-                  },
-                  {
-                    "title": "Key Event: Storming of the Bastille",
-                    "text": "In 1789, Parisian citizens stormed the Bastille prison, symbolizing the start of the popular uprising against royal authority.",
-                    "emoji": "🏰"
-                  },
-                  {
-                    "title": "Ideological Shift",
-                    "text": "The revolution championed Enlightenment ideals like liberty, equality, and fraternity, challenging the divine right of kings.",
-                    "emoji": "💡"
-                  },
-                  {
-                    "title": "The Reign of Terror",
-                    "text": "A radical phase where revolutionary leaders, fearing counter-revolutionaries, executed thousands of perceived enemies of the state.",
-                    "emoji": "🔪"
-                  }
-                ],
-                "answer": "The French Revolution was a complex period driven by social inequality and economic distress that dismantled the old monarchical order in favor of revolutionary ideals.",
-                "followup": "Which core Enlightenment ideal—liberty, equality, or fraternity—do you think was the most powerful motivator for the common people?",
-                "_parseMethod": "direct"
-              },
-              "topic": "french revolution",
-              "level": "intermediate",
-              "_ms": 35309
-            }
-          },
-          {
-            "tool": "suggest_next_topic",
-            "args": {
-              "currentTopic": "french revolution",
-              "subject": "history"
-            },
-            "result": {
-              "success": true,
-              "nextTopic": "Enlightenment Philosophy",
-              "reason": "This topic provides the intellectual and philosophical context necessary to deepen the understanding of the French Revolution.",
-              "relatedTo": "The Enlightenment ideas directly fueled the political and social changes that characterized the French Revolution.",
-              "_ms": 38527
-            }
-          },
-          {
-            "tool": "track_progress",
-            "args": {
-              "topic": "french revolution",
-              "level": "intermediate"
-            },
-            "result": {
-              "success": true,
-              "saved": {
-                "topic": "french revolution",
-                "level": "intermediate"
-              },
-              "topicRecord": {
-                "timesStudied": 7,
-                "scores": [],
-                "level": "intermediate",
-                "lastStudied": "2026-04-12T14:47:23.167Z",
-                "srs": {
-                  "repetitions": 0,
-                  "easeFactor": 2.5,
-                  "interval": 1,
-                  "nextReview": "2026-04-10T04:00:00.000Z"
-                }
-              },
-              "weakAreas": [
-                "gravity",
-                "because the phone",
-                "gravity is a",
-                "yes its a",
-                "a push comes",
-                "who invented pi",
-                "photosynthesis",
-                "french revolution",
-                "Schrödinger equation",
-                "entropy"
-              ],
-              "totalStudied": 10
-            }
-          }
-        ],
-        "iterations": 2
-      },
-      "timestamp": "2026-04-12T14:47:23.191Z"
-    },
-    {
-      "id": "agent-advanced-complex",
-      "category": "Agent mode (/agent)",
-      "name": "POST /agent — advanced, complex topic",
-      "method": "POST",
-      "path": "/agent",
-      "note": null,
-      "ms": 80949,
-      "status": 200,
-      "ok": true,
-      "valid": true,
-      "error": null,
-      "body": {
-        "success": true,
-        "rawReply": "Your question has been processed.",
-        "structured": {
-          "agentSummary": "Your question has been processed.",
-          "toolsUsed": [
-            "explain_topic",
-            "generate_quiz",
-            "suggest_next_topic",
-            "track_progress"
-          ],
-          "explanation": {
-            "intro": "The Schrödinger equation is the fundamental equation of non-relativistic quantum mechanics, governing how the quantum state of a physical system evolves over time.",
-            "steps": [
-              {
-                "title": "Hamiltonian Operator",
-                "text": "The equation is built upon the Hamiltonian operator (H), which represents the total energy of the system (Kinetic + Potential).",
-                "emoji": "⚛️"
-              },
-              {
-                "title": "Time Dependence",
-                "text": "The time-dependent form is given by the equation: i * h_bar * partial(psi) / partial(t) = H * psi.",
-                "emoji": "⏳"
-              },
-              {
-                "title": "Separation of Variables",
-                "text": "For time-independent potentials, we separate the time dependence, leading to the time-independent form: H * psi = E * psi.",
-                "emoji": "⏱️"
-              },
-              {
-                "title": "Derivation Context",
-                "text": "Derivation from first principles often involves quantizing classical observables (like momentum and energy) using canonical quantization rules.",
-                "emoji": "📐"
-              }
-            ],
-            "answer": "The Schrödinger equation is essentially the quantum mechanical equivalent of Newton's second law, relating the system's energy (H) to its wave function (psi).",
-            "followup": "If a system is stationary, which form of the Schrödinger equation should be used, and what does the resulting constant represent?",
-            "_parseMethod": "direct"
-          },
-          "quiz": [],
-          "nextTopic": {
-            "success": true,
-            "nextTopic": "Quantum Tunneling",
-            "reason": "It is a direct, advanced application of the Schrödinger equation.",
-            "relatedTo": "The Schrödinger equation provides the mathematical framework necessary to calculate quantum tunneling probabilities.",
-            "_ms": 40909
-          },
-          "progressNote": "Great work studying!"
-        },
-        "toolCallLog": [
-          {
-            "tool": "generate_quiz",
-            "args": {
-              "topic": "Schrödinger equation",
-              "level": "advanced",
-              "numQuestions": 3
-            },
-            "result": {
-              "success": false,
-              "error": "Quiz generation failed",
-              "questions": [],
-              "_ms": 37921
-            }
-          },
-          {
-            "tool": "suggest_next_topic",
-            "args": {
-              "currentTopic": "Schrödinger equation",
-              "subject": "quantum mechanics"
-            },
-            "result": {
-              "success": true,
-              "nextTopic": "Quantum Tunneling",
-              "reason": "It is a direct, advanced application of the Schrödinger equation.",
-              "relatedTo": "The Schrödinger equation provides the mathematical framework necessary to calculate quantum tunneling probabilities.",
-              "_ms": 40909
-            }
-          },
-          {
-            "tool": "explain_topic",
-            "args": {
-              "topic": "Schrödinger equation",
-              "level": "advanced",
-              "context": "derivation from first principles"
-            },
-            "result": {
-              "success": true,
-              "explanation": {
-                "intro": "The Schrödinger equation is the fundamental equation of non-relativistic quantum mechanics, governing how the quantum state of a physical system evolves over time.",
-                "steps": [
-                  {
-                    "title": "Hamiltonian Operator",
-                    "text": "The equation is built upon the Hamiltonian operator (H), which represents the total energy of the system (Kinetic + Potential).",
-                    "emoji": "⚛️"
-                  },
-                  {
-                    "title": "Time Dependence",
-                    "text": "The time-dependent form is given by the equation: i * h_bar * partial(psi) / partial(t) = H * psi.",
-                    "emoji": "⏳"
-                  },
-                  {
-                    "title": "Separation of Variables",
-                    "text": "For time-independent potentials, we separate the time dependence, leading to the time-independent form: H * psi = E * psi.",
-                    "emoji": "⏱️"
-                  },
-                  {
-                    "title": "Derivation Context",
-                    "text": "Derivation from first principles often involves quantizing classical observables (like momentum and energy) using canonical quantization rules.",
-                    "emoji": "📐"
-                  }
-                ],
-                "answer": "The Schrödinger equation is essentially the quantum mechanical equivalent of Newton's second law, relating the system's energy (H) to its wave function (psi).",
-                "followup": "If a system is stationary, which form of the Schrödinger equation should be used, and what does the resulting constant represent?",
-                "_parseMethod": "direct"
-              },
-              "topic": "Schrödinger equation",
-              "level": "advanced",
-              "_ms": 57236
-            }
-          },
-          {
-            "tool": "track_progress",
-            "args": {
-              "topic": "Schrödinger equation",
-              "level": "advanced"
-            },
-            "result": {
-              "success": true,
-              "saved": {
-                "topic": "Schrödinger equation",
-                "level": "advanced"
-              },
-              "topicRecord": {
-                "timesStudied": 4,
-                "scores": [],
-                "level": "advanced",
-                "lastStudied": "2026-04-12T14:48:45.296Z",
-                "srs": {
-                  "repetitions": 0,
-                  "easeFactor": 2.5,
-                  "interval": 1,
-                  "nextReview": "2026-04-10T04:00:00.000Z"
-                }
-              },
-              "weakAreas": [
-                "gravity",
-                "because the phone",
-                "gravity is a",
-                "yes its a",
-                "a push comes",
-                "who invented pi",
-                "photosynthesis",
-                "french revolution",
-                "Schrödinger equation",
-                "entropy"
-              ],
-              "totalStudied": 10
-            }
-          }
-        ],
-        "iterations": 2
-      },
-      "timestamp": "2026-04-12T14:48:45.343Z"
-    },
-    {
-      "id": "agent-cache-hit",
-      "category": "Agent mode (/agent)",
-      "name": "POST /agent — repeat query (should cache hit)",
-      "method": "POST",
-      "path": "/agent",
-      "note": "Should be near-instant if cache is working correctly",
-      "ms": 30163,
-      "status": 200,
-      "ok": true,
-      "valid": true,
-      "error": null,
-      "body": {
-        "success": true,
-        "rawReply": "Your question has been processed.",
-        "structured": {
-          "agentSummary": "Your question has been processed.",
-          "toolsUsed": [
-            "explain_topic",
-            "generate_quiz",
-            "suggest_next_topic",
-            "track_progress"
-          ],
-          "explanation": {
-            "intro": "Photosynthesis is the amazing process plants use to create their own food using sunlight, water, and air.",
-            "steps": [
-              {
-                "title": "Ingredients Needed",
-                "text": "Plants take in sunlight energy, water through their roots, and carbon dioxide from the air.",
-                "emoji": "☀️💧💨"
-              },
-              {
-                "title": "The Chloroplasts",
-                "text": "Inside the leaves are chloroplasts, which contain chlorophyll, the green pigment that captures sunlight.",
-                "emoji": "🌿"
-              },
-              {
-                "title": "The Chemical Reaction",
-                "text": "Using the captured energy, plants convert carbon dioxide and water into glucose (sugar) and oxygen.",
-                "emoji": "🧪"
-              },
-              {
-                "title": "What's Made",
-                "text": "The glucose provides the plant with energy to grow, and oxygen is released back into the atmosphere for us to breathe.",
-                "emoji": "🍬🌬️"
-              }
-            ],
-            "answer": "In simple terms, photosynthesis is how plants use light energy to turn water and carbon dioxide into sugar for food and oxygen for us.",
-            "followup": "What gas do plants take from the air that they need for photosynthesis?",
-            "_parseMethod": "direct"
-          },
-          "quiz": [
-            {
-              "question": "What is the primary source of energy that powers photosynthesis?",
-              "options": [
-                "A) Oxygen",
-                "B) Water",
-                "C) Sunlight",
-                "D) Carbon Dioxide"
-              ],
-              "correct": 0,
-              "answer": "C) Sunlight",
-              "explanation": "Photosynthesis requires energy, which plants capture from sunlight using chlorophyll."
-            },
-            {
-              "question": "What gas do plants take in from the atmosphere for photosynthesis?",
-              "options": [
-                "A) Oxygen",
-                "B) Nitrogen",
-                "C) Carbon Dioxide",
-                "D) Hydrogen"
-              ],
-              "correct": 0,
-              "answer": "C) Carbon Dioxide",
-              "explanation": "Plants use carbon dioxide (CO2) from the air, which is necessary to build glucose."
-            },
-            {
-              "question": "What type of sugar is produced by plants as food during photosynthesis?",
-              "options": [
-                "A) Starch",
-                "B) Protein",
-                "C) Glucose",
-                "D) Fat"
-              ],
-              "correct": 0,
-              "answer": "C) Glucose",
-              "explanation": "Glucose is a simple sugar (food) that the plant uses for energy and growth."
-            }
-          ],
-          "nextTopic": {
-            "success": true,
-            "nextTopic": "Cellular Respiration",
-            "reason": "It is the direct biochemical counterpart to photosynthesis, completing the core energy cycle.",
-            "relatedTo": "Photosynthesis is the process that creates the glucose used in cellular respiration.",
-            "_ms": 3588
-          },
-          "progressNote": "Great work studying!"
-        },
-        "toolCallLog": [
-          {
-            "tool": "explain_topic",
-            "args": {
-              "topic": "photosynthesis",
-              "level": "beginner",
-              "context": ""
-            },
-            "result": {
-              "success": true,
-              "explanation": {
-                "intro": "Photosynthesis is the amazing process plants use to create their own food using sunlight, water, and air.",
-                "steps": [
-                  {
-                    "title": "Ingredients Needed",
-                    "text": "Plants take in sunlight energy, water through their roots, and carbon dioxide from the air.",
-                    "emoji": "☀️💧💨"
-                  },
-                  {
-                    "title": "The Chloroplasts",
-                    "text": "Inside the leaves are chloroplasts, which contain chlorophyll, the green pigment that captures sunlight.",
-                    "emoji": "🌿"
-                  },
-                  {
-                    "title": "The Chemical Reaction",
-                    "text": "Using the captured energy, plants convert carbon dioxide and water into glucose (sugar) and oxygen.",
-                    "emoji": "🧪"
-                  },
-                  {
-                    "title": "What's Made",
-                    "text": "The glucose provides the plant with energy to grow, and oxygen is released back into the atmosphere for us to breathe.",
-                    "emoji": "🍬🌬️"
-                  }
-                ],
-                "answer": "In simple terms, photosynthesis is how plants use light energy to turn water and carbon dioxide into sugar for food and oxygen for us.",
-                "followup": "What gas do plants take from the air that they need for photosynthesis?",
-                "_parseMethod": "direct"
-              },
-              "topic": "photosynthesis",
-              "level": "beginner",
-              "_ms": 28007
-            }
-          },
-          {
-            "tool": "generate_quiz",
-            "args": {
-              "topic": "photosynthesis",
-              "level": "beginner",
-              "numQuestions": 3
-            },
-            "result": {
-              "success": true,
-              "questions": [
-                {
-                  "question": "What is the primary source of energy that powers photosynthesis?",
-                  "options": [
-                    "A) Oxygen",
-                    "B) Water",
-                    "C) Sunlight",
-                    "D) Carbon Dioxide"
-                  ],
-                  "correct": 0,
-                  "answer": "C) Sunlight",
-                  "explanation": "Photosynthesis requires energy, which plants capture from sunlight using chlorophyll."
-                },
-                {
-                  "question": "What gas do plants take in from the atmosphere for photosynthesis?",
-                  "options": [
-                    "A) Oxygen",
-                    "B) Nitrogen",
-                    "C) Carbon Dioxide",
-                    "D) Hydrogen"
-                  ],
-                  "correct": 0,
-                  "answer": "C) Carbon Dioxide",
-                  "explanation": "Plants use carbon dioxide (CO2) from the air, which is necessary to build glucose."
-                },
-                {
-                  "question": "What type of sugar is produced by plants as food during photosynthesis?",
-                  "options": [
-                    "A) Starch",
-                    "B) Protein",
-                    "C) Glucose",
-                    "D) Fat"
-                  ],
-                  "correct": 0,
-                  "answer": "C) Glucose",
-                  "explanation": "Glucose is a simple sugar (food) that the plant uses for energy and growth."
-                }
-              ],
-              "topic": "photosynthesis",
-              "numQuestions": 3,
-              "_ms": 12171
-            }
-          },
-          {
-            "tool": "suggest_next_topic",
-            "args": {
-              "currentTopic": "photosynthesis",
-              "subject": "biology"
-            },
-            "result": {
-              "success": true,
-              "nextTopic": "Cellular Respiration",
-              "reason": "It is the direct biochemical counterpart to photosynthesis, completing the core energy cycle.",
-              "relatedTo": "Photosynthesis is the process that creates the glucose used in cellular respiration.",
-              "_ms": 3588
-            }
-          },
-          {
-            "tool": "track_progress",
-            "args": {
-              "topic": "photosynthesis",
-              "level": "beginner"
-            },
-            "result": {
-              "success": true,
-              "saved": {
-                "topic": "photosynthesis",
-                "level": "beginner"
-              },
-              "topicRecord": {
-                "timesStudied": 12,
-                "scores": [],
-                "level": "beginner",
-                "lastStudied": "2026-04-12T14:49:16.681Z",
-                "srs": {
-                  "repetitions": 0,
-                  "easeFactor": 2.5,
-                  "interval": 1,
-                  "nextReview": "2026-04-10T04:00:00.000Z"
-                }
-              },
-              "weakAreas": [
-                "gravity",
-                "because the phone",
-                "gravity is a",
-                "yes its a",
-                "a push comes",
-                "who invented pi",
-                "photosynthesis",
-                "french revolution",
-                "Schrödinger equation",
-                "entropy"
-              ],
-              "totalStudied": 10
-            }
-          }
-        ],
-        "iterations": 2
-      },
-      "timestamp": "2026-04-12T14:49:16.710Z"
-    },
-    {
-      "id": "socratic-beginner",
-      "category": "Socratic mode (/socratic)",
-      "name": "POST /socratic — beginner",
-      "method": "POST",
-      "path": "/socratic",
-      "note": null,
-      "ms": 8196,
-      "status": 200,
-      "ok": true,
-      "valid": true,
-      "error": null,
-      "body": {
-        "success": true,
-        "rawReply": "Alright, gravity! This is the force that keeps your feet planted on the ground instead of floating off into the stratosphere like a rogue TikTok star. 🚀 Before we dive deep into the physics textbooks (ugh!), if you had to explain gravity to a 5-year-old using only pizza toppings, what would you say? 🍕",
-        "structured": {
-          "mode": "socratic",
-          "agentSummary": "Socratic turn 1 on \"gravity\"",
-          "toolsUsed": [
-            "ask_socratic_question",
-            "track_progress"
-          ],
-          "acknowledgement": "",
-          "question": "Alright, gravity! This is the force that keeps your feet planted on the ground instead of floating off into the stratosphere like a rogue TikTok star. 🚀 Before we dive deep into the physics textbooks (ugh!), if you had to explain gravity to a 5-year-old using only pizza toppings, what would you say? 🍕",
-          "hint": "",
-          "isNearAnswer": false,
-          "isFinalTurn": false,
-          "summary": "",
-          "topic": "gravity",
-          "turn": 1,
-          "progressNote": "You're learning steadily. Keep focused on weak areas!"
-        },
-        "toolCallLog": [
-          {
-            "tool": "ask_socratic_question",
-            "args": {
-              "topic": "gravity",
-              "level": "beginner",
-              "turnNumber": 1
-            },
-            "result": {
-              "success": true,
-              "acknowledgement": "",
-              "question": "Alright, gravity! This is the force that keeps your feet planted on the ground instead of floating off into the stratosphere like a rogue TikTok star. 🚀 Before we dive deep into the physics textbooks (ugh!), if you had to explain gravity to a 5-year-old using only pizza toppings, what would you say? 🍕",
-              "hint": "",
-              "isNearAnswer": false,
-              "summary": "",
-              "topic": "gravity",
-              "turn": 1,
-              "isFinalTurn": false,
-              "_ms": 8146
-            }
-          },
-          {
-            "tool": "track_progress",
-            "args": {
-              "topic": "gravity",
-              "level": "beginner"
-            },
-            "result": {
-              "success": true,
-              "saved": {
-                "topic": "gravity",
-                "level": "beginner",
-                "quizScore": null
-              },
-              "topicRecord": {
-                "timesStudied": 6,
-                "scores": [],
-                "level": "beginner",
-                "lastStudied": "2026-04-12T14:49:26.083Z",
-                "srs": {
-                  "repetitions": 4,
-                  "easeFactor": 2.5,
-                  "interval": 38,
-                  "nextReview": "2026-05-19T04:00:00.000Z"
-                }
-              },
-              "weakAreas": [
-                "gravity",
-                "because the phone",
-                "gravity is a",
-                "yes its a",
-                "a push comes",
-                "who invented pi",
-                "photosynthesis",
-                "french revolution",
-                "Schrödinger equation",
-                "entropy"
-              ],
-              "totalStudied": 10
-            }
-          }
-        ],
-        "iterations": 1
-      },
-      "timestamp": "2026-04-12T14:49:26.107Z"
-    },
-    {
-      "id": "socratic-advanced",
-      "category": "Socratic mode (/socratic)",
-      "name": "POST /socratic — advanced",
-      "method": "POST",
-      "path": "/socratic",
-      "note": null,
-      "ms": 6536,
-      "status": 200,
-      "ok": true,
-      "valid": true,
-      "error": null,
-      "body": {
-        "success": true,
-        "rawReply": "Alright, entropy! Sounds like something that belongs in a sci-fi movie, right? 🌌 Before we dive into the thermodynamics deep end, let's get your brain warmed up. If you had to explain the concept of 'disorder' to a friend who thinks the universe runs on vibes alone, what's the most chaotic, relatable, and slightly dramatic example you'd use? 🍕",
-        "structured": {
-          "mode": "socratic",
-          "agentSummary": "Socratic turn 1 on \"entropy\"",
-          "toolsUsed": [
-            "ask_socratic_question",
-            "track_progress"
-          ],
-          "acknowledgement": "",
-          "question": "Alright, entropy! Sounds like something that belongs in a sci-fi movie, right? 🌌 Before we dive into the thermodynamics deep end, let's get your brain warmed up. If you had to explain the concept of 'disorder' to a friend who thinks the universe runs on vibes alone, what's the most chaotic, relatable, and slightly dramatic example you'd use? 🍕",
-          "hint": "",
-          "isNearAnswer": false,
-          "isFinalTurn": false,
-          "summary": "",
-          "topic": "entropy",
-          "turn": 1,
-          "progressNote": "You're learning steadily. Keep focused on weak areas!"
-        },
-        "toolCallLog": [
-          {
-            "tool": "ask_socratic_question",
-            "args": {
-              "topic": "entropy",
-              "level": "advanced",
-              "turnNumber": 1
-            },
-            "result": {
-              "success": true,
-              "acknowledgement": "",
-              "question": "Alright, entropy! Sounds like something that belongs in a sci-fi movie, right? 🌌 Before we dive into the thermodynamics deep end, let's get your brain warmed up. If you had to explain the concept of 'disorder' to a friend who thinks the universe runs on vibes alone, what's the most chaotic, relatable, and slightly dramatic example you'd use? 🍕",
-              "hint": "",
-              "isNearAnswer": false,
-              "summary": "",
-              "topic": "entropy",
-              "turn": 1,
-              "isFinalTurn": false,
-              "_ms": 6488
-            }
-          },
-          {
-            "tool": "track_progress",
-            "args": {
-              "topic": "entropy",
-              "level": "advanced"
-            },
-            "result": {
-              "success": true,
-              "saved": {
-                "topic": "entropy",
-                "level": "advanced",
-                "quizScore": null
-              },
-              "topicRecord": {
-                "timesStudied": 4,
-                "scores": [],
-                "level": "advanced",
-                "lastStudied": "2026-04-12T14:49:33.823Z",
-                "srs": {
-                  "repetitions": 0,
-                  "easeFactor": 2.5,
-                  "interval": 1,
-                  "nextReview": "2026-04-10T04:00:00.000Z"
-                }
-              },
-              "weakAreas": [
-                "gravity",
-                "because the phone",
-                "gravity is a",
-                "yes its a",
-                "a push comes",
-                "who invented pi",
-                "photosynthesis",
-                "french revolution",
-                "Schrödinger equation",
-                "entropy"
-              ],
-              "totalStudied": 10
-            }
-          }
-        ],
-        "iterations": 1
-      },
-      "timestamp": "2026-04-12T14:49:33.852Z"
-    },
-    {
-      "id": "concept-map-simple",
-      "category": "Concept map (/concept-map)",
-      "name": "POST /concept-map — simple topic",
-      "method": "POST",
-      "path": "/concept-map",
-      "note": null,
-      "ms": 19775,
-      "status": 200,
-      "ok": true,
-      "valid": true,
-      "error": null,
-      "body": {
-        "success": true,
-        "central": "Gravity",
-        "nodes": [
-          {
-            "id": "n1",
-            "label": "Force of Attraction",
-            "type": "main"
-          },
-          {
-            "id": "n2",
-            "label": "Mass",
-            "type": "main"
-          },
-          {
-            "id": "n3",
-            "label": "Distance",
-            "type": "main"
-          },
-          {
-            "id": "n4",
-            "label": "Planets",
-            "type": "example"
-          },
-          {
-            "id": "n5",
-            "label": "Earth",
-            "type": "example"
-          },
-          {
-            "id": "n6",
-            "label": "Falling Objects",
-            "type": "example"
-          }
-        ],
-        "edges": [
-          {
-            "from": "central",
-            "to": "n1",
-            "label": "is a"
-          },
-          {
-            "from": "central",
-            "to": "n2",
-            "label": "depends on"
-          },
-          {
-            "from": "central",
-            "to": "n3",
-            "label": "is affected by"
-          },
-          {
-            "from": "n1",
-            "to": "n2",
-            "label": "increases with"
-          },
-          {
-            "from": "n1",
-            "to": "n3",
-            "label": "decreases with"
-          },
-          {
-            "from": "n2",
-            "to": "n4",
-            "label": "possesses"
-          },
-          {
-            "from": "n3",
-            "to": "n6",
-            "label": "explains the fall of"
-          }
-        ],
-        "topic": "gravity",
-        "level": "beginner",
-        "_ms": 19735
-      },
-      "timestamp": "2026-04-12T14:49:54.831Z"
-    },
-    {
-      "id": "concept-map-complex",
-      "category": "Concept map (/concept-map)",
-      "name": "POST /concept-map — complex topic",
-      "method": "POST",
-      "path": "/concept-map",
-      "note": null,
-      "ms": 23415,
-      "status": 200,
-      "ok": true,
-      "valid": true,
-      "error": null,
-      "body": {
-        "success": true,
-        "central": "Ecosystem Food Chain",
-        "nodes": [
-          {
-            "id": "n1",
-            "label": "Producers (Autotrophs)",
-            "type": "main"
-          },
-          {
-            "id": "n2",
-            "label": "Consumers (Heterotrophs)",
-            "type": "main"
-          },
-          {
-            "id": "n3",
-            "label": "Decomposers",
-            "type": "main"
-          },
-          {
-            "id": "n4",
-            "label": "Energy Flow",
-            "type": "related"
-          },
-          {
-            "id": "n5",
-            "label": "Trophic Levels",
-            "type": "related"
-          },
-          {
-            "id": "n6",
-            "label": "Photosynthesis",
-            "type": "example"
-          },
-          {
-            "id": "n7",
-            "label": "Carnivores",
-            "type": "example"
-          },
-          {
-            "id": "n8",
-            "label": "Detritivores",
-            "type": "example"
-          }
-        ],
-        "edges": [
-          {
-            "from": "central",
-            "to": "n1",
-            "label": "begins with"
-          },
-          {
-            "from": "central",
-            "to": "n2",
-            "label": "is structured by"
-          },
-          {
-            "from": "central",
-            "to": "n3",
-            "label": "completes with"
-          },
-          {
-            "from": "n1",
-            "to": "n6",
-            "label": "uses process of"
-          },
-          {
-            "from": "n2",
-            "to": "n5",
-            "label": "occupies"
-          },
-          {
-            "from": "n3",
-            "to": "n4",
-            "label": "recycles nutrients for"
-          },
-          {
-            "from": "n1",
-            "to": "n2",
-            "label": "is eaten by"
-          },
-          {
-            "from": "n2",
-            "to": "n7",
-            "label": "includes group like"
-          },
-          {
-            "from": "n3",
-            "to": "n8",
-            "label": "includes group like"
-          }
-        ],
-        "topic": "ecosystem food chain",
-        "level": "intermediate",
-        "_ms": 23394
-      },
-      "timestamp": "2026-04-12T14:50:19.450Z"
-    },
-    {
-      "id": "srs-update",
-      "category": "SRS & Progress",
-      "name": "PUT /srs/gravity — score update",
-      "method": "PUT",
-      "path": "/srs/gravity",
-      "note": null,
-      "ms": 17,
-      "status": 200,
-      "ok": true,
-      "valid": true,
-      "error": null,
-      "body": {
-        "success": true,
-        "topic": "gravity",
-        "srs": {
-          "repetitions": 5,
-          "easeFactor": 2.5,
-          "interval": 95,
-          "nextReview": "2026-07-16T04:00:00.000Z"
-        }
-      },
-      "timestamp": "2026-04-12T14:50:20.672Z"
-    },
-    {
-      "id": "progress-report",
-      "category": "SRS & Progress",
-      "name": "GET /progress-report",
-      "method": "GET",
-      "path": "/progress-report",
-      "note": null,
-      "ms": 15,
-      "status": 200,
-      "ok": true,
-      "valid": true,
-      "error": null,
-      "body": {
-        "totalTopics": 10,
-        "totalSessions": 0,
-        "overallAverage": 0,
-        "weakAreas": [],
-        "strongAreas": [],
-        "recentSessions": [],
-        "generatedAt": "2026-04-12T14:50:21.883Z"
-      },
-      "timestamp": "2026-04-12T14:50:21.889Z"
+      "success": true,
+      "model": "dhee-odia",
+      "caseId": 5,
+      "caseName": "Part 15 Constrained Test",
+      "targetCount": 3,
+      "generatedCount": 3,
+      "validJSON": true,
+      "completeQuestions": "1/3",
+      "fourOptions": "3/3",
+      "validAnswerIndex": "3/3",
+      "odiaScriptRatio": "3/3",
+      "sentenceFragments": [
+        "ଆଲୋକ ସଂଶ୍ଳେଷଣ ପାଇଁ ଆବଶ୍ଯ଼କ ଅଙ୍ଗାରମଯ଼ ହୋଇଥିବା ଉତ୍ସ",
+        "ଆଲୋକ ସଂଶ୍ଳେଷଣ"
+      ],
+      "factualValid": false,
+      "factualIssues": [],
+      "diversityValid": true,
+      "qualityValid": false,
+      "qualityReason": "Question \"ଆଲୋକ ସଂଶ୍ଳେଷଣ ପାଇଁ ଆବଶ୍ଯ଼କ ଅଙ୍ଗାରମଯ଼ ହୋଇଥିବା ଉତ୍ସ\" appears to be an incomplete sentence fragment or missing interrogative structure.",
+      "canonicalTermsCount": 2,
+      "canonicalTerms": [
+        "ଆଲୋକ ସଂଶ୍ଳେଷଣ",
+        "ହରିତକଣିକା"
+      ],
+      "corruptedTermsFound": [],
+      "latencyMs": 27613,
+      "promptTokens": 1546,
+      "evalTokens": 1200,
+      "tokensPerSec": "44.1",
+      "sampleQ1": "ସୂର୍ଯ୍ଯ଼ାଲୋକ ଶକ୍ତିର ଉତ୍ସ (ଆଲୋକ ସଂଶ୍ଳେଷଣ ପାଇଁ ପ୍ରାଥମିକ ଶକ୍ତିର ଉତ୍ସ) ହେଉଛି?",
+      "sampleAns1": "A) ଆଲୋକ ସଂଶ୍ଳେଷଣ"
     }
   ]
 }

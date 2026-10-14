@@ -31,6 +31,8 @@
   animation: fadeSlideUp 0.35s ease both;
   position: relative;
   word-break: break-word;
+  overflow-wrap: anywhere;
+  box-sizing: border-box;
 }
 .bubble.user {
   align-self: flex-end;
@@ -67,9 +69,9 @@
 }
 .bubble h1 { font-size: var(--font-size-lg); }
 .bubble h2 { font-size: var(--font-size-md); }
-.bubble h3 { font-size: var(--font-size-base); font-weight: 600; }
-.bubble p { margin: 6px 0; }
-.bubble ul, .bubble ol { padding-left: 20px; margin: 6px 0; }
+.bubble p { margin: 8px 0; line-height: 1.7; }
+.bubble p:first-child { margin-top: 0; }
+.bubble p:last-child { margin-bottom: 0; }
 .bubble li { margin: 4px 0; }
 .bubble code {
   font-family: var(--font-mono);
@@ -213,16 +215,33 @@
 /* ── Due-Reviews Banner ── */
 .due-reviews-banner {
   display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  padding: 10px 16px;
+  flex-direction: column;
+  gap: 10px;
+  padding: 12px 16px;
   background: var(--accent-soft);
   border: 1px solid var(--accent-glow);
   border-radius: var(--radius-md);
   font-size: var(--font-size-sm);
   color: var(--text-primary);
   animation: fadeSlideUp 0.35s ease both;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+.due-reviews-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.due-reviews-title {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: var(--font-size-sm);
+  color: var(--text-primary);
 }
 .due-reviews-banner button {
   white-space: nowrap;
@@ -237,6 +256,27 @@
   transition: opacity 0.15s;
 }
 .due-reviews-banner button:hover { opacity: 0.85; }
+.due-reviews-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.due-reviews-list li {
+  line-height: 1.5;
+  color: var(--text-secondary);
+  font-size: var(--font-size-xs);
+  word-break: break-word;
+  overflow-wrap: anywhere;
+}
+.due-reviews-list li.due-reviews-more {
+  font-size: 0.75rem;
+  color: var(--accent);
+  font-weight: 600;
+  margin-top: 2px;
+}
 
 /* ── Structured-response entrance animations ── */
 .animate-greeting { animation: greetFade 0.4s ease both; }
@@ -461,4 +501,189 @@
 @media (max-width: 480px) {
   .shortcuts-modal { padding: 18px; }
   .shortcut-row { font-size: 13px; }
+}
+
+/* ── Mobile and Narrow Screen Adaptations (Class 9 Odisha) ── */
+@media (max-width: 600px) {
+  #chat {
+    padding: 16px 12px 10px;
+    gap: 12px;
+  }
+  .bubble {
+    max-width: 95%;
+    padding: 12px 14px;
+    font-size: 0.95rem;
+    line-height: 1.65;
+  }
+  .due-reviews-banner {
+    padding: 12px 14px;
+  }
+  .due-reviews-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+  .due-reviews-banner button {
+    align-self: flex-start;
+  }
+}
+
+
+/* ── Contextual Practice CTA & Next-Study Decision Card ── */
+.next-study-card {
+  align-self: flex-start;
+  max-width: 82%;
+  padding: 14px 16px;
+  border-radius: var(--radius-md);
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-glow);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  animation: fadeInUp 0.22s ease forwards;
+  margin-top: 4px;
+}
+.next-study-card__title {
+  margin: 0;
+  font-size: var(--font-size-base);
+  font-weight: 600;
+  color: var(--text-primary);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.next-study-card__text {
+  margin: 0;
+  font-size: var(--font-size-sm);
+  color: var(--text-secondary);
+  line-height: 1.5;
+}
+.next-study-card__btn {
+  align-self: flex-start;
+  margin-top: 4px;
+  padding: 8px 16px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--accent);
+  background: transparent;
+  color: var(--accent);
+  font-size: var(--font-size-sm);
+  font-family: var(--font-body);
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.18s, color 0.18s, border-color 0.18s;
+}
+.next-study-card__btn:hover:not(:disabled) {
+  background: var(--accent);
+  color: #fff;
+}
+.next-study-card__btn:disabled {
+  opacity: 0.5;
+  cursor: wait;
+}
+
+.practice-cta {
+  align-self: flex-start;
+  margin-top: 4px;
+  padding: 8px 16px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--accent);
+  background: transparent;
+  color: var(--accent);
+  font-size: var(--font-size-sm);
+  font-family: var(--font-body);
+  cursor: pointer;
+  transition: background 0.18s, color 0.18s;
+  animation: fadeInUp 0.22s ease forwards;
+}
+.practice-cta:hover:not(:disabled) {
+  background: var(--accent);
+  color: #fff;
+}
+.practice-cta:disabled { opacity: 0.5; cursor: wait; }
+
+@media (max-width: 768px) {
+  .next-study-card {
+    max-width: 95%;
+    padding: 12px 14px;
+  }
+}
+
+/* ── Inline MCQ card ── */
+.inline-mcq {
+  align-self: flex-start;
+  max-width: 82%;
+  padding: 16px 18px;
+  border-radius: var(--radius-lg);
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-subtle);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  animation: fadeInUp 0.22s ease forwards;
+}
+.inline-mcq__question {
+  margin: 0;
+  font-size: var(--font-size-base);
+  color: var(--text-primary);
+  line-height: 1.6;
+}
+.inline-mcq__options { display: flex; flex-direction: column; gap: 8px; }
+.inline-mcq__option {
+  text-align: left;
+  padding: 10px 14px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border-glow);
+  background: var(--bg-glass);
+  color: var(--text-primary);
+  font-size: var(--font-size-sm);
+  font-family: var(--font-body);
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s;
+  line-height: 1.5;
+}
+.inline-mcq__option:hover:not(:disabled) {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+}
+.inline-mcq__option:disabled { cursor: default; }
+.inline-mcq__option--correct {
+  border-color: var(--success) !important;
+  background: rgba(52,211,153,0.12) !important;
+  color: var(--success);
+}
+.inline-mcq__option--wrong {
+  border-color: var(--error) !important;
+  background: rgba(248,113,113,0.12) !important;
+  color: var(--error);
+}
+.inline-mcq__feedback {
+  padding: 10px 14px;
+  border-radius: var(--radius-sm);
+  background: var(--bg-glass);
+  border: 1px solid var(--border-subtle);
+  font-size: var(--font-size-sm);
+  color: var(--text-secondary);
+  line-height: 1.6;
+}
+.inline-mcq__feedback strong { display: block; margin-bottom: 4px; color: var(--text-primary); }
+.inline-mcq__feedback p { margin: 0; }
+
+.practice-completed-msg {
+  padding: 10px 14px;
+  border-radius: var(--radius-sm);
+  background: rgba(52, 211, 153, 0.08);
+  border: 1px solid rgba(52, 211, 153, 0.25);
+  color: var(--success);
+  font-size: var(--font-size-sm);
+  line-height: 1.5;
+  margin-top: 4px;
+}
+.practice-completed-msg strong {
+  display: block;
+  margin-bottom: 4px;
+  color: var(--text-primary);
+}
+.practice-completed-msg p {
+  margin: 0;
+  color: var(--text-secondary);
 }

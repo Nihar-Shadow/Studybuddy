@@ -1,0 +1,308 @@
+{
+  "model": "gemma2:2b",
+  "timestamp": "2026-10-09T22:27:12.069Z",
+  "passedCount": 5,
+  "totalCount": 5,
+  "results": [
+    {
+      "scenario": "Photosynthesis",
+      "rawText": "```json\n{\n  \"mode\": \"THINKING-MODE\",\n  \"intro\": \"🙏🙏🙏 ମତ୍ୟଗୁଡ଼ିଆ ପନ୍ଦାରୀ କହେଛି, ସହଜ ଭାଷାରେ ବୁଝାଅ। 🙏🙏🙏 ଏଥଲ୍ୱାର ଶିଖଇତ୍ୟାର ଉତ୍ତମାତ୍ୟଗୁଡ଼ିଆ ପନ୍ଦାରୀ କହେଛି, ସହଜ ଭାଷାରେ ବୁଝାଅ। 🙏🙏🙏\",\n  \"steps\": [\n    {\n      \"title\": \"Start with the basics: What is a plant?\",\n      \"text\": \"ପ୍ରତ୍ୟଗ୍ରମୀତି ସହଜ ଭାଷାରେ ବୁଝାଅ। କଲ୍ନ୍ତିତ୍ୟ ଏଥଲ୍ୱାର ଶିଖଇତ୍ୟାର ଉତ୍ତମାତ୍ୟଗୁଡ଼ିଆ ପନ୍ଦାରୀ କହେଛି, ସହଜ ଭାଷାରେ ବୁଝାଅ। 🙏🙏🙏\",\n      \"emoji\": \"🌱🌳🌻\"\n    },\n    {\n      \"title\": \"Now, what do plants need to grow?\",\n      \"text\": \"ପ୍ରତ୍ୟଗ୍ରମୀତି ସହଜ ଭାଷାରେ ବୁଝାଅ। କଲ୍ନ୍ତିତ୍ୟ ଏଥଲ୍ୱାର ଶିଖଇତ୍ୟାର ଉତ୍ତମାତ୍ୟଗୁଡ଼ିଆ ପନ୍ଦାରୀ କହେଛି, ସହଜ ଭାଷାରେ ବୁଝାଅ। 🙏🙏🙏\",\n      \"emoji\": \"☀️💧\"\n    },\n    {\n      \"title\": \"Let's talk about sunlight!\",\n      \"text\": \"ପ୍ରତ୍ୟଗ୍ରମୀତି ସହଜ ଭାଷାରେ ବୁଝାଅ। କଲ୍ନ୍ତିତ୍ୟ ଏଥଲ୍ୱାର ଶିଖଇତ୍ୟାର ଉତ୍ତମାତ୍ୟଗୁଡ଼ିଆ ପନ୍ଦାରୀ କହେଛି, ସହଜ ଭାଷାରେ ବୁଝାଅ। 🙏🙏🙏\",\n      \"emoji\": \"🌞\"\n    },\n  ],\n  \"answer\": \"ପ୍ରତ୍ୟଗ୍ରମୀତି ସହଜ ଭାଷାରେ ବୁଝାଅ। କଲ୍ନ୍ତିତ୍ୟ ଏଥଲ୍ୱାର ଶିଖଇତ୍ୟାର ଉତ୍ତମାତ୍ୟଗୁଡ଼ିଆ ପନ୍ଦାରୀ କହେଛି, ସହଜ ଭାଷାରେ",
+      "structured": {
+        "intro": "🙏🙏🙏 ମତ୍ୟଗୁଡ଼ିଆ ପନ୍ଦାରୀ କହେଛି, ସହଜ ଭାଷାରେ ବୁଝାଅ। 🙏🙏🙏 ଏଥଲ୍ୱାର ଶିଖଇତ୍ୟାର ଉତ୍ତମାତ୍ୟଗୁଡ଼ିଆ ପନ୍ଦାରୀ କହେଛି, ସହଜ ଭାଷାରେ ବୁଝାଅ। 🙏🙏🙏",
+        "steps": [
+          {
+            "title": "Start with the basics: What is a plant?",
+            "text": "ପ୍ରତ୍ୟଗ୍ରମୀତି ସହଜ ଭାଷାରେ ବୁଝାଅ। କଲ୍ନ୍ତିତ୍ୟ ଏଥଲ୍ୱାର ଶିଖଇତ୍ୟାର ଉତ୍ତମାତ୍ୟଗୁଡ଼ିଆ ପନ୍ଦାରୀ କହେଛି, ସହଜ ଭାଷାରେ ବୁଝାଅ। 🙏🙏🙏",
+            "emoji": "🌱🌳🌻"
+          },
+          {
+            "title": "Now, what do plants need to grow?",
+            "text": "ପ୍ରତ୍ୟଗ୍ରମୀତି ସହଜ ଭାଷାରେ ବୁଝାଅ। କଲ୍ନ୍ତିତ୍ୟ ଏଥଲ୍ୱାର ଶିଖଇତ୍ୟାର ଉତ୍ତମାତ୍ୟଗୁଡ଼ିଆ ପନ୍ଦାରୀ କହେଛି, ସହଜ ଭାଷାରେ ବୁଝାଅ। 🙏🙏🙏",
+            "emoji": "☀️💧"
+          },
+          {
+            "title": "Let's talk about sunlight!",
+            "text": "ପ୍ରତ୍ୟଗ୍ରମୀତି ସହଜ ଭାଷାରେ ବୁଝାଅ। କଲ୍ନ୍ତିତ୍ୟ ଏଥଲ୍ୱାର ଶିଖଇତ୍ୟାର ଉତ୍ତମାତ୍ୟଗୁଡ଼ିଆ ପନ୍ଦାରୀ କହେଛି, ସହଜ ଭାଷାରେ ବୁଝାଅ। 🙏🙏🙏",
+            "emoji": "🌞"
+          }
+        ],
+        "answer": "",
+        "followup": "",
+        "_parseMethod": "truncation_repair"
+      },
+      "evaluation": {
+        "structuralCorrectness": {
+          "score": "PASSED",
+          "valid": true
+        },
+        "languageCompliance": {
+          "score": "PASSED",
+          "odiaScript": true,
+          "details": "Compliant Odia script"
+        },
+        "scientificAccuracy": {
+          "score": "NEEDS_REVIEW",
+          "matchedKeywords": [],
+          "expected": [
+            "ଆଲୋକ",
+            "ପତ୍ର",
+            "photosynthesis",
+            "chlorophyll",
+            "ଶକ୍ତି",
+            "ଖାଦ୍ୟ"
+          ]
+        },
+        "humanReview": {
+          "status": "PENDING_HUMAN_INSPECTION",
+          "notes": "Automated checks confirm structure & script. Native speaker review recommended for Odia grammatical naturalness and nuances."
+        }
+      },
+      "overallPassed": true
+    },
+    {
+      "scenario": "Water Cycle",
+      "rawText": "```json\n{\n  \"mode\": \"THINKING-MODE\",\n  \"intro\": \"ସୁନ୍ଦର ଭାବରେ, ଆଲୋକ ସଂଶ୍ଳେଷଣ (Photosynthesis) ପତିତ୍ୟମ୍ । ଏହି ଜଡ଼ିଗୀଙ୍ଗ ଅଛି ଯାଇଥିବା ଖୁମ୍ଭର୍ଦ୍ୟାର୍ଆକ୍ରାସନ୍।\",\n  \"steps\": [\n    {\n      \"title\": \"Start with the basics: What is photosynthesis?\",\n      \"text\": \"ପତିତ୍ୟମ୍ ଜଡ଼ିଗୀଙ୍ଗ ବହୁତେ ଅଛି କାର୍ଯ୍ୟନ୍। ସ୍ୱର୍ଦ୍ୟାର୍ଆକ୍ରାସନ୍ ଭାବରେ ଏହି ପତିତ୍ୟମ୍ ଜଡ଼ିଗୀଙ୍ଗ ଲୋଇଥିବା ଖୁମ୍ଭର୍ଦ୍ୟାର୍ଆକ୍ରାସନ୍।\",\n      \"emoji\": \"🌱☀️💧\"\n    },\n    {\n      \"title\": \"What are the main ingredients of photosynthesis?\",\n      \"text\": \"ପତିତ୍ୟମ୍ ଜଡ଼ିଗୀଙ୍ଗ ବହୁତେ କାର୍ଯ୍ୟନ୍। ସ୍ୱର୍ଦ୍ୟାର୍ଆକ୍ରାସନ୍ ଭାବରେ ଏହି ପତିତ୍ୟମ୍ ଜଡ଼ିଗୀଙ୍ଗ ଲୋଇଥିବା ଖୁମ୍ଭର୍ଦ୍ୟାର୍ଆକ୍ରାସନ୍।\",\n      \"emoji\": \"🌱☀️💧\"\n    },\n    {\n      \"title\": \"How does photosynthesis work?\",\n      \"text\": \"ପତିତ୍ୟମ୍ ଜଡ଼ିଗୀଙ୍ଗ ବହୁତେ କାର୍ଯ୍ୟନ୍। ସ୍ୱର୍ଦ୍ୟାର୍ଆକ୍ରାସନ୍ ଭାବରେ ଏହି ପତିତ୍ୟମ୍ ଜଡ଼ିଗୀଙ୍ଗ ଲୋଇଥିବା ଖୁମ୍ଭର୍ଦ୍ୟାର୍ଆକ୍ରାସନ୍।\",\n      \"emoji\": \"🌱☀️💧\"\n    }\n  ],\n  \"answer\": \"ପତିତ୍ୟମ୍ ଜଡ଼ିଗୀଙ୍ଗ ବହୁତେ କାର୍ଯ୍ୟନ୍। ସ୍ୱର୍ଦ୍ୟାର୍ଆକ୍ରାସନ୍ ଭାବରେ ଏହି ପତିତ୍ୟମ୍ ଜଡ଼ିଗୀଙ୍ଗ ଲୋଇଥିବା ଖୁମ୍ଭର୍ଦ୍ୟାର୍ଆକ୍ରାସନ୍।",
+      "structured": {
+        "intro": "ସୁନ୍ଦର ଭାବରେ, ଆଲୋକ ସଂଶ୍ଳେଷଣ (Photosynthesis) ପତିତ୍ୟମ୍ । ଏହି ଜଡ଼ିଗୀଙ୍ଗ ଅଛି ଯାଇଥିବା ଖୁମ୍ଭର୍ଦ୍ୟାର୍ଆକ୍ରାସନ୍।",
+        "steps": [
+          {
+            "title": "Start with the basics: What is photosynthesis?",
+            "text": "ପତିତ୍ୟମ୍ ଜଡ଼ିଗୀଙ୍ଗ ବହୁତେ ଅଛି କାର୍ଯ୍ୟନ୍। ସ୍ୱର୍ଦ୍ୟାର୍ଆକ୍ରାସନ୍ ଭାବରେ ଏହି ପତିତ୍ୟମ୍ ଜଡ଼ିଗୀଙ୍ଗ ଲୋଇଥିବା ଖୁମ୍ଭର୍ଦ୍ୟାର୍ଆକ୍ରାସନ୍।",
+            "emoji": "🌱☀️💧"
+          },
+          {
+            "title": "What are the main ingredients of photosynthesis?",
+            "text": "ପତିତ୍ୟମ୍ ଜଡ଼ିଗୀଙ୍ଗ ବହୁତେ କାର୍ଯ୍ୟନ୍। ସ୍ୱର୍ଦ୍ୟାର୍ଆକ୍ରାସନ୍ ଭାବରେ ଏହି ପତିତ୍ୟମ୍ ଜଡ଼ିଗୀଙ୍ଗ ଲୋଇଥିବା ଖୁମ୍ଭର୍ଦ୍ୟାର୍ଆକ୍ରାସନ୍।",
+            "emoji": "🌱☀️💧"
+          },
+          {
+            "title": "How does photosynthesis work?",
+            "text": "ପତିତ୍ୟମ୍ ଜଡ଼ିଗୀଙ୍ଗ ବହୁତେ କାର୍ଯ୍ୟନ୍। ସ୍ୱର୍ଦ୍ୟାର୍ଆକ୍ରାସନ୍ ଭାବରେ ଏହି ପତିତ୍ୟମ୍ ଜଡ଼ିଗୀଙ୍ଗ ଲୋଇଥିବା ଖୁମ୍ଭର୍ଦ୍ୟାର୍ଆକ୍ରାସନ୍।",
+            "emoji": "🌱☀️💧"
+          }
+        ],
+        "answer": "",
+        "followup": "",
+        "_parseMethod": "truncation_repair"
+      },
+      "evaluation": {
+        "structuralCorrectness": {
+          "score": "PASSED",
+          "valid": true
+        },
+        "languageCompliance": {
+          "score": "PASSED",
+          "odiaScript": true,
+          "details": "Compliant Odia script"
+        },
+        "scientificAccuracy": {
+          "score": "NEEDS_REVIEW",
+          "matchedKeywords": [],
+          "expected": [
+            "ଜଳ",
+            "ବାଷ୍ପ",
+            "ବର୍ଷା",
+            "water",
+            "cycle",
+            "ବାଷ୍ପୀଭବନ"
+          ]
+        },
+        "humanReview": {
+          "status": "PENDING_HUMAN_INSPECTION",
+          "notes": "Automated checks confirm structure & script. Native speaker review recommended for Odia grammatical naturalness and nuances."
+        }
+      },
+      "overallPassed": true
+    },
+    {
+      "scenario": "Newton First Law",
+      "rawText": "```json\n{\n  \"mode\": \"THINKING-MODE\",\n  \"intro\": \"ସହିତ୍ରେ ଭଲ ଜଗଣ୍ଡିକ୍ଷ୍ଟିଙ୍ଗର ପ୍ରଥମ ନିୟମ ବୁଝାଅ। ଏହି ଆଲୋକ ସଂଶ୍ଳେଷଣ (Photosynthesis) ଦିତ୍ୟାତ୍ୟର୍ତ୍ର ଭାଇଜ୍ଞ୍ଗିତ୍ିଙ୍ଗ ପ୍ରଥମ ନିୟମ ବୁଝାଅ।\",\n  \"steps\": [\n    {\n      \"title\": \"ସହିତ୍ରେ ଭଲ ଜଗଣ୍ଡିକ୍ଷ୍ଟିଙ୍ଗର ପ୍ରଥମ ନିୟମ ବୁଝାଅ।\",\n      \"text\": \"ଆଲୋକ ସଂଶ୍ଳେଷଣ (Photosynthesis) ଦିତ୍ୟାତ୍ୟର୍ତ୍ର ଭାଇଜ୍ଞ୍ଗିତ୍ିଙ୍ଗ ପ୍ରଥମ ନିୟମ ବୁଝାଅ।\",\n      \"emoji\": \"\"\n    }\n  ],\n  \"answer\": \"ଆଲୋକ ସଂଶ୍ଳେଷଣ (Photosynthesis) ଦିତ୍ୟାତ୍ୟର୍ତ୍ର ଭାଇଜ୍ଞ୍ଗିତ୍ିଙ୍ଗ ପ୍ରଥମ ନିୟମ ବୁଝାଅ।\",\n  \"followup\": \"ଆଲୋକ ସଂଶ୍ଳେଷଣ (Photosynthesis) ଦିତ୍ୟାତ୍ୟର୍ତ୍ର ଭାଇଜ୍ଞ୍ଗିତ୍ିଙ୍ଗ ପ୍ରଥମ ନିୟମ ବୁଝାଅ। ଏହି ଆଲୋକ ସଂଶ୍ଳେଷଣ (Photosynthesis) ଦିତ୍ୟାତ୍ୟର୍ତ୍ର ଭାଇଜ୍ଞ୍ଗିତ୍ିଙ୍ଗ ପ୍ରଥମ ନିୟମ ବୁଝାଅ।\"\n}\n```",
+      "structured": {
+        "intro": "ସହିତ୍ରେ ଭଲ ଜଗଣ୍ଡିକ୍ଷ୍ଟିଙ୍ଗର ପ୍ରଥମ ନିୟମ ବୁଝାଅ। ଏହି ଆଲୋକ ସଂଶ୍ଳେଷଣ (Photosynthesis) ଦିତ୍ୟାତ୍ୟର୍ତ୍ର ଭାଇଜ୍ଞ୍ଗିତ୍ିଙ୍ଗ ପ୍ରଥମ ନିୟମ ବୁଝାଅ।",
+        "steps": [
+          {
+            "title": "ସହିତ୍ରେ ଭଲ ଜଗଣ୍ଡିକ୍ଷ୍ଟିଙ୍ଗର ପ୍ରଥମ ନିୟମ ବୁଝାଅ।",
+            "text": "ଆଲୋକ ସଂଶ୍ଳେଷଣ (Photosynthesis) ଦିତ୍ୟାତ୍ୟର୍ତ୍ର ଭାଇଜ୍ଞ୍ଗିତ୍ିଙ୍ଗ ପ୍ରଥମ ନିୟମ ବୁଝାଅ।",
+            "emoji": ""
+          }
+        ],
+        "answer": "ଆଲୋକ ସଂଶ୍ଳେଷଣ (Photosynthesis) ଦିତ୍ୟାତ୍ୟର୍ତ୍ର ଭାଇଜ୍ଞ୍ଗିତ୍ିଙ୍ଗ ପ୍ରଥମ ନିୟମ ବୁଝାଅ।",
+        "followup": "ଆଲୋକ ସଂଶ୍ଳେଷଣ (Photosynthesis) ଦିତ୍ୟାତ୍ୟର୍ତ୍ର ଭାଇଜ୍ଞ୍ଗିତ୍ିଙ୍ଗ ପ୍ରଥମ ନିୟମ ବୁଝାଅ। ଏହି ଆଲୋକ ସଂଶ୍ଳେଷଣ (Photosynthesis) ଦିତ୍ୟାତ୍ୟର୍ତ୍ର ଭାଇଜ୍ଞ୍ଗିତ୍ିଙ୍ଗ ପ୍ରଥମ ନିୟମ ବୁଝାଅ।",
+        "_parseMethod": "direct"
+      },
+      "evaluation": {
+        "structuralCorrectness": {
+          "score": "PASSED",
+          "valid": true
+        },
+        "languageCompliance": {
+          "score": "PASSED",
+          "odiaScript": true,
+          "details": "Compliant Odia script"
+        },
+        "scientificAccuracy": {
+          "score": "PASSED",
+          "matchedKeywords": [
+            "ନିୟମ"
+          ],
+          "expected": [
+            "ନ୍ୟୁଟନ",
+            "ନିୟମ",
+            "ଗତି",
+            "ବଳ",
+            "newton",
+            "inertia",
+            "force"
+          ]
+        },
+        "humanReview": {
+          "status": "PENDING_HUMAN_INSPECTION",
+          "notes": "Automated checks confirm structure & script. Native speaker review recommended for Odia grammatical naturalness and nuances."
+        }
+      },
+      "overallPassed": true
+    },
+    {
+      "scenario": "Odia Quiz",
+      "structured": [
+        {
+          "question": "ବାହିତ୍ରୀମ୍ୟୁପ୍ରକ୍ଷେସ୍ଜଗଡ଼ି ଆଲୋକ ସଂଶ୍ଳେଷଣ ଭାରତ ଦନ୍ତିକ ଅଛି?",
+          "options": [
+            "A) ବାହିତ୍ରୀମ୍ୟୁପ୍ରକ୍ଷେସ୍ଜଗଡ଼ି",
+            "B) ଆଲୋକ ସଂଶ୍ଳେଷଣ ଭାରତ ଦନ୍ତିକ ଅଛି?",
+            "C) ବହ୍ନମ୍ୟୁପ୍ରକ୍ଷେସ୍ଜଗଡ଼ି ଆଲୋକ ସଂଶ୍ଳେଷଣ ଭାରତ ଦନ୍ତିକ ଅଛି?"
+          ],
+          "correct": 0,
+          "answer": "B) ଆଲୋକ ସଂଶ୍ଳେଷଣ ଭାରତ ଦନ୍ତିକ ଅଛି?",
+          "explanation": "ପଥୁମ୍ୟୁଗଡ଼ି ବହ୍ନମ୍ୟୁପ୍ରକ୍ଷେସ୍ଜଗଡ଼ି ଆଲୋକ ସଂଶ୍ଳେଷଣ ଭାରତ ଦନ୍ତିକ ଅଛି?"
+        },
+        {
+          "question": "ବହ୍ନମ୍ୟୁପ୍ରକ୍ଷେସ୍ଜଗଡ଼ି ଆଲୋକ ସଂଶ୍ଳେଷଣ ଭାରତ ଦନ୍ତିକ ଅଛି?",
+          "options": [
+            "A) ବହ୍ନମ୍ୟୁପ୍ରକ୍ଷେସ୍ଜଗଡ଼ି",
+            "B) ଆଲୋକ ସଂଶ୍ଳେଷଣ ଭାରତ ଦନ୍ତିକ ଅଛି?",
+            "C) ବହ୍ନମ୍ୟୁପ୍ରକ୍ଷେସ୍ଜଗଡ଼ି ଆଲୋକ ସଂଶ୍ଳେଷଣ ଭାରତ ଦନ୍ତିକ ଅଛି?"
+          ],
+          "correct": 0,
+          "answer": "",
+          "explanation": ""
+        }
+      ],
+      "evaluation": {
+        "structuralCorrectness": {
+          "score": "PASSED",
+          "questionsCount": 2
+        },
+        "languageCompliance": {
+          "score": "PASSED",
+          "details": {
+            "valid": true
+          }
+        },
+        "humanReview": {
+          "status": "PENDING_HUMAN_INSPECTION"
+        }
+      },
+      "overallPassed": true
+    },
+    {
+      "scenario": "Agent Mode",
+      "structured": {
+        "agentSummary": "ଆପଣଙ୍କ ପ୍ରଶ୍ନର ଅଧ୍ୟୟନ ଏବଂ ଉତ୍ତର ସମ୍ପୂର୍ଣ୍ଣ ହୋଇଛି।",
+        "toolsUsed": [
+          "explain_topic",
+          "generate_quiz",
+          "suggest_next_topic",
+          "track_progress"
+        ],
+        "explanation": {
+          "intro": "Photosynthesis is how plants make their own food.",
+          "steps": [
+            {
+              "title": "The Ingredients",
+              "text": "Plants need sunlight, water and carbon dioxide to make food.",
+              "emoji": "☀️💧💨"
+            },
+            {
+              "title": "Inside the Plant",
+              "text": "This happens inside special cells called chloroplasts. ",
+              "emoji": "🌿"
+            },
+            {
+              "title": "The Process",
+              "text": "Sunlight helps them turn water and carbon dioxide into sugar (food) for the plant.",
+              "emoji": "➡️"
+            }
+          ],
+          "answer": "Plants use sunlight, water, and air to create their own food through photosynthesis!",
+          "followup": "How do you think plants get energy from this process?",
+          "_parseMethod": "direct"
+        },
+        "quiz": [
+          {
+            "question": " photosynthesis ମାତ୍ରୀକ୍ଷୁଗ୍ରିତ୍ୟରେ ସହିତ୍ତ୍ନପର୍ବର୍ଶ୍ରାଜ୍ଞାର୍ଣ୍ଣର ଭାରତ ଆଡ଼ିଲ୍ଛି?",
+            "options": [
+              "A) ମାତ୍ରୀକ୍ଷୁଗ୍ରିତ୍ୟରେ ସହିତ୍ତ୍ନପର୍ବର୍ଶ୍ରାଜ୍ଞାର୍ଣ୍ଣର ଭାରତ ଆଡ଼ିଲ୍ଛି",
+              "B) ମାତ୍ରୀକ୍ଷୁଗ୍ରିତ୍ୟରେ ସହିତ୍ତ୍ନପର୍ବର୍ଶ୍ରାଜ୍ଞାର୍ଣ୍ଣର ଭାରତ ଆଡ଼ିଲ୍ଛି"
+            ],
+            "correct": 0,
+            "answer": "A) ମାତ୍ରୀକ୍ଷୁଗ୍ରିତ୍ୟରେ ସହିତ୍ତ୍ନପର୍ବର୍ଶ୍ରାଜ୍ଞାର୍ଣ୍ଣର ଭାରତ ଆଡ଼ିଲ୍ଛି",
+            "explanation": "ମାତ୍ରୀକ୍ଷୁଗ୍ରିତ୍ୟରେ ସହିତ୍ତ୍ନପର୍ବର୍ଶ୍ରାଜ୍ଞାର୍ଣ୍ଣର ଭାରତ ଆଡ଼ିଲ୍ଛି"
+          },
+          {
+            "question": "Photosynthesis ମାତ୍ରୀକ୍ଷୁଗ୍ରିତ୍ୟରେ ସହିତ୍ତ୍ନପର୍ବର୍ଶ୍ରାଜ୍ଞାର୍ଣ୍ଣର ଭାରତ ଆଡ଼ିଲ୍ଛି?",
+            "options": [
+              "A) ମାତ୍ରୀକ୍ଷୁଗ୍ରିତ୍ୟରେ ସହିତ୍ତ୍ନପର୍ବର୍ଶ୍ରାଜ୍ଞାର୍ଣ୍ଣର ଭାରତ ଆଡ଼ିଲ୍ଛି",
+              "B) ମାତ୍ରୀକ୍ଷୁଗ୍ରିତ୍ୟରେ ସହିତ୍ତ୍ନପର୍ବର୍ଶ୍ରାଜ୍ଞାର୍ଣ୍ଣର ଭାରତ ଆଡ଼ିଲ୍ଛି"
+            ],
+            "correct": 0,
+            "answer": "A) ମାତ୍ରୀକ୍ଷୁଗ୍ରିତ୍ୟରେ ସହିତ୍ତ୍ନପର୍ବର୍ଶ୍ରାଜ୍ଞାର୍ଣ୍ଣର ଭାରତ ଆଡ଼ିଲ୍ଛି",
+            "explanation": "ମାତ୍ରୀକ୍ଷୁଗ୍ରିତ୍ୟରେ ସହିତ୍ତ୍ନପର୍ବର୍ଶ୍ରାଜ୍ଞାର୍ଣ୍ଣର ଭାରତ ଆଡ଼ିଲ୍ଛି"
+          },
+          {
+            "question": "Photosynthesis ମାତ୍ରୀକ୍ଷୁଗ୍ରିତ୍ୟରେ ସହିତ୍ତ୍ନପର୍ବର୍ଶ୍ରାଜ୍ଞାର୍ଣ୍ଣର ଭାରତ ଆଡ଼ିଲ୍ଛି?",
+            "options": [
+              "A) ମାତ୍ରୀକ୍ଷୁଗ୍ରିତ୍ୟରେ ସହିତ୍ତ୍ନପର୍ବର୍ଶ୍ରାଜ୍ଞାର୍ଣ୍ଣର ଭାରତ ଆଡ଼ିଲ୍ଛି",
+              "B) ମାତ୍ରୀକ୍ଷୁଗ୍ରିତ୍ୟରେ ସହିତ୍ତ୍ନପର୍ବର୍ଶ୍ରାଜ୍ଞାର୍ଣ୍ଣର ଭାରତ ଆଡ଼ିଲ୍ଛି"
+            ],
+            "correct": 0,
+            "answer": "",
+            "explanation": ""
+          }
+        ],
+        "nextTopic": {
+          "success": true,
+          "nextTopic": "cellular respiration",
+          "reason": "Understanding cellular respiration is crucial for understanding how plants convert sunlight into energy and ultimately, how all living organisms get the energy they need.",
+          "relatedTo": "Photosynthesis provides the initial step in converting light energy to chemical energy (glucose), while cellular respiration uses this glucose to release energy.",
+          "_ms": 5933
+        },
+        "progressNote": "ଅଧ୍ୟୟନରେ ଉତ୍ତମ ପ୍ରଗତି ଜାରି ରଖନ୍ତୁ!"
+      },
+      "evaluation": {
+        "structuralCorrectness": {
+          "score": "PASSED",
+          "toolsUsed": [
+            "explain_topic",
+            "generate_quiz",
+            "suggest_next_topic",
+            "track_progress"
+          ]
+        },
+        "languageCompliance": {
+          "score": "PASSED",
+          "summaryVal": {
+            "valid": true
+          },
+          "noteVal": {
+            "valid": true
+          }
+        },
+        "humanReview": {
+          "status": "PENDING_HUMAN_INSPECTION"
+        }
+      },
+      "overallPassed": true
+    }
+  ]
+}

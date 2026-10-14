@@ -4,6 +4,14 @@ async function sendMessage() {
   const message = inputEl.value.trim();
   if (!message && !pendingImage) return;
 
+  // Auto-detect Odia script and align state if not already set
+  if (/[\u0b00-\u0b7f]/.test(message) && currentLanguage !== 'Odia') {
+    currentLanguage = 'Odia';
+    if (languageEl) languageEl.value = 'Odia';
+    try { localStorage.setItem('studybuddy-language', 'Odia'); } catch (_) {}
+    if (typeof updateLanguageIndicator === 'function') updateLanguageIndicator('Odia');
+  }
+
   inputEl.value = '';
   sendBtn.disabled = true;
 
@@ -14,6 +22,11 @@ async function sendMessage() {
   // Clear image preview from input area immediately on send
   imagePreviewContainer.innerHTML = '';
   attachBtn.classList.remove('active');
+
+  // Clear unclicked next-study recommendation cards on new user turn
+  document.querySelectorAll('.next-study-card, .practice-cta').forEach(el => {
+    if (!el.closest('.inline-mcq')) el.remove();
+  });
 
   // Show user message with optional image (handled by sendToChat)
   if (!pendingImage) {

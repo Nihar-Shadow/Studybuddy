@@ -1,7 +1,8 @@
 const { toolDefinitions, toolImplementations, setActiveLanguage } = require('./tools');
 const { getProgressSummary } = require('./progressStore');
 const { preWarm } = require('./smartCache');
-const { reasoningWithDraft } = require('./models');
+const { reasoningWithDraft, getModelForLanguage } = require('./models');
+const { getLanguageDirective, isOdia, containsOdiaScript, validateOdiaContent } = require('../lib/languagePolicy');
 
 // The main agent loop - simplified version
 // Directly executes tools based on the student message and synthesizes results
@@ -18,26 +19,31 @@ async function runAgentLoop(studentMessage, level, conversationHistory, progress
   try {
     // STEP 1: Always try to explain the topic first
     const topicMatch = studentMessage.match(/(?:explain|learn|teach|what is|tell me about)\s+(?:what is |about )?([\w\s]+)(?:\?|$)/i);
-    const isQuizRequest = /quiz|test|practice|question/.test(studentMessage.toLowerCase());
-    const isProgressRequest = /progress|studied|weak|strong|next/.test(studentMessage.toLowerCase());
+    const isQuizRequest = /quiz|test|practice|question|ପ୍ରଶ୍ନ|କ୍ୱିଜ୍/i.test(studentMessage);
+    const isProgressRequest = /progress|studied|weak|strong|next|ଅଗ୍ରଗତି/i.test(studentMessage);
 
     let mainTopic = null;
 
     if (topicMatch && !isQuizRequest) {
-      // Extract topic from the message
       mainTopic = topicMatch[1].trim();
-      
+    } else if (!isQuizRequest && !isProgressRequest) {
+      mainTopic = extractCleanTopic(studentMessage);
+    }
+
+    if (mainTopic) {
       // STEP 1: Run explain_topic and generate_concept_map IN PARALLEL
-      console.log(`[Agent] Running explain + concept map in parallel for: ${mainTopic}`);
+      console.log(`[Agent] Running explain + concept map in parallel for: ${mainTopic} [${language || 'English'}]`);
       const [expResult, mapResult] = await Promise.all([
         toolImplementations.explain_topic({
           topic: mainTopic,
           level: level,
-          context: studentMessage
+          context: studentMessage,
+          language
         }),
         toolImplementations.generate_concept_map({
           topic: mainTopic,
-          level: level
+          level: level,
+          language
         })
       ]);
 
@@ -53,11 +59,12 @@ async function runAgentLoop(studentMessage, level, conversationHistory, progress
 
       // STEP 2: Generate a quiz after explanation
       if (explanation && explanation.steps && explanation.steps.length > 0) {
-        console.log(`[Agent] Generating quiz for: ${mainTopic}`);
+        console.log(`[Agent] Generating quiz for: ${mainTopic} [${language || 'English'}]`);
         const quizResult = await toolImplementations.generate_quiz({
           topic: mainTopic,
           level: level,
-          numQuestions: 3
+          numQuestions: 3,
+          language
         });
 
         if (quizResult.success && quizResult.questions && quizResult.questions.length > 0) {
@@ -84,7 +91,8 @@ async function runAgentLoop(studentMessage, level, conversationHistory, progress
         console.log(`[Agent] Suggesting next topic after: ${mainTopic}`);
         const nextResult = await toolImplementations.suggest_next_topic({
           currentTopic: mainTopic,
-          subject: studentMessage.split(' ')[0] || 'general'
+          subject: studentMessage.split(' ')[0] || 'general',
+          language
         });
 
         if (nextResult.success) {
@@ -103,7 +111,8 @@ async function runAgentLoop(studentMessage, level, conversationHistory, progress
         const quizResult = await toolImplementations.generate_quiz({
           topic: lastTopic,
           level: level,
-          numQuestions: 4
+          numQuestions: 4,
+          language
         });
 
         if (quizResult.success && quizResult.questions) {
@@ -113,17 +122,20 @@ async function runAgentLoop(studentMessage, level, conversationHistory, progress
       }
     }
 
+    const isOdia = language && (language.toLowerCase() === 'odia' || language.toLowerCase() === 'oriya');
     // Build final synthesized response
     const structured = {
       agentSummary: toolCallLog.length > 0 
-        ? `I've completed ${toolCallLog.length} tasks: ${toolCallLog.map(t => t.tool.replace(/_/g, ' ')).join(', ')}.`
-        : 'Ready to help with your learning!',
+        ? (isOdia
+            ? `ମୁଁ ${toolCallLog.length} ଟି କାର୍ଯ୍ୟ ସମ୍ପୂର୍ଣ୍ଣ କରିଛି: ${toolCallLog.map(t => t.tool.replace(/_/g, ' ')).join(', ')}।`
+            : `I've completed ${toolCallLog.length} tasks: ${toolCallLog.map(t => t.tool.replace(/_/g, ' ')).join(', ')}.`)
+        : (isOdia ? 'ଆପଣଙ୍କୁ ଶିଖାଇବା ପାଇଁ ପ୍ରସ୍ତୁତ!' : 'Ready to help with your learning!'),
       toolsUsed: toolCallLog.map(t => t.tool),
       explanation: explanation || null,
       conceptMap: conceptMap || null,
       quiz: quiz || null,
       nextTopic: nextTopic || null,
-      progressNote: generateProgressNote(summary, toolCallLog.length)
+      progressNote: generateProgressNote(summary, toolCallLog.length, language)
     };
 
     return {
@@ -147,17 +159,25 @@ async function runAgentLoop(studentMessage, level, conversationHistory, progress
 }
 
 // Generate encouraging progress note
-function generateProgressNote(summary, toolsUsed) {
+function generateProgressNote(summary, toolsUsed, language = 'English') {
+  const isOdia = language && (language.toLowerCase() === 'odia' || language.toLowerCase() === 'oriya');
+  if (isOdia) {
+    if (toolsUsed === 0) return 'ଆପଣ ବହୁତ ଭଲ କରୁଛନ୍ତି! ନୂଆ ବିଷୟଗୁଡ଼ିକ ଅନୁସନ୍ଧାନ ଜାରି ରଖନ୍ତୁ।';
+    if (!summary || summary.totalTopicsStudied <= 1) return 'ଉତ୍ତମ ଆରମ୍ଭ! ଆପଣଙ୍କର ଶିକ୍ଷଣ ଯାତ୍ରା ଆରମ୍ଭ ହୋଇଛି।';
+    if (summary.totalTopicsStudied < 5) return 'ଉତ୍ତମ ଅଗ୍ରଗତି! ଆପଣ ଏକ ଦୃଢ଼ ମୂଳଦୁଆ ଗଠନ କରୁଛନ୍ତି।';
+    if (summary.weakAreas && summary.weakAreas.length === 0) return 'ଚମତ୍କାର! ଆପଣ ବିଷୟଗୁଡ଼ିକ ଶୀଘ୍ର ଆୟତ୍ତ କରୁଛନ୍ତି।';
+    return 'ଆପଣ ନିରନ୍ତର ଶିଖୁଛନ୍ତି। ଧ୍ୟାନ ଦେଇ ପାଠ ପଢ଼ନ୍ତୁ!';
+  }
   if (toolsUsed === 0) {
     return `You're doing great! Keep exploring new topics.`;
   }
-  if (summary.totalTopicsStudied === 1) {
+  if (!summary || summary.totalTopicsStudied <= 1) {
     return `Great start! You've begun your learning journey.`;
   }
   if (summary.totalTopicsStudied < 5) {
     return `Nice progress! You're building solid foundations.`;
   }
-  if (summary.weakAreas.length === 0) {
+  if (summary.weakAreas && summary.weakAreas.length === 0) {
     return `Impressive! You're mastering topics quickly.`;
   }
   return `You're learning steadily. Keep focused on weak areas!`;
@@ -177,27 +197,40 @@ async function executeTool(toolName, toolArgs) {
   }
 }
 
-// Simple topic extractor fallback
-function extractTopic(message) {
+// Robust topic extractor supporting Odia and English
+function extractCleanTopic(message) {
+  if (!message) return 'science';
   const cleaned = message
-    .toLowerCase()
-    .replace(/explain|describe|what is|teach me|tell me about|i want to learn|help me with/gi, '')
+    .replace(/(?:ସହଜ ଭାଷାରେ |ସରଳ ଭାଷାରେ |ସହଜରେ )?ବୁଝାଅ/gi, '')
+    .replace(/(?:କ’ଣ|କଣ|କିପରି କାମ କରେ|କିପରି|କେମିତି|କହିପାରିବ କି|ବିଷୟରେ କୁହ|ବିଷୟରେ)/gi, '')
+    .replace(/(?:explain|describe|what is|how does|teach me about|tell me about|work|in odia)/gi, '')
+    .replace(/[?।!.,'"`]/g, '')
     .trim();
-  return cleaned.split(' ').slice(0, 3).join(' ') || 'the topic';
+  return cleaned || message.replace(/[?।!.,]/g, '').trim() || 'science';
+}
+
+function extractTopic(message) {
+  return extractCleanTopic(message);
 }
 
 // Fast parallel agent — runs independent tools concurrently
 async function runParallelAgent(studentMessage, level, conversationHistory, language, studentId, studentName) {
-  setActiveLanguage(language);
+  const isOdiaReq = isOdia(language) || containsOdiaScript(studentMessage);
+  const effectiveLang = isOdiaReq ? 'Odia' : (language || 'English');
+  setActiveLanguage(effectiveLang);
+  console.log(`[Diagnostic: Request] Agent mode received request with language: "${effectiveLang}"`);
+
   const summary = getProgressSummary(studentId);
   const toolCallLog = [];
 
   try {
     // Step 1 — Ask Gemma to decide which tools to call (planning phase)
+    console.log(`[Diagnostic: Prompt Construction] Agent planning phase prompt with language: "${effectiveLang}"`);
     const planningPrompt = `
 You are a study planning agent. Given a student message, decide which tools to call.
 
 Student message: "${studentMessage}"
+Language requested: ${effectiveLang}
 Student level: ${level}
 Student's weak areas: ${summary.weakAreas.join(', ') || 'none yet'}
 Recently studied: ${summary.recentTopics.join(', ') || 'nothing yet'}
@@ -219,12 +252,15 @@ Example:
   `.trim();
 
     let planRes;
+    const planModel = getModelForLanguage(effectiveLang);
+    console.log(`[LLM]\nlanguage=${effectiveLang}\nmodel=${planModel}\ntask=agent-plan`);
     try {
       planRes = await fetch('http://localhost:11434/api/chat', {
         method:  'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          ...reasoningWithDraft(),
+          ...reasoningWithDraft(planModel),
+          model: planModel,
           messages: [
             { role: 'system', content: 'You are a tool planning agent. Respond only with a JSON array.' },
             { role: 'user',   content: planningPrompt }
@@ -259,12 +295,12 @@ Example:
     console.log('[Agent] Planning parse failed:', err.message);
     console.log('[Agent] Planning response was:', planData.message?.content?.substring(0, 200));
     // Planning failed — fall back to default tool set
-    const topic = extractTopic(studentMessage);
+    const topic = extractCleanTopic(studentMessage);
     toolCalls = [
-      { name: 'explain_topic',      args: { topic, level, context: studentMessage } },
-      { name: 'generate_quiz',      args: { topic, level, numQuestions: 2 } },
+      { name: 'explain_topic',      args: { topic, level, context: studentMessage, language } },
+      { name: 'generate_quiz',      args: { topic, level, numQuestions: 2, language } },
       { name: 'track_progress',     args: { topic, level } },
-      { name: 'suggest_next_topic', args: { currentTopic: topic, subject: '' } }
+      { name: 'suggest_next_topic', args: { currentTopic: topic, subject: '', language } }
     ];
     console.log('[Agent] Using fallback tools for topic:', topic);
   }
@@ -276,7 +312,9 @@ Example:
   // Step 3 — Run all Ollama tools IN PARALLEL
   const parallelResults = await Promise.all(
     asyncTools.map(async (call) => {
-      const result = await executeTool(call.name, call.args || {});
+      const argsWithLang = { ...(call.args || {}), language: effectiveLang };
+      console.log(`[Diagnostic: Tool Call] Agent executing tool "${call.name}" with language: "${effectiveLang}"`);
+      const result = await executeTool(call.name, argsWithLang);
       toolCallLog.push({ tool: call.name, args: call.args, result });
       return { name: call.name, result };
     })
@@ -286,6 +324,7 @@ Example:
   for (const call of syncTools) {
     // Inject student identity so progress is saved under the correct student
     const args = { ...(call.args || {}), studentId, studentName };
+    console.log(`[Diagnostic: Tool Call] Agent executing sync tool "${call.name}"`);
     const result = await executeTool(call.name, args);
     toolCallLog.push({ tool: call.name, args: call.args, result });
     parallelResults.push({ name: call.name, result });
@@ -296,35 +335,39 @@ Example:
     .map(r => `Tool: ${r.name}\nResult: ${JSON.stringify(r.result, null, 2)}`)
     .join('\n\n---\n\n');
 
+  const synthLangDirective = getLanguageDirective(effectiveLang, 'agent_synthesis');
+  console.log(`[Diagnostic: Synthesis] Agent synthesis prompt constructed with language: "${effectiveLang}"`);
+
   const synthesisPrompt = `
+${synthLangDirective}
 You are StudyBuddy. A student at ${level} level asked: "${studentMessage}"
 
-You ran several tools and got these results:
+Tool execution summary:
 ${toolResultsSummary}
 
-Now synthesise everything into a single helpful response.
+Now synthesise the session into an encouraging closing note and summary in ${effectiveLang}.
 Respond ONLY with valid JSON — no markdown, no preamble:
 {
-  "agentSummary":  "1-2 sentence summary of this session",
-  "toolsUsed":     ["tool1", "tool2"],
-  "explanation":   { ...explanation object from explain_topic result, or null },
-  "quiz":          [ ...questions array from generate_quiz result, or null ],
-  "nextTopic":     { "nextTopic": "...", "reason": "..." } or null,
-  "progressNote":  "one short encouraging sentence"
+  "agentSummary":  "${isOdiaReq ? 'ସତେଜ ସାରାଂଶ (Odia summary of what was covered)' : '1-2 sentence summary of what was covered in this session'}",
+  "progressNote":  "${isOdiaReq ? 'ଉତ୍ସାହଜନକ ବାକ୍ୟ (one short encouraging sentence in Odia)' : 'one short encouraging sentence'}"
 }
   `.trim();
 
+  const synthModel = getModelForLanguage(effectiveLang);
+  console.log(`[LLM]\nlanguage=${effectiveLang}\nmodel=${synthModel}\ntask=agent-synthesis`);
   const synthRes = await fetch('http://localhost:11434/api/chat', {
     method:  'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
-      ...reasoningWithDraft(),
+      ...reasoningWithDraft(synthModel),
+      model: synthModel,
       messages: [
-        { role: 'system', content: 'You are a synthesis agent. Respond only with JSON.' },
+        { role: 'system', content: `You are a synthesis agent. ${synthLangDirective} Respond only with JSON.` },
         { role: 'user',   content: synthesisPrompt }
       ],
       stream:   false,
-      options:  { num_predict: 700, num_ctx: 4096, temperature: 0.6 }
+      format:   'json',
+      options:  { num_predict: 400, num_ctx: 4096, temperature: 0.3, repeat_penalty: 1.15 }
     })
   });
 
@@ -332,51 +375,87 @@ Respond ONLY with valid JSON — no markdown, no preamble:
   let structured  = null;
 
   try {
-    const cleaned = synthData.message.content
+    const rawContent = synthData.message?.content || '';
+    const cleaned = rawContent
+      .replace(/<think>[\s\S]*?<\/think>/gi, '')
       .replace(/^```json\s*/i, '')
       .replace(/^```\s*/i, '')
       .replace(/```\s*$/i, '')
       .trim();
-    structured = JSON.parse(cleaned);
+    const parsed = JSON.parse(cleaned);
+    structured = {
+      agentSummary: parsed.agentSummary || 'Session completed.',
+      toolsUsed:    parallelResults.map(r => r.name),
+      explanation:  parallelResults.find(r => r.name === 'explain_topic')?.result?.explanation || null,
+      quiz:         parallelResults.find(r => r.name === 'generate_quiz')?.result?.questions || null,
+      nextTopic:    parallelResults.find(r => r.name === 'suggest_next_topic')?.result || null,
+      progressNote: parsed.progressNote || 'Keep up the good work!'
+    };
     console.log('[Agent] Synthesis phase completed successfully');
-
-    // Patch: if explanation is null but we have a direct result, inject it
-    if (!structured.explanation) {
-      const expResult = parallelResults.find(r => r.name === 'explain_topic');
-      if (expResult?.result?.explanation) {
-        structured.explanation = expResult.result.explanation;
-        console.log('[Agent] Patched explanation from tool result');
-      }
-    }
-    // Patch: if quiz is null but we have a direct result, inject it
-    if (!structured.quiz) {
-      const quizResult = parallelResults.find(r => r.name === 'generate_quiz');
-      if (quizResult?.result?.questions?.length > 0) {
-        structured.quiz = quizResult.result.questions;
-        console.log('[Agent] Patched quiz from tool result');
-      }
-    }
-    // Patch: if nextTopic is null but we have a direct result, inject it
-    if (!structured.nextTopic) {
-      const nextResult = parallelResults.find(r => r.name === 'suggest_next_topic');
-      if (nextResult?.result?.nextTopic) {
-        structured.nextTopic = nextResult.result;
-        console.log('[Agent] Patched nextTopic from tool result');
-      }
-    }
   } catch (err) {
     console.log('[Agent] Synthesis parse failed:', err.message);
-    console.log('[Agent] Synthesis response was:', synthData.message?.content?.substring(0, 200));
-    // Fallback: synthesise from raw tool results
     structured = {
-      agentSummary: 'Your question has been processed.',
-      toolsUsed: parallelResults.map(r => r.name),
-      explanation: parallelResults.find(r => r.name === 'explain_topic')?.result?.explanation || null,
-      quiz: parallelResults.find(r => r.name === 'generate_quiz')?.result?.questions || null,
-      nextTopic: parallelResults.find(r => r.name === 'suggest_next_topic')?.result || null,
-      progressNote: 'Great work studying!'
+      agentSummary: isOdiaReq ? 'ଆପଣଙ୍କ ପ୍ରଶ୍ନର ଅଧ୍ୟୟନ ସମ୍ପୂର୍ଣ୍ଣ ହୋଇଛି।' : 'Your question has been processed.',
+      toolsUsed:    parallelResults.map(r => r.name),
+      explanation:  parallelResults.find(r => r.name === 'explain_topic')?.result?.explanation || null,
+      quiz:         parallelResults.find(r => r.name === 'generate_quiz')?.result?.questions || null,
+      nextTopic:    parallelResults.find(r => r.name === 'suggest_next_topic')?.result || null,
+      progressNote: isOdiaReq ? 'ଅଧ୍ୟୟନରେ ଉତ୍ତମ ପ୍ରଗତି ଜାରି ରଖନ୍ତୁ!' : 'Great work studying!'
     };
     console.log('[Agent] Using fallback synthesis');
+  }
+
+  // Validate Odia synthesis and attempt bounded corrective retry if model reverted to English
+  if (isOdiaReq) {
+    const sumVal  = validateOdiaContent(structured.agentSummary);
+    const noteVal = validateOdiaContent(structured.progressNote);
+    if (!sumVal.valid || !noteVal.valid) {
+      console.warn(`[Agent] Odia synthesis validation failed (summary: ${sumVal.reason}, note: ${noteVal.reason}) — attempting 1 corrective retry...`);
+      toolCallLog.push({ tool: 'synthesis_retry', status: 'attempted' });
+      try {
+        const retryRes = await fetch('http://localhost:11434/api/chat', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            ...reasoningWithDraft(synthModel),
+            model: synthModel,
+            messages: [
+              { role: 'system', content: 'You are a synthesis agent. Respond only with JSON.' },
+              { role: 'user',   content: synthesisPrompt },
+              { role: 'assistant', content: synthData.message?.content || '' },
+              { role: 'user',   content: 'CORRECTION: The student selected Odia. Your agentSummary and progressNote were in English. Rewrite agentSummary and progressNote in clear Odia (ଓଡ଼ିଆ) using the Odia script. Respond ONLY with raw JSON: {"agentSummary": "...", "progressNote": "..."}' }
+            ],
+            stream: false,
+            options: { num_predict: 400, num_ctx: 4096, temperature: 0.3, repeat_penalty: 1.15 }
+          })
+        });
+        if (retryRes.ok) {
+          const retryData = await retryRes.json();
+          const retryClean = (retryData.message?.content || '')
+            .replace(/<think>[\s\S]*?<\/think>/gi, '')
+            .replace(/^```json\s*/i, '').replace(/^```\s*/i, '').replace(/```\s*$/i, '').trim();
+          const retryParsed = JSON.parse(retryClean);
+          if (validateOdiaContent(retryParsed.agentSummary).valid) {
+            structured.agentSummary = retryParsed.agentSummary;
+            console.log('[Agent] Corrective retry produced valid Odia agentSummary');
+          }
+          if (validateOdiaContent(retryParsed.progressNote).valid) {
+            structured.progressNote = retryParsed.progressNote;
+            console.log('[Agent] Corrective retry produced valid Odia progressNote');
+          }
+        }
+      } catch (retryErr) {
+        console.warn('[Agent] Synthesis corrective retry failed:', retryErr.message);
+      }
+    }
+
+    // Safe localized recovery if model still returned English after retry
+    if (!validateOdiaContent(structured.agentSummary).valid) {
+      structured.agentSummary = 'ଆପଣଙ୍କ ପ୍ରଶ୍ନର ଅଧ୍ୟୟନ ଏବଂ ଉତ୍ତର ସମ୍ପୂର୍ଣ୍ଣ ହୋଇଛି।';
+    }
+    if (!validateOdiaContent(structured.progressNote).valid) {
+      structured.progressNote = 'ଅଧ୍ୟୟନରେ ଉତ୍ତମ ପ୍ରଗତି ଜାରି ରଖନ୍ତୁ!';
+    }
   }
 
   // Predictive pre-warming — fire and forget

@@ -30,3 +30,16 @@ data/progress.json.corrupted-*
 
 # Playwright MCP scratch
 .playwright-mcp/
+
+# Large Model Weights and Binaries (>100MB)
+models/
+*.gguf
+*.safetensors
+speed_test.bin
+
+# Local tool scratch & caches
+graphify-out/
+.gemini/
+scratch/
+scripts/llama_cpp/
+

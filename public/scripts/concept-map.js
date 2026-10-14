@@ -14,6 +14,9 @@ function closeConceptMapModal(event) {
   document.getElementById('cm-svg-wrap').style.display = 'none';
   document.getElementById('cm-loading').style.display = 'none';
   document.getElementById('cm-legend').style.display = 'none';
+  const detailEl = document.getElementById('cm-node-detail');
+  if (detailEl) detailEl.style.display = 'none';
+  if (typeof speechController !== 'undefined') speechController.stop();
 }
 
 async function generateConceptMap() {
@@ -31,7 +34,11 @@ async function generateConceptMap() {
     const res  = await fetch('/concept-map', {
       method:  'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ topic, level: levelEl.value })
+      body: JSON.stringify({
+        topic,
+        level: levelEl.value,
+        language: typeof currentLanguage !== 'undefined' ? currentLanguage : (localStorage.getItem('studybuddy-language') || 'English')
+      })
     });
     const data = await res.json();
 
@@ -142,7 +149,31 @@ function buildConceptMapSVG(data, container) {
       .on('drag', dragged)
       .on('end', dragended)
     )
-    .style('cursor', 'grab');
+    .style('cursor', 'pointer')
+    .on('click', (event, d) => {
+      const detailEl = document.getElementById('cm-node-detail');
+      if (!detailEl) return;
+      const label = (d.label || '').trim();
+      // Never speak placeholder/internal IDs like "Concept 2"
+      const isPlaceholder = /\bConcept\s+\d+\b/i.test(label) || /^n\d+$/i.test(label);
+      detailEl.innerHTML = '';
+      detailEl.style.display = 'flex';
+
+      const titleSpan = document.createElement('span');
+      titleSpan.style.fontSize = 'var(--font-size-sm)';
+      titleSpan.style.color = 'var(--text-primary)';
+      titleSpan.innerHTML = `<strong>${d.type === 'central' ? 'Topic' : 'Concept'}:</strong> ${escapeHtml(label)}`;
+      detailEl.appendChild(titleSpan);
+
+      if (!isPlaceholder && typeof speechController !== 'undefined' && typeof speechController.createSpeechControl === 'function') {
+        const speechWrap = speechController.createSpeechControl({
+          getText: () => label,
+          getLanguage: () => (typeof currentLanguage !== 'undefined' ? currentLanguage : 'English'),
+          ariaPrefix: 'concept node'
+        });
+        if (speechWrap) detailEl.appendChild(speechWrap);
+      }
+    });
 
   // Circles
   node.append('circle')

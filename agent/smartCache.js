@@ -47,22 +47,25 @@ const STOP_WORDS = new Set([
 // Key generation utilities
 // ─────────────────────────────────────────────────────────────
 
-// Normalise a raw message to a clean topic string
+// Normalise a raw message to a clean topic string (supports Unicode/Odia)
 function normaliseText(text) {
   return (text || '')
     .toLowerCase()
-    .replace(/[^a-z0-9\s]/g, '')
+    .replace(/[^\p{L}\p{N}\s]/gu, '')
     .split(/\s+/)
-    .filter(w => w.length > 1 && !STOP_WORDS.has(w))
+    .filter(w => w.length > 0 && !STOP_WORDS.has(w))
     .sort()          // sort so "acid base" and "base acid" match
     .join(' ')
     .trim();
 }
 
-// Generate a short MD5 hash key from tool + topic + level
-function makeKey(tool, topic, level) {
-  const norm = normaliseText(topic);
-  const raw  = `${tool}::${norm}::${level}`;
+const CACHE_POLICY_VERSION = 'v3_odia_policy';
+
+// Generate a short MD5 hash key from version + model + tool + topic + level + language
+function makeKey(tool, topic, level, lang = '') {
+  const model = process.env.OLLAMA_MODEL || 'default';
+  const norm  = normaliseText(topic);
+  const raw   = `${CACHE_POLICY_VERSION}::${model}::${tool}::${norm}::${level}::${(lang || 'english').toLowerCase()}`;
   return crypto.createHash('md5').update(raw).digest('hex');
 }
 
@@ -178,24 +181,26 @@ function cacheSet(key, value) {
 // Call this before any Ollama tool call.
 // Returns cached value if found, null if miss.
 // ─────────────────────────────────────────────────────────────
-function smartGet(tool, message, level) {
+function smartGet(tool, message, level, lang = '') {
   // ── Layer 1: Live taxonomy resolution (base + learned topics) ──
-  const canonical = resolveCanonicalTopicLive(message);
-  if (canonical) {
-    const key1 = makeKey(tool, canonical, level);
-    const hit1 = cacheGet(key1);
-    if (hit1) {
-      console.log(`[L1-taxonomy] ✓ ${canonical} (${tool})`);
-      trackAsk(canonical);   // increment ask count for analytics
-      return { value: hit1, key: key1, layer: 1 };
+  if (!lang || lang.toLowerCase() === 'english') {
+    const canonical = resolveCanonicalTopicLive(message);
+    if (canonical) {
+      const key1 = makeKey(tool, canonical, level, lang);
+      const hit1 = cacheGet(key1);
+      if (hit1) {
+        console.log(`[L1-taxonomy] ✓ ${canonical} (${tool})`);
+        trackAsk(canonical);
+        return { value: hit1, key: key1, layer: 1 };
+      }
     }
   }
 
   // ── Layer 2: Normalised hash (catches varied phrasing) ──
-  const key2 = makeKey(tool, message, level);
+  const key2 = makeKey(tool, message, level, lang);
   const hit2 = cacheGet(key2);
   if (hit2) {
-    console.log(`[L2-hash] ✓ ${normaliseText(message)} (${tool})`);
+    console.log(`[L2-hash] ✓ ${normaliseText(message)} (${tool}) [${lang || 'default'}]`);
     return { value: hit2, key: key2, layer: 2 };
   }
 
@@ -207,23 +212,25 @@ function smartGet(tool, message, level) {
   }
 
   // ── Layer 4: Miss — trigger taxonomy learning and caller must invoke Ollama ──
-  console.log(`[cache L4 MISS] ${normaliseText(message)} (${tool})`);
-  if (tool === 'explain' || tool === 'quiz') {
-    processCacheMiss(message, level);   // fire-and-forget taxonomy learning
+  console.log(`[cache L4 MISS] ${normaliseText(message)} (${tool}) [${lang || 'default'}]`);
+  if ((tool === 'explain' || tool === 'quiz') && (!lang || lang.toLowerCase() === 'english')) {
+    processCacheMiss(message, level);
   }
   return { value: null, key: key2, layer: 4 };
 }
 
 // Store a result and clear in-flight
-function smartSet(tool, message, level, value) {
-  const key = makeKey(tool, message, level);
+function smartSet(tool, message, level, value, lang = '') {
+  const key = makeKey(tool, message, level, lang);
   cacheSet(key, value);
 
-  // Also store under canonical key if resolvable
-  const canonical = resolveCanonicalTopic(message);
-  if (canonical) {
-    const canonicalKey = makeKey(tool, canonical, level);
-    if (canonicalKey !== key) cacheSet(canonicalKey, value);
+  // Also store under canonical key if resolvable and English
+  if (!lang || lang.toLowerCase() === 'english') {
+    const canonical = resolveCanonicalTopic(message);
+    if (canonical) {
+      const canonicalKey = makeKey(tool, canonical, level, lang);
+      if (canonicalKey !== key) cacheSet(canonicalKey, value);
+    }
   }
 
   // Clear in-flight

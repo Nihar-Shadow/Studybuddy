@@ -129,6 +129,10 @@ try {
       } else if (event.error === 'service-not-allowed') {
         errorMessage = 'Voice input not available in your browser.';
         screenReaderMsg = 'Voice input service not available';
+      } else if (event.error === 'language-not-supported') {
+        const langName = (typeof currentLanguage !== 'undefined' ? currentLanguage : 'Selected language');
+        errorMessage = `${langName} voice recognition is not supported in this browser. You can type your question in the text box.`;
+        screenReaderMsg = `${langName} voice recognition not supported by browser. Text input remains available.`;
       } else {
         errorMessage = `Voice error: ${event.error}`;
         screenReaderMsg = `Voice recognition error: ${event.error}`;
@@ -300,9 +304,21 @@ function hideVoiceStatusBar() {
 }
 
 function getVoiceLanguage() {
-  const levelEl = document.getElementById('level');
-  // Default to en-US; could extend with more logic later
-  return 'en-US';
+  const lang = (typeof currentLanguage !== 'undefined' ? currentLanguage : (localStorage.getItem('studybuddy-language') || 'English'));
+  const voiceMap = {
+    'Odia':       'or-IN',
+    'Hindi':      'hi-IN',
+    'Spanish':    'es-ES',
+    'French':     'fr-FR',
+    'Arabic':     'ar-SA',
+    'Mandarin':   'zh-CN',
+    'Portuguese': 'pt-BR',
+    'Bengali':    'bn-IN',
+    'Tamil':      'ta-IN',
+    'Swahili':    'sw-KE',
+    'English':    'en-US'
+  };
+  return voiceMap[lang] || 'en-US';
 }
 
 function announceToScreenReader(message) {

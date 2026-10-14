@@ -277,16 +277,28 @@ async function sendToChat(message) {
         renderFormattedFallback(fullStreamedText);
       }
 
+      // ── Next-study → contextual practice CTA ──
+      injectPracticeCTA(finalData);
+
+      if (finalData && typeof updateAIStatusBadge === 'function') {
+        updateAIStatusBadge(finalData);
+      }
+
       const replyText = finalData ? (finalData.reply || fullStreamedText) : fullStreamedText;
       history.push({ role: 'user', content: message });
       history.push({ role: 'assistant', content: replyText });
     }
   } catch (err) {
+    console.error('[agent.js error]', err);
     // Clean up any loading states
     hideFactsLoading();
     if (estimateBadge) estimateBadge.triggerShrinkFade();
     if (countdownInterval) clearInterval(countdownInterval);
-    alert('⚠️ Could not reach StudyBuddy. Is the server running?');
+    if (err instanceof TypeError || err.message?.includes('render')) {
+      alert(`⚠️ Display Error: ${err.message}`);
+    } else {
+      alert('⚠️ Could not reach StudyBuddy. Is the server running?');
+    }
   }
 }
 
@@ -353,6 +365,9 @@ async function sendToAgent(message) {
       addBubble(escapeHtml(data.rawReply), 'bot');
     }
 
+    // Next-study → contextual practice/review/introduce CTA
+    injectPracticeCTA(data);
+
     // Add to history
     history.push({ role: 'user',      content: message });
     history.push({ role: 'assistant', content: data.rawReply });
@@ -410,8 +425,30 @@ function renderToolBadges(toolCallLog) {
 }
 
 function renderAgentResponse(s) {
+  console.log('[Diagnostic: Final Rendering] renderAgentResponse called with language:', typeof currentLanguage !== 'undefined' ? currentLanguage : 'unknown');
+
+  // 0. Render agent summary card if present
+  if (s.agentSummary) {
+    const summaryCard = document.createElement('div');
+    summaryCard.className = 'agent-summary-card';
+    summaryCard.style.cssText = `
+      align-self: flex-start;
+      max-width: 78%;
+      padding: 10px 14px;
+      border-radius: 10px;
+      background: var(--surface, #fff);
+      border: 1px solid var(--border, #E5E7EB);
+      font-size: 14px;
+      line-height: 1.5;
+      margin-bottom: 6px;
+      animation: fadeInUp 0.25s ease forwards;
+    `;
+    summaryCard.textContent = s.agentSummary;
+    chatEl.appendChild(summaryCard);
+  }
+
   // 1. Render explanation if present (reuse existing renderStructuredResponse)
-  if (s.explanation && s.explanation.steps && s.explanation.steps.length > 0) {
+  if (s.explanation && ((s.explanation.steps && s.explanation.steps.length > 0) || s.explanation.answer)) {
     renderStructuredResponse(s.explanation);
   }
 
@@ -547,4 +584,441 @@ async function resetProgress() {
   await fetch('/progress', { method: 'DELETE' });
   const msgBubble = addBubble('Progress has been reset.');
   msgBubble.classList.add('system-msg');
+}
+
+// ── Contextual Next-Study Decision CTA ───────────────────────────────────────────
+// Injected below tutor response and inline MCQ submission when backend signals
+// action=practice | review | introduce for the active topic & concept.
+// Reuses existing /practice/next, /practice/submit, and tutor pipeline.
+// No new learning logic — backend remains the single source of truth.
+
+function shouldShowPracticeCTA(structured) {
+  if (!structured) return false;
+  const ns = structured.nextStudy;
+  if (!ns) return false;
+  if (!structured.knowledgeFound) return false;
+  if (ns.action !== 'practice' && ns.action !== 'review' && ns.action !== 'introduce') return false;
+  if (ns.topic !== structured.currentTopic || ns.concept !== structured.currentConcept) return false;
+  return true;
+}
+
+const CONCEPT_LABELS = {
+  photosynthesis: {
+    name: 'ଆଲୋକ ସଂଶ୍ଳେଷଣ',
+    en: 'Photosynthesis',
+    concepts: {
+      oxygen_role: { od: 'ଆଲୋକ ସଂଶ୍ଳେଷଣରେ ଅମ୍ଳଜାନର ଭୂମିକା', en: 'role of oxygen in photosynthesis' },
+      carbon_dioxide_role: { od: 'ଆଲୋକ ସଂଶ୍ଳେଷଣରେ ଅଙ୍ଗାରକାମ୍ଳର ଭୂମିକା', en: 'role of carbon dioxide in photosynthesis' },
+      carbon_dioxide: { od: 'ଆଲୋକ ସଂଶ୍ଳେଷଣରେ ଅଙ୍ଗାରକାମ୍ଳ', en: 'role of carbon dioxide in photosynthesis' },
+      sunlight: { od: 'ଆଲୋକ ସଂଶ୍ଳେଷଣରେ ସୂର୍ଯ୍ୟାଲୋକର ଭୂମିକା', en: 'role of sunlight in photosynthesis' },
+      water: { od: 'ଆଲୋକ ସଂଶ୍ଳେଷଣରେ ଜଳର ଭୂମିକା', en: 'role of water in photosynthesis' },
+      chlorophyll: { od: 'ଆଲୋକ ସଂଶ୍ଳେଷଣରେ ପତ୍ରହରିତ', en: 'chlorophyll in photosynthesis' },
+      chloroplast: { od: 'ହରିତକଣିକା', en: 'chloroplast in photosynthesis' },
+      stomata: { od: 'ପତ୍ରରନ୍ଧ୍ର', en: 'stomata in photosynthesis' }
+    }
+  },
+  respiration: {
+    name: 'ଶ୍ୱାସକ୍ରିୟା',
+    en: 'Respiration',
+    concepts: {
+      plant_respiration: { od: 'ଉଦ୍ଭିଦ ଶ୍ୱାସକ୍ରିୟା', en: 'plant respiration' },
+      human_breathing: { od: 'ମଣିଷର ଶ୍ୱାସକ୍ରିୟା', en: 'human breathing' },
+      inhalation_oxygen: { od: 'ଶ୍ୱାସକ୍ରିୟାରେ ଅମ୍ଳଜାନ ଗ୍ରହଣ', en: 'inhalation of oxygen in respiration' },
+      exhalation_co2: { od: 'ଶ୍ୱାସକ୍ରିୟାରେ ଅଙ୍ଗାରକାମ୍ଳ ତ୍ୟାଗ', en: 'exhalation of carbon dioxide in respiration' }
+    }
+  },
+  cell: {
+    name: 'କୋଷ',
+    en: 'Cell',
+    concepts: {
+      mitochondria_powerhouse: { od: 'କୋଷର ଶକ୍ତି କେନ୍ଦ୍ର ମାଇଟୋକଣ୍ଡ୍ରିଆ', en: 'mitochondria powerhouse of cell' },
+      cell_wall: { od: 'କୋଷ ଭିତ୍ତି', en: 'cell wall' },
+      nucleus: { od: 'କୋଷର ନ୍ୟୁକ୍ଲିଅସ', en: 'cell nucleus' }
+    }
+  },
+  states_of_matter: {
+    name: 'ପଦାର୍ଥର ଅବସ୍ଥା',
+    en: 'States of Matter',
+    concepts: {
+      heating_water: { od: 'ଗରମ ଜଳର ଅବସ୍ଥା ପରିବର୍ତ୍ତନ', en: 'heating water and changes of state' },
+      boiling_point: { od: 'ଜଳର ସ୍ଫୁଟନାଙ୍କ', en: 'boiling point of water' },
+      melting_point: { od: 'ବରଫର ଗଳନାଙ୍କ', en: 'melting point of ice' },
+      water_states: { od: 'ଜଳର ତିନୋଟି ଅବସ୍ଥା', en: 'three states of water' }
+    }
+  },
+  force_and_motion: {
+    name: 'ବଳ ଓ ଗତି',
+    en: 'Force and Motion',
+    concepts: {
+      inertia_first_law: { od: 'ଜଡ଼ତା ଏବଂ ଗତିର ପ୍ରଥମ ନିୟମ', en: 'inertia and first law of motion' },
+      momentum_second_law: { od: 'ସଂବେଗ ଏବଂ ଗତିର ଦ୍ୱିତୀୟ ନିୟମ', en: 'momentum and second law of motion' },
+      action_reaction_third_law: { od: 'ପ୍ରତିକ୍ରିୟା ଏବଂ ଗତିର ତୃତୀୟ ନିୟମ', en: 'action reaction third law of motion' }
+    }
+  },
+  evaporation: {
+    name: 'ବାଷ୍ପୀଭବନ',
+    en: 'Evaporation',
+    concepts: {
+      cooling_effect: { od: 'ବାଷ୍ପୀଭବନ ଦ୍ୱାରା ଶୀତଳତା', en: 'cooling effect of evaporation' },
+      liquid_to_gas: { od: 'ତରଳରୁ ବାଷ୍ପରେ ପରିଣତ', en: 'liquid to gas evaporation' }
+    }
+  },
+  water_cycle: {
+    name: 'ଜଳଚକ୍ର',
+    en: 'Water Cycle',
+    concepts: {
+      condensation_clouds: { od: 'ଘନୀଭବନ ଏବଂ ମେଘ ସୃଷ୍ଟି', en: 'condensation and clouds in water cycle' },
+      precipitation_rain: { od: 'ବର୍ଷା ଏବଂ ଅବକ୍ଷେପଣ', en: 'precipitation and rain in water cycle' },
+      evaporation_stage: { od: 'ଜଳଚକ୍ରରେ ବାଷ୍ପୀଭବନ', en: 'evaporation stage in water cycle' }
+    }
+  },
+  matter: {
+    name: 'ପଦାର୍ଥ',
+    en: 'Matter',
+    concepts: {
+      particles_atoms: { od: 'ପଦାର୍ଥର କଣିକା ଓ ଅଣୁ', en: 'particles and atoms of matter' },
+      mass_and_space: { od: 'ପଦାର୍ଥର ବସ୍ତୁତ୍ୱ ଓ ସ୍ଥାନ', en: 'mass and space of matter' }
+    }
+  }
+};
+
+function getIntroduceQuery(topic, concept, isOdiaUI) {
+  const topInfo = CONCEPT_LABELS[topic];
+  const conceptInfo = topInfo?.concepts?.[concept];
+  if (isOdiaUI) {
+    const term = conceptInfo?.od || topInfo?.name || topic;
+    return `${term} ବିଷୟରେ ସହଜ ଭାବରେ ବୁଝାଅ।`;
+  } else {
+    const term = conceptInfo?.en || topInfo?.en || topic;
+    return `Please explain ${term} in a simple and concise way.`;
+  }
+}
+
+function injectPracticeCTA(finalData) {
+  const s  = finalData?.structured;
+  if (!shouldShowPracticeCTA(s)) return;
+  const ns = s.nextStudy;
+
+  if (typeof chatEl !== 'undefined' && chatEl) {
+    chatEl.querySelectorAll('.next-study-card, .practice-cta').forEach(el => {
+      if (!el.closest('.inline-mcq')) el.remove();
+    });
+  }
+
+  const isOdiaUI = typeof currentLanguage !== 'undefined' && currentLanguage === 'Odia';
+
+  let titleText = '';
+  let descText = '';
+  let btnLabel = '';
+
+  if (ns.action === 'practice') {
+    titleText = isOdiaUI ? '🧠 ଏବେ କ\'ଣ କରିବା?' : '🧠 What should we do next?';
+    if (ns.reason === 'partially_understood') {
+      descText = isOdiaUI
+        ? '🧠 ତୁମେ ଏହି ବିଷୟଟି ବିଷୟରେ ପଚାରିଛ। ଆହୁରି ଭଲଭାବେ ବୁଝିବା ପାଇଁ ଗୋଟିଏ ପ୍ରଶ୍ନ କରିବା।'
+        : 'You asked about this topic. Let\'s practice a question to understand it better.';
+    } else {
+      descText = isOdiaUI
+        ? 'ଏହି ବିଷୟଟି ଆହୁରି ଭଲଭାବେ ବୁଝିବା ପାଇଁ ଅଭ୍ୟାସ କରିବା।'
+        : 'Let\'s practice a question to strengthen your understanding.';
+    }
+    btnLabel = isOdiaUI ? '📝 ଗୋଟିଏ ପ୍ରଶ୍ନ କରିବା' : '📝 Practice a question';
+  } else if (ns.action === 'review') {
+    titleText = isOdiaUI ? '🔄 ପୁଣିଥରେ ଅଭ୍ୟାସ କରିବା' : '🔄 Review and practice again';
+    if (ns.reason === 'practice_incorrect') {
+      descText = isOdiaUI
+        ? 'ଏହି ପ୍ରଶ୍ନର ଉତ୍ତରଟି ଭୁଲ ହୋଇଛି। ଚାଲ, ଏହି ଧାରଣାଟିକୁ ପୁଣିଥରେ ଅଭ୍ୟାସ କରିବା।'
+        : 'This answer was incorrect. Let\'s practice this concept again.';
+    } else if (ns.reason === 'recent_confusion') {
+      descText = isOdiaUI
+        ? 'ତୁମେ ଏହି ବିଷୟଟିକୁ ପୁଣିଥରେ ପଚାରିଛ। ଚାଲ, ଏହାକୁ ଆଉଥରେ ଅଭ୍ୟାସ କରିବା।'
+        : 'You asked about this topic again. Let\'s practice it once more.';
+    } else if (ns.reason === 'fallback_used' || ns.reason === 'needed_repair') {
+      descText = isOdiaUI
+        ? 'ଏହି ବିଷୟଟିକୁ ଆଉଥରେ ଭଲଭାବେ ଅଭ୍ୟାସ କରିବା।'
+        : 'Let\'s practice this topic again to understand it clearly.';
+    } else {
+      descText = isOdiaUI
+        ? 'ତୁମର ଉତ୍ତରରେ ଟିକେ ଭୁଲ ହୋଇଛି। ଆଉଥରେ ଅଭ୍ୟାସ କଲେ ଏହା ଭଲଭାବେ ବୁଝିପାରିବ।'
+        : 'Let\'s review and practice this concept again to build confidence.';
+    }
+    btnLabel = isOdiaUI ? '🔄 ପୁଣିଥରେ ଅଭ୍ୟାସ କରିବା' : '🔄 Practice again';
+  } else if (ns.action === 'introduce') {
+    titleText = isOdiaUI ? '📚 ପ୍ରଥମେ ଏହାକୁ ଶିଖିବା' : '📚 Learn this first';
+    descText = isOdiaUI
+      ? 'ଚାଲ, ଏହି ବିଷୟଟିକୁ ସହଜ ଭାବରେ ବୁଝିବା।'
+      : 'Let\'s learn this topic step-by-step in a simple way.';
+    btnLabel = isOdiaUI ? '📖 ଶିଖିବା ଆରମ୍ଭ କର' : '📖 Start learning';
+  }
+
+  const card = document.createElement('div');
+  card.className = 'next-study-card';
+
+  const titleEl = document.createElement('div');
+  titleEl.className = 'next-study-card__title';
+  titleEl.textContent = titleText;
+  card.appendChild(titleEl);
+
+  const descEl = document.createElement('p');
+  descEl.className = 'next-study-card__text';
+  descEl.textContent = descText;
+  card.appendChild(descEl);
+
+  const cta = document.createElement('button');
+  cta.className = 'next-study-card__btn practice-cta';
+  cta.textContent = btnLabel;
+  cta.setAttribute('aria-label', btnLabel);
+  card.appendChild(cta);
+
+  if (typeof chatEl !== 'undefined' && chatEl) {
+    chatEl.appendChild(card);
+    scrollToBottom();
+  }
+
+  cta.addEventListener('click', async () => {
+    cta.disabled = true;
+    cta.textContent = isOdiaUI ? '⏳ ଲୋଡ ହେଉଛି...' : '⏳ Loading...';
+
+    if (ns.action === 'introduce') {
+      card.remove();
+      const query = getIntroduceQuery(ns.topic, ns.concept, isOdiaUI);
+      if (typeof addBubble === 'function') addBubble(query, 'user');
+      if (typeof sendToChat === 'function') await sendToChat(query);
+      return;
+    }
+
+    try {
+      const r = await fetch('/practice/next', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: { action: ns.action, topic: ns.topic, concept: ns.concept },
+          language: currentLanguage,
+          excludeQuestion: s.lastQuestion || null
+        })
+      });
+      if (!r.ok) throw new Error('practice/next failed');
+      const data = await r.json();
+
+      card.remove();
+
+      if (data.exhausted) {
+        const revCard = document.createElement('div');
+        revCard.className = 'practice-completed-msg';
+        const explText = data.explanation || data.message || '';
+        revCard.innerHTML = `<strong>${isOdiaUI ? '📖 ବିଷୟ ସାରାଂଶ:' : '📖 Review Summary:'}</strong> <p>${explText}</p>`;
+        if (typeof chatEl !== 'undefined' && chatEl) {
+          chatEl.appendChild(revCard);
+          scrollToBottom();
+        }
+        return;
+      }
+
+      const { activity } = data;
+      if (!activity) throw new Error('No activity returned');
+
+      console.log('[Practice] /practice/next activity:', JSON.stringify(activity));
+      renderInlineMCQ(activity);
+    } catch (e) {
+      cta.disabled = false;
+      cta.textContent = btnLabel;
+      toast(isOdiaUI ? 'ପ୍ରଶ୍ନ ଲୋଡ ହେଲା ନାହିଁ। ପୁନଃ ଚେଷ୍ଟା କରନ୍ତୁ।' : 'Could not load question. Try again.', 'error');
+    }
+  });
+}
+
+function getActivityFingerprint(activity) {
+  if (!activity) return '';
+  if (activity.id) return activity.id;
+  const top = activity.topic || '';
+  const con = activity.concept || '';
+  const q = (activity.question || '').replace(/\s+/g, ' ').trim();
+  return `${top}:${con}:${q}`;
+}
+
+function renderInlineMCQ(activity) {
+  if (!activity) return;
+  const fp = getActivityFingerprint(activity);
+  const safeId = fp.replace(/[^a-zA-Z0-9_\u0b00-\u0b7f:-]/g, '_');
+
+  if (typeof chatEl !== 'undefined' && chatEl) {
+    const existing = chatEl.querySelector(`.inline-mcq[data-activity-id="${safeId}"]`);
+    if (existing) {
+      console.warn('[Practice] Duplicate activity detected, skipping render:', fp);
+      existing.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      return;
+    }
+  }
+
+  const isOdiaUI = typeof currentLanguage !== 'undefined' && currentLanguage === 'Odia';
+
+  const card = document.createElement('div');
+  card.className = 'inline-mcq';
+  card.setAttribute('data-activity-id', safeId);
+
+  const qEl = document.createElement('p');
+  qEl.className = 'inline-mcq__question';
+  qEl.textContent = activity.question;
+  card.appendChild(qEl);
+
+  if (typeof speechController !== 'undefined' && typeof speechController.createSpeechControl === 'function') {
+    const qSpeech = speechController.createSpeechControl({
+      getText: () => activity.question,
+      getLanguage: () => (typeof currentLanguage !== 'undefined' ? currentLanguage : 'English'),
+      ariaPrefix: 'practice question'
+    });
+    if (qSpeech) card.appendChild(qSpeech);
+  }
+
+  const opts = document.createElement('div');
+  opts.className = 'inline-mcq__options';
+
+  (activity.options || []).forEach(opt => {
+    const btn = document.createElement('button');
+    btn.className = 'inline-mcq__option';
+    btn.textContent = opt;
+    btn.addEventListener('click', () => submitInlineMCQ(activity, opt, card));
+    opts.appendChild(btn);
+  });
+
+  card.appendChild(opts);
+  if (typeof chatEl !== 'undefined' && chatEl) {
+    chatEl.appendChild(card);
+    scrollToBottom();
+  }
+}
+
+async function submitInlineMCQ(activity, selectedOption, card) {
+  const isOdiaUI = typeof currentLanguage !== 'undefined' && currentLanguage === 'Odia';
+
+  // Disable all option buttons immediately
+  card.querySelectorAll('.inline-mcq__option').forEach(b => { b.disabled = true; });
+
+  const reqBody = { activity, studentAnswer: selectedOption };
+  console.log('[Practice] POST /practice/submit', JSON.stringify(reqBody).slice(0, 300));
+  console.log('[Practice] submit activity:', JSON.stringify(activity));
+
+  let r;
+  try {
+    r = await fetch('/practice/submit', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(reqBody)
+    });
+  } catch (networkErr) {
+    console.error('[Practice] Network error calling /practice/submit:', networkErr);
+    card.querySelectorAll('.inline-mcq__option').forEach(b => { b.disabled = false; });
+    toast(isOdiaUI ? 'ନେଟୱାର୍କ ତ୍ରୁଟି। ପୁନଃ ଚେଷ୍ଟା କରନ୍ତୁ।' : 'Network error. Please try again.', 'error');
+    return;
+  }
+
+  console.log('[Practice] /practice/submit status:', r.status);
+
+  if (!r.ok) {
+    const errText = await r.text().catch(() => '(unreadable)');
+    console.error('[Practice] /practice/submit failed:', r.status, errText);
+    card.querySelectorAll('.inline-mcq__option').forEach(b => { b.disabled = false; });
+    toast(isOdiaUI ? 'ଦାଖଲ ବିଫଳ ହେଲା। ପୁନଃ ଚେଷ୍ଟା କରନ୍ତୁ।' : 'Submit failed. Please try again.', 'error');
+    return;
+  }
+
+  let result;
+  try {
+    result = await r.json();
+    console.log('[Practice] submit response:', JSON.stringify(result));
+  } catch (parseErr) {
+    console.error('[Practice] /practice/submit JSON parse error:', parseErr);
+    card.querySelectorAll('.inline-mcq__option').forEach(b => { b.disabled = false; });
+    toast(isOdiaUI ? 'ଅଜ୍ଞାତ ଉତ୍ତର। ପୁନଃ ଚେଷ୍ଟା କରନ୍ତୁ।' : 'Invalid response. Please try again.', 'error');
+    return;
+  }
+
+  // /practice/submit returns { practiceResult, learningState, nextStudy }
+  const pr = result.practiceResult;
+  console.log('[Practice] /practice/submit response:', JSON.stringify({ correct: pr?.correct, evidence: pr?.evidence, nextStudy: result.nextStudy }));
+
+  if (!pr) {
+    console.error('[Practice] Missing practiceResult in response:', result);
+    card.querySelectorAll('.inline-mcq__option').forEach(b => { b.disabled = false; });
+    toast(isOdiaUI ? 'ଅଜ୍ଞାତ ଉତ୍ତର।' : 'Unexpected response.', 'error');
+    return;
+  }
+
+  // Highlight correct / incorrect options
+  card.querySelectorAll('.inline-mcq__option').forEach(b => {
+    if (b.textContent === activity.correctAnswer) {
+      b.classList.add('inline-mcq__option--correct');
+    } else if (b.textContent === selectedOption && !pr.correct) {
+      b.classList.add('inline-mcq__option--wrong');
+    }
+  });
+
+  // Show feedback
+  const fb = document.createElement('div');
+  fb.className = 'inline-mcq__feedback';
+  const icon = pr.correct ? '✅' : '❌';
+  const verdict = pr.correct
+    ? (isOdiaUI ? 'ସଠିକ୍!' : 'Correct!')
+    : (isOdiaUI ? 'ଭୁଲ।' : 'Incorrect.');
+  fb.innerHTML = `<strong>${icon} ${verdict}</strong>`;
+  if (pr.feedback) {
+    const exp = document.createElement('p');
+    exp.textContent = pr.feedback;
+    fb.appendChild(exp);
+  }
+
+  if (typeof speechController !== 'undefined' && typeof speechController.createSpeechControl === 'function') {
+    const feedbackText = `${verdict}. ${pr.feedback || ''}`.trim();
+    const fbSpeech = speechController.createSpeechControl({
+      getText: () => feedbackText,
+      getLanguage: () => (typeof currentLanguage !== 'undefined' ? currentLanguage : 'English'),
+      ariaPrefix: 'practice feedback'
+    });
+    if (fbSpeech) fb.appendChild(fbSpeech);
+  }
+
+  card.appendChild(fb);
+
+  // Clean up any stale CTA card in chat
+  if (typeof chatEl !== 'undefined' && chatEl) {
+    chatEl.querySelectorAll('.next-study-card, .practice-cta').forEach(el => el.remove());
+  }
+
+  // Requirement C: Correct Answer -> Concept completed, show completion message and NO CTA
+  if (pr.correct) {
+    const comp = document.createElement('div');
+    comp.className = 'practice-completed-msg';
+    comp.innerHTML = isOdiaUI
+      ? '<span>🎉 ବହୁତ ବଢ଼ିଆ! ଏହି ଧାରଣାଟି ସଫଳତାର ସହ ଅଭ୍ୟାସ ହୋଇଗଲା।</span>'
+      : '<span>🎉 Great job! Concept practiced successfully.</span>';
+    card.appendChild(comp);
+    scrollToBottom();
+    return;
+  }
+
+  scrollToBottom();
+
+  // Requirement A: Wrong Answer -> Show ONE Review CTA with lastQuestion passed
+  if (result.nextStudy && (result.nextStudy.action === 'review' || result.nextStudy.action === 'practice')) {
+    injectPracticeCTA({
+      structured: {
+        knowledgeFound: true,
+        currentTopic: activity.topic,
+        currentConcept: activity.concept,
+        nextStudy: result.nextStudy,
+        lastQuestion: activity.question
+      }
+    });
+  }
+}
+
+if (typeof module !== 'undefined' && module.exports) {
+  module.exports = {
+    shouldShowPracticeCTA,
+    injectPracticeCTA,
+    CONCEPT_LABELS,
+    getIntroduceQuery,
+    getActivityFingerprint,
+    renderInlineMCQ
+  };
 }

@@ -1,0 +1,1039 @@
+================================================================================
+STUDYBUDDY: COMPLETE REPOSITORY REVERSE-ENGINEERING & END-TO-END PROJECT MASTERY
+================================================================================
+Project: StudyBuddy (studybuddy@1.0.0)
+Event: Nextech 2.0 (Nirmit) Agentic AI Hackathon
+Problem Statement: Agentic EdTech for Regional Language & Geography
+Target Persona: Sunita (Class 9, Government School, Southern Odisha)
+Local Environment: Node.js (CommonJS), Express 4.22.1, Ollama (localhost:11434)
+Verified Date: October 14, 2026
+Authoritative Repository Path: c:\studybuddy-main
+================================================================================
+
+
+--------------------------------------------------------------------------------
+TABLE OF CONTENTS
+--------------------------------------------------------------------------------
+1. Executive Overview & Repository Discovery
+2. Top-Down Technology Stack Analysis
+3. Complete System Architecture & Flow Diagrams
+4. File-by-File Module Deep Dive & Code Walkthrough
+5. Complete End-to-End Execution Traces
+6. Exhaustive API & Network Communication Inventory
+7. Data Storage, Schemas, and State Flow Internals
+8. AI/ML Inference, Model Routing & Safety Guardrail Pipeline
+9. Authentication, Security, Role Controls & Error Handling
+10. Testing, Debugging, and Running Guide (38 Test Suites)
+11. Data Structures, Algorithms & Pedagogical Business Logic
+12. Design Decisions, Architectural Trade-Offs & Code Quality Audit
+13. Technical Viva & Interview Preparation Question Bank (80 Q&As)
+14. Final Project Mastery Summary & 5-Minute Pitch
+
+
+================================================================================
+SECTION 1: EXECUTIVE OVERVIEW & REPOSITORY DISCOVERY
+================================================================================
+
+1.1 What StudyBuddy Does
+StudyBuddy is an Odia-first, local-first agentic tutoring platform built for
+Class 9 students in rural, low-connectivity regions of Odisha, India (modeled
+after the persona "Sunita"). Sunita speaks Kui or Odia at home, attends an
+Odia-medium government school, and only has access to a low-end shared smartphone
+for approximately 1 hour in the evening over weak or intermittent 2G/3G connectivity.
+
+Existing EdTech tools fail Sunita because they:
+- Demand high-bandwidth cloud connectivity for video streams and API calls.
+- Default to English or Hindi, lacking Odia scientific vocabulary.
+- Operate as generic chatbots without memory of what the student has mastered or
+  struggled with.
+
+StudyBuddy solves this by running 100% locally on a community laptop or classroom
+hub (Ollama + Express) requiring zero cloud subscriptions or API keys. It accepts
+questions in Odia (native script or transliteration) and English via text or voice,
+routes Odia to a dedicated 2B model (dhee-odia) and English to qwen3:4b, validates
+every answer against a 2,400-line Odia scientific language policy, tracks concept
+mastery using the SM-2 spaced repetition algorithm, and streams live telemetry to
+a teacher dashboard via Server-Sent Events (SSE).
+
+1.2 Repository Directory Inventory
+c:\studybuddy-main\
+├── server.js                      Express entry point, security validation, SSE hub, warmup
+├── package.json                   Manifest: 7 production dependencies, CommonJS
+├── PRD.md                         Product Requirements Document
+├── progress.md                    Comprehensive progress report against PRD
+├── requirements.md                Formal requirements traceability matrix
+│
+├── agent/                         Core Autonomous Engine & State Store
+│   ├── agentLoop.js               runParallelAgent planner & runAgentLoop deterministic fallback
+│   ├── dynamicTaxonomy.js         Runtime topic learner & keyword trie builder
+│   ├── models.js                  Ollama HTTP client, language router (dhee-odia vs qwen3:4b)
+│   ├── progressStore.js           Student profile database, SM-2 algorithm, atomic JSON writes
+│   ├── smartCache.js              4-layer cache (memory, in-flight, disk JSON, pre-warm)
+│   ├── taxonomy.js                Class 9 curriculum concepts, sub-concepts, and keywords
+│   ├── tools.js                   6 executable tools (explain, quiz, track, suggest, socratic, map)
+│   └── trie.js                    Prefix search trie data structure for O(K) keyword lookups
+│
+├── lib/                           Domain Logic, Knowledge Bases & Pedagogical Policy
+│   ├── class9Knowledge.js         1,433 lines: Odisha SCERT Class 9 syllabus verified facts & terms
+│   ├── curriculumKnowledge.js     Topic dependency graph & pre-requisite relationships
+│   ├── helpers.js                 Model warmup routines, prompt sanitizers, text extractors
+│   ├── languagePolicy.js          2,400+ lines: Odia script detector, term validator, repair engine
+│   ├── llmProvider.js             Low-level Ollama client with retry and timeout wrappers
+│   ├── masteryAgent.js            Student learning objective evaluator
+│   ├── parseJSON.js               Resilient JSON parser (handles markdown, trailing commas)
+│   ├── structuredTutor.js         3-tier explanation builder (beginner, intermediate, advanced)
+│   ├── studentLearningState.js    Per-student concept confidence state machine (unknown/partial/understood)
+│   └── targetedPractice.js        Remedial practice questions generator for identified gaps
+│
+├── middleware/                    Express Request Pipeline
+│   ├── devTiming.js               Latency, CPU, and heap memory tracking for dev panel
+│   ├── pwa.js                     MIME type enforcement and Service Worker cache headers
+│   └── upload.js                  Multer configuration and image upload validation
+│
+├── public/                        Client-Side PWA Frontend (Zero Frameworks)
+│   ├── index.html                 Student chat, quiz modal, concept map, audio controls
+│   ├── login.html                 4-digit PIN authentication portal
+│   ├── teacher.html               Live SSE teacher analytics dashboard
+│   ├── taxonomy-admin.html        Teacher curriculum management & CSV upload UI
+│   ├── reports.html               Student learning report viewer & PDF export UI
+│   ├── sw.js                      Service Worker: precaches shell assets (cache: studybuddy-v7)
+│   ├── manifest.json              PWA installation manifest
+│   ├── scripts/                   Client controllers (agent.js, chat.js, speech.js, voice.js, etc.)
+│   └── styles/                    Custom CSS design system (variables, chat, layout, dark theme)
+│
+├── routes/                        Express REST & Streaming Endpoints
+│   ├── admin.js                   CSV curriculum upload, taxonomy export, PDF report generator
+│   ├── agent.js                   POST /agent: autonomous multi-tool execution endpoint
+│   ├── auth.js                    POST /login, /logout, /me, session role guards
+│   ├── chat.js                    POST /chat: streaming SSE doubt-clearing pipeline
+│   ├── conceptMap.js              POST /concept-map: generates D3 graph nodes and links
+│   ├── dev.js                     /dev/cache-stats, /dev/timing telemetry endpoints
+│   ├── progress.js                GET /progress, /due-reviews, /streak
+│   ├── quiz.js                    POST /quiz, /quiz/submit: MCQ generation and grading
+│   └── socratic.js                POST /socratic: multi-turn guided inquiry loop
+│
+├── data/                          Flat-File Persistent JSON Datastores
+│   ├── cache.json                 Persisted LLM prompt-response cache
+│   ├── progress.json              Student records, quiz logs, SM-2 schedules
+│   └── taxonomy_learned.json      Dynamically extracted curriculum concepts
+│
+└── tests/                         38 automated test suites (unit, regression, live Ollama E2E)
+
+
+================================================================================
+SECTION 2: TOP-DOWN TECHNOLOGY STACK ANALYSIS
+================================================================================
+
+2.1 Presentation Layer: Vanilla Web Stack
+- Implementation: Semantic HTML5, Vanilla CSS3, Vanilla ES6+ JavaScript.
+- Why Used: Low-end Android devices (1GB-2GB RAM) experience massive garbage
+  collection stuttering and memory thrashing when parsing multi-megabyte React or
+  Next.js bundles. The entire StudyBuddy frontend is under 200KB uncompressed,
+  enabling instantaneous rendering on low-tier hardware.
+- Key Files:
+  - public/index.html: Main student app shell.
+  - public/styles/variables.css: HSL-tailored color tokens, dark/light theme variables.
+  - public/styles/layout.css: Responsive mobile-first flexbox/grid layout.
+  - public/vendor/d3.min.js: D3.js v7 for force-directed concept graphs.
+  - public/vendor/chart.umd.min.js: Chart.js for real-time teacher analytics.
+
+2.2 Frontend Client Architecture & Speech
+- Client Controllers:
+  - public/scripts/chat.js: Form submit interceptor, auto-scroll, message injection.
+  - public/scripts/agent.js: SSE stream reader, thinking indicator, tool badges.
+  - public/scripts/speech.js (970 lines): Production-tested Web Speech API TTS
+    controller. Maps Odia to or-IN, strips markdown before speaking, handles word
+    boundaries, and provides fallback handling.
+  - public/scripts/voice.js: Web Speech STT controller with microphone audio waveform
+    visualizer.
+  - public/sw.js: Service Worker precaching shell assets (cache name: studybuddy-v7).
+    Guarantees the app shell loads when disconnected from the hub.
+
+2.3 Backend API Layer: Node.js & Express 4.22.1
+- Implementation: Express 4.22.1 over Node.js (CommonJS).
+- Why Used: Non-blocking asynchronous I/O is ideal for holding multiple long-lived
+  Server-Sent Events (SSE) connections with near-zero memory footprint.
+- Selective Gzip Compression:
+  In server.js (lines 71-80), compression({ level: 6, threshold: 1024 }) is configured
+  to compress responses >1KB. Crucially, paths in SSE_PATHS (['/chat', '/api/events'])
+  are explicitly excluded. Standard gzip buffers chunks until a block size is reached;
+  excluding SSE prevents buffering and delivers real-time token streaming.
+
+2.4 AI/ML Inference Layer: Local Ollama (Port 11434)
+- Engine: Ollama v0.35.0 running on localhost:11434.
+- Dual-Model Local Routing (agent/models.js):
+  - dhee-odia:latest (1.8 GB, 2B Qwen-based): Pre-trained on Odia linguistic corpora.
+    Handles all queries containing Odia Unicode (\u0b00-\u0b7f) or Odia language selection.
+  - qwen3:4b (2.5 GB): High-capacity reasoning model. Handles English/Hindi questions,
+    complex multi-tool agent planning, and structured JSON generation.
+- Keep-Alive Optimization: OLLAMA_KEEP_ALIVE=60m keeps models resident in GPU/VRAM to
+  eliminate 10-second cold-load latencies during live student sessions.
+
+2.5 Data & Persistence Layer: Atomic Flat-File JSON
+- Files: data/progress.json, data/cache.json, data/taxonomy_learned.json.
+- Implementation (agent/progressStore.js):
+  - Atomic Disk Writes: Data is written to a temporary file (progress.json.tmp) and
+    renamed atomically to progress.json using fs.renameSync. This prevents data
+    corruption during sudden power loss or process kill.
+  - Corruption Recovery: If JSON.parse fails on startup, the corrupted file is renamed
+    to progress.json.corrupt.<timestamp> and a fresh valid schema is initialized.
+- SM-2 Spaced Repetition: Implements SuperMemo SM-2 to update repetitions, interval,
+  and ease factors after every quiz attempt.
+
+
+================================================================================
+SECTION 3: COMPLETE SYSTEM ARCHITECTURE & FLOW DIAGRAMS
+================================================================================
+
+3.1 High-Level Architecture
+```
++-----------------------------------------------------------------------------+
+| CLIENT TIER (Low-End Mobile Phone / Browser)                                |
+|  - HTML5 / CSS3 / ES6 (No Heavy Frameworks, <200KB bundle)                  |
+|  - Service Worker (studybuddy-v7 Shell Cache)                               |
+|  - Web Speech API (or-IN STT Speech-to-Text & or-IN TTS Text-to-Speech)     |
++-----------------------------------------------------------------------------+
+                                      |
+                      HTTP REST & Server-Sent Events (SSE)
+                                      v
++-----------------------------------------------------------------------------+
+| LOCAL HUB SERVER (Laptop / Mini-PC at Village or School Hub: 0.0.0.0:3000)  |
+|                                                                             |
+|  [Security & Middleware]                                                    |
+|   - Express 4.22.1 + Session Auth (PIN login: Student 1234, Teacher 9999)   |
+|   - Compression (Gzip with SSE Streaming Bypass)                            |
+|                                                                             |
+|  [Orchestration & Agent Core]                                               |
+|   - Routes: /chat (SSE), /agent (Multi-Tool), /quiz, /socratic, /api/events |
+|   - Agent Planner: runParallelAgent (LLM) + runAgentLoop (Deterministic)    |
+|   - 6 Tools: explain_topic, generate_quiz, track_progress,                  |
+|              suggest_next_topic, ask_socratic_question, generate_concept_map|
+|   - 4-Layer SmartCache: Memory -> In-Flight -> Disk JSON -> Pre-Warm        |
+|                                                                             |
+|  [Grounding & Guardrails]                                                   |
+|   - SCERT Class 9 Knowledge Base (1,433 lines verified syllabus facts)      |
+|   - Language Policy Engine (2,400+ lines: Odia term enforcement & repair)   |
+|   - Resilient JSON Parser (parseJSON.js with AST recovery)                  |
+|                                                                             |
+|  [Persistence Engine]                                                       |
+|   - progressStore.js (Atomic JSON writes, Corruption auto-backup)           |
+|   - SM-2 Spaced Repetition Calculator & Learner State Machine               |
+|   - Flat Files: data/progress.json, data/cache.json                         |
++-----------------------------------------------------------------------------+
+                                      |
+                         HTTP JSON API (Port 11434)
+                                      v
++-----------------------------------------------------------------------------+
+| LOCAL INFERENCE ENGINE (Ollama v0.35 - Zero Cloud / 100% Offline)           |
+|  - Odia Queries: dhee-odia:latest (2B Qwen-based Odia Specialist)           |
+|  - Planning & English: qwen3:4b (High-Capacity Reasoning Engine)            |
+|  - Keep-Alive: 60m resident in VRAM                                         |
++-----------------------------------------------------------------------------+
+```
+
+3.2 Authentication & Authorization Flow
+```
+User navigates to "/"
+       |
+       v
+Check req.session.role in server.js
+       |
+       +---> If no session -> 302 Redirect to "/login"
+       |
+       +---> If role === 'student' -> 302 Redirect to "/app"
+       |
+       +---> If role === 'teacher' -> 302 Redirect to "/teacher"
+
+POST /login with { pin: "1234" }
+       |
+       v
+auth.js verifies against process.env.STUDENT_PIN / TEACHER_PIN
+       |
+       +---> Invalid -> 401 { error: "Invalid PIN" }
+       |
+       +---> Match -> Sets req.session.role, studentId, studentName
+                      Returns 200 { success: true, role: "student" }
+```
+
+3.3 Multi-Tier Safety Guardrail Flow
+```
+User sends Odia Question ("ଆଲୋକ ସଂଶ୍ଳେଷଣ କ’ଣ?")
+       |
+       v
+Grounding: Retrieve verified facts from lib/class9Knowledge.js
+       |
+       v
+Inference: Call Ollama (dhee-odia) with SCERT grounded facts
+       |
+       v
+Language Policy Validation (lib/languagePolicy.js):
+   - Check Odia Unicode purity
+   - Verify scientific terminology (reject corrupted terms)
+   - Fact validation (prevent false science statements)
+       |
+       +---> PASS -> Stream tokens directly to client
+       |
+       +---> FAIL -> Trigger 1 Corrective Repair Prompt to Ollama
+                        |
+                        +---> REPAIR PASS -> Stream repaired answer
+                        |
+                        +---> REPAIR FAIL -> Stream SCERT Verified Fallback Facts
+```
+
+
+================================================================================
+SECTION 4: FILE-BY-FILE MODULE DEEP DIVE & CODE WALKTHROUGH
+================================================================================
+
+4.1 Application Entry: server.js (271 lines)
+- Responsibility: Express bootstrap, environment validation, session configuration,
+  route registration, SSE teacher broadcasting, and Ollama model pre-warming.
+- Security Validation (lines 20-39):
+  In production (NODE_ENV=production), refuses to boot if SESSION_SECRET is missing,
+  or if STUDENT_PIN or TEACHER_PIN use default insecure values ('1234', '9999').
+- SSE Broadcasting (lines 226-257):
+  Maintains a Set of active teacher response streams (sseClients). Hooks into
+  progressStore.on('data_updated') to broadcast real-time student activity to the
+  teacher dashboard instantly.
+- Model Warmup (line 269):
+  Executes warmUpModels() upon server start to ensure models are compiled and resident
+  in VRAM before the first student request arrives.
+
+4.2 Route: routes/chat.js (39,579 bytes)
+- Responsibility: Main doubt resolution streaming controller.
+- Key Functions:
+  - resolveTopicAndConcept(query, history): Matches user input against curriculum
+    taxonomy keywords using trie.js and dynamicTaxonomy.js.
+  - POST /chat: Validates request body { message, language, studentId, level }.
+    Sets Content-Type: text/event-stream. Checks smartCache; if cache hits, streams
+    cached response with latency tag. If cache misses, calls llmProvider, validates
+    output against languagePolicy, streams SSE data chunks, and mutates student
+    confidence state.
+
+4.3 Route: routes/agent.js (1,693 bytes)
+- Responsibility: POST /agent autonomous multi-tool endpoint.
+- Logic:
+  Extracts query and history, binds session studentId, and executes runParallelAgent()
+  or runAgentLoop() from agent/agentLoop.js. Returns structured JSON containing
+  plan, toolExecutions, synthesizedAnswer, and nextStudy recommendation.
+
+4.4 Route: routes/quiz.js (28,373 bytes)
+- Responsibility: Quiz generation and submission grading.
+- POST /quiz:
+  Accepts { topic, concept, count, language }. Calls generate_quiz tool. Employs
+  parseJSON.js to parse the LLM's MCQ array. Validates that exactly 1 correct answer
+  exists per question.
+- POST /quiz/submit:
+  Accepts { studentId, topic, concept, answers }. Grades each response, calculates
+  percentage score, updates SM-2 repetition schedule in progressStore.js, and
+  updates concept confidence (e.g. marking <60% scores as needs_review).
+
+4.5 Route: routes/auth.js (5,351 bytes)
+- Responsibility: Authentication, PIN verification, session destruction.
+- Middlewares Exported:
+  - requireAuth: Ensures req.session.role exists; redirects to /login if missing.
+  - requireTeacher: Ensures req.session.role === 'teacher'; returns 403 or redirects.
+
+4.6 Agent Core: agent/agentLoop.js (24,589 bytes)
+- Responsibility: Autonomous planning and tool execution engine.
+- runParallelAgent(query, context):
+  Prompts qwen3:4b to generate a JSON tool execution plan. The model selects from
+  the 6 registered tools. Independent tools (e.g. explain_topic and generate_concept_map)
+  are executed concurrently using Promise.all(). Gathers all outputs and generates
+  a final synthesis.
+- runAgentLoop(query, context):
+  Deterministic 4-step fallback pipeline. If planning fails or returns malformed
+  JSON, safely executes: explain_topic -> validate -> track_progress -> suggest_next_topic.
+
+4.7 Agent Tools: agent/tools.js (32,729 bytes)
+- Exports the 6 executable tools:
+  1. explain_topic: Generates 3-part structured explanation (intro, steps, takeaway).
+  2. generate_quiz: Generates 3-5 MCQs with distractors and explanations.
+  3. track_progress: Updates progressStore and emits SSE update event.
+  4. suggest_next_topic: Evaluates student history and SM-2 schedules to pick next topic.
+  5. ask_socratic_question: Generates 5-step guided inquiry dialogue turns.
+  6. generate_concept_map: Builds node and edge graph for D3 rendering.
+
+4.8 Persistence: agent/progressStore.js (15,389 bytes)
+- Responsibility: Multi-student state management, SM-2 algorithm, disk persistence.
+- Key Methods:
+  - ensureStudent(studentId, name): Initializes student profile if new.
+  - sm2(studentId, topic, concept, score): Calculates repetitions, interval, and
+    ease factor (EF) using SuperMemo SM-2.
+  - getWeakConcepts(studentId): Returns concepts with score < 60% or flagged needs_review.
+  - getDueReviews(studentId): Returns concepts whose nextReview date <= Date.now().
+  - save(): Writes to data/progress.json.tmp and atomically renames to progress.json.
+
+4.9 Domain Knowledge: lib/class9Knowledge.js (90,320 bytes, 1,433 lines)
+- Responsibility: Grounding facts for 8 Odisha SCERT Class 9 science topics:
+  1. photosynthesis (ଆଲୋକ ସଂଶ୍ଳେଷଣ)
+  2. matter (ପଦାର୍ଥ)
+  3. states_of_matter (ପଦାର୍ଥର ଅବସ୍ଥା)
+  4. evaporation (ବାଷ୍ପୀଭବନ)
+  5. water_cycle (ଜଳ ଚକ୍ର)
+  6. force_and_motion (ବଳ ଓ ଗତି)
+  7. cell (କୋଷ)
+  8. respiration (ଶ୍ୱସନ)
+- Each topic provides: canonical Odia terms, verified textbook definitions, step-by-step
+  processes, common student misconceptions, and pre-compiled fallback answers.
+
+4.10 Guardrails: lib/languagePolicy.js (166,442 bytes, 2,400+ lines)
+- Responsibility: Enforces Odia linguistic integrity and scientific validity.
+- Key Features:
+  - containsOdiaScript(text): Regex validation for Unicode range \u0b00-\u0b7f.
+  - validateScientificTerms(text, topic): Detects corrupted transliterations and
+    verifies presence of canonical Odia scientific vocabulary.
+  - buildRepairPrompt(errorType, originalAnswer, verifiedFacts): Synthesizes targeted
+    corrective prompt instructing the LLM to fix the exact validation failure.
+
+
+================================================================================
+SECTION 5: COMPLETE END-TO-END EXECUTION TRACES
+================================================================================
+
+5.1 Trace 1: Application Startup Sequence
+1. Shell executes: npm run dev -> node server.js.
+2. server.js executes require('dotenv').config() and sets OLLAMA_KEEP_ALIVE='60m'.
+3. Checks IS_PROD; validates that non-default PINs and SESSION_SECRET exist.
+4. Initializes Express app, registers selective compression (SSE excluded).
+5. Registers session middleware with 24-hour cookie expiration.
+6. Mounts authRoutes, static directories, and feature routes (/chat, /quiz, /agent, etc.).
+7. App binds to 0.0.0.0:3000.
+8. warmUpModels() executes: sends a probe ping to Ollama localhost:11434 for qwen3:4b
+   and dhee-odia:latest. Pre-warms model weights in GPU VRAM.
+
+5.2 Trace 2: Student Asks an Odia Doubt (Streaming SSE Trace)
+- User Action: Sunita types "ଆଲୋକ ସଂଶ୍ଳେଷଣ କ’ଣ?" (What is photosynthesis?) and clicks Send.
+- Frontend (public/scripts/chat.js & agent.js):
+  - Captures form submit; detects Odia Unicode (\u0b00-\u0b7f).
+  - Appends student message bubble to UI.
+  - Appends thinking indicator bubble.
+  - Dispatches fetch('POST', '/chat', { body: JSON.stringify({ message: "...", language: "or" }) }).
+- Backend Ingestion (routes/chat.js):
+  - Express validates session; resolves studentId ('student_default').
+  - resolveTopicAndConcept extracts topic: 'photosynthesis', concept: 'mechanism'.
+  - smartCache.get() checks in-memory and disk cache (miss).
+- Knowledge Retrieval:
+  - class9Knowledge.js retrieves SCERT verified facts for photosynthesis.
+- Model Inference (agent/models.js):
+  - Routes to dhee-odia:latest on localhost:11434.
+  - Prompt constructs system role with grounding facts and strict terminology rules.
+- Guardrail Validation (lib/languagePolicy.js):
+  - Validates output tokens. Confirms canonical term "ଆଲୋକ ସଂଶ୍ଳେଷଣ".
+- Response Streaming:
+  - res.write(`data: ${JSON.stringify({ token: chunk })}\n\n`) streams tokens.
+  - Frontend agent.js consumes stream using getReader(); updates DOM incrementally.
+- State Update:
+  - studentLearningState.js records interaction; marks photosynthesis concept as 'partial'.
+  - server.js fires broadcastSSE('data_updated') to update teacher dashboard.
+
+5.3 Trace 3: Quiz Generation, Submission, and SM-2 Spaced Repetition Update
+1. User clicks "ପ୍ରଶ୍ନୋତ୍ତର" (Quiz Me).
+2. Frontend dispatches POST /quiz with { topic: "photosynthesis", count: 3, language: "or" }.
+3. routes/quiz.js calls agent/tools.js -> generate_quiz.
+4. LLM generates JSON array of MCQs; parseJSON.js cleans markdown backticks and parses.
+5. Quiz renders in modal (public/scripts/quiz.js).
+6. Sunita selects answers and clicks Submit.
+7. Frontend dispatches POST /quiz/submit with selected options.
+8. routes/quiz.js calculates score (e.g. 1/3 = 33%).
+9. progressStore.sm2(studentId, 'photosynthesis', 'mechanism', 1) is invoked:
+   - Score < 60%: repetitions resets to 0, interval = 1 day, Ease Factor drops.
+   - Concept flagged as needs_review.
+10. Atomic write updates data/progress.json.
+11. Response returns detailed review and targeted practice recommendation.
+
+
+================================================================================
+SECTION 6: EXHAUSTIVE API & NETWORK COMMUNICATION INVENTORY
+================================================================================
+
+| Method | Path | Purpose | Auth Required | Request Body / Params | Response Format |
+|---|---|---|---|---|---|
+| POST | /login | Authenticate user via PIN | None | { pin: string } | JSON { success: true, role: string } |
+| POST | /logout | Destroy session | None | None | 302 Redirect to /login |
+| GET | /me | Return current user session | None | None | JSON { authenticated: bool, role: string, studentId: string } |
+| POST | /chat | Streaming doubt answering | Student/Teacher | { message: string, language: string, level: string } | SSE (text/event-stream) tokens |
+| POST | /agent | Autonomous multi-tool execution | Student/Teacher | { query: string, history: array } | JSON { plan: object, toolExecutions: array, answer: string } |
+| POST | /quiz | Generate curriculum MCQs | Student/Teacher | { topic: string, concept: string, count: number, language: string } | JSON { questions: array } |
+| POST | /quiz/submit | Grade quiz & update SM-2 | Student/Teacher | { studentId: string, topic: string, answers: array } | JSON { score: number, total: number, results: array, nextAction: string } |
+| POST | /socratic | Guided inquiry dialogue turn | Student/Teacher | { message: string, history: array, topic: string } | JSON { reply: string, step: number, completed: bool } |
+| POST | /concept-map | Generate D3 concept graph | Student/Teacher | { topic: string } | JSON { nodes: array, links: array } |
+| GET | /progress | Fetch student mastery & streak | Student/Teacher | Query: studentId | JSON { topics: object, streak: number, lastActive: string } |
+| GET | /due-reviews | Fetch SM-2 overdue concepts | Student/Teacher | Query: studentId | JSON { dueReviews: array } |
+| GET | /api/events | Real-time teacher telemetry | Teacher only | None | SSE (text/event-stream) live events |
+| POST | /admin/upload-taxonomy | Upload CSV curriculum | Teacher only | Multipart form (CSV file) | JSON { success: true, count: number } |
+| GET | /admin/export-taxonomy | Export curriculum | Teacher only | None | JSON taxonomy structure |
+| GET | /dev/cache-stats | Inspect cache hit/miss rates | Dev only | None | JSON { hits: number, misses: number, size: number } |
+
+
+================================================================================
+SECTION 7: DATA STORAGE, SCHEMAS, AND STATE FLOW INTERNALS
+================================================================================
+
+7.1 Data Storage Architecture
+StudyBuddy utilizes flat-file JSON stores. This eliminates the operational overhead
+and memory footprint of running a Postgres or MongoDB daemon on resource-constrained
+laptops.
+
+7.2 data/progress.json Schema
+```json
+{
+  "students": {
+    "student_default": {
+      "studentId": "student_default",
+      "studentName": "Sunita",
+      "firstSeen": "2026-10-11T14:30:00.000Z",
+      "lastSeen": "2026-10-14T11:00:00.000Z",
+      "topics": {
+        "photosynthesis": {
+          "status": "in_progress",
+          "confidence": "partial",
+          "concepts": {
+            "light_reaction": {
+              "status": "understood",
+              "repetitions": 3,
+              "interval": 6,
+              "easeFactor": 2.5,
+              "nextReview": "2026-10-20T11:00:00.000Z",
+              "history": [ { "score": 100, "date": "2026-10-14T10:00:00.000Z" } ]
+            },
+            "chloroplast": {
+              "status": "needs_review",
+              "repetitions": 0,
+              "interval": 1,
+              "easeFactor": 2.18,
+              "nextReview": "2026-10-15T11:00:00.000Z",
+              "history": [ { "score": 33, "date": "2026-10-14T10:15:00.000Z" } ]
+            }
+          }
+        }
+      },
+      "streaks": { "current": 3, "best": 5, "lastDate": "2026-10-14" }
+    }
+  }
+}
+```
+
+7.3 data/cache.json Schema
+Stores normalized prompt keys and their generated responses:
+```json
+{
+  "or:explain:photosynthesis:beginner": {
+    "response": "ଆଲୋକ ସଂଶ୍ଳେଷଣ ହେଉଛି ଏକ ଜୈବ-ରାସାୟନିକ ପ୍ରକ୍ରିୟା...",
+    "timestamp": 1728900000000,
+    "model": "dhee-odia:latest",
+    "hits": 14
+  }
+}
+```
+
+
+================================================================================
+SECTION 8: AI/ML INFERENCE, MODEL ROUTING & SAFETY GUARDRAIL PIPELINE
+================================================================================
+
+8.1 Dual-Model Routing Mechanism (agent/models.js)
+```javascript
+function getModelForLanguage(language, text = '') {
+  const isOdia = language === 'or' || 
+                 language === 'Odia' || 
+                 containsOdiaScript(text);
+  if (isOdia) {
+    return {
+      model: 'dhee-odia:latest',
+      temperature: 0.2, // Low temperature for high factual precision
+      top_p: 0.9
+    };
+  }
+  return {
+    model: 'qwen3:4b',
+    temperature: 0.4,
+    top_p: 0.9
+  };
+}
+```
+
+8.2 The Hallucination & Terminology Problem in Low-Resource Languages
+Small 2B parameter models in low-resource Indic languages frequently produce
+phonetic loan-word corruptions (e.g. writing "ଫୋଟୋସିନ୍ଥେସିସ୍" instead of the
+canonical Odia curriculum term "ଆଲୋକ ସଂଶ୍ଳେଷଣ").
+Furthermore, 2B models can mix up scientific causation (such as claiming plants
+take in oxygen to produce food).
+
+8.3 The Multi-Tier Guardrail Implementation (lib/languagePolicy.js)
+1. Linguistic Policy Rules: A dictionary of 500+ approved Odisha SCERT scientific
+   terms and 200+ banned corruptions.
+2. Output Interception: Before the final token stream is verified, the text is
+   checked against the active topic's rules.
+3. Corrective Repair Prompt: If a corrupted term is found, an immediate zero-shot
+   repair prompt is fired:
+   "Your previous answer used an incorrect scientific term '[corrupted]'. Rewrite
+   the answer in pure Odia replacing it with canonical term '[canonical]'."
+4. Deterministic SCERT Fallback: If the repaired answer still fails validation,
+   StudyBuddy completely aborts the model's text and serves the pre-compiled,
+   verified textbook explanation from lib/class9Knowledge.js.
+
+
+================================================================================
+SECTION 9: AUTHENTICATION, SECURITY, ROLE CONTROLS & ERROR HANDLING
+================================================================================
+
+9.1 PIN Authentication Model
+- Why PINs: Rural students do not have individual email addresses, Google accounts,
+  or mobile numbers for OTP authentication. A 4-digit PIN allows instant access.
+- Roles:
+  - student (PIN: 1234 in dev): Access to /app, /chat, /quiz, /progress.
+  - teacher (PIN: 9999 in dev): Access to /teacher, /taxonomy-admin, /teacher/reports,
+    and /api/events.
+
+9.2 Security Hardening in server.js
+- In production, server.js refuses to boot if default PINs are detected.
+- Sessions use httpOnly: true cookies to protect against Cross-Site Scripting (XSS).
+- Cookie secure flag is false because local offline community hubs run over plain HTTP
+  (http://192.168.x.x:3000) on local Wi-Fi hotspots where SSL certificates cannot be
+  verified without internet access.
+
+9.3 Critical Vulnerability & Quality Audit
+1. CSRF Protection: Currently, session cookies use sameSite: 'lax', but no CSRF
+   tokens are implemented on POST endpoints.
+   Severity: Low in local offline network; Medium if deployed to public internet.
+   Remediation: Implement csurf middleware before public deployment.
+2. In-Memory Session Storage: MemoryStore is used by default.
+   Severity: Low for single-machine demo; Sessions reset on server reboot.
+   Remediation: Configure session-file-store for persistent session recovery.
+
+
+================================================================================
+SECTION 10: TESTING, DEBUGGING, AND RUNNING GUIDE (38 TEST SUITES)
+================================================================================
+
+10.1 Execution Commands
+- Start Ollama: ollama serve
+- Start Development Server: npm run dev
+- Start Production Server: npm start
+- Run Speech & TTS Tests: node tests/speech-tts.test.js
+- Run Student Learning State Tests: node tests/student-learning-state.test.js
+- Run SCERT Knowledge Base Tests: node tests/class9-knowledge.test.js
+- Run Failure & Fallback Regression Tests: node tests/judge-failure-regression.test.js
+- Run Live End-to-End Quiz Generation Test: node tests/live-e2e-odia-water-quiz.test.js
+
+10.2 Practical Debugging Guide
+| Symptom | Root Cause | Solution |
+|---|---|---|
+| fetch failed: Connection refused on port 11434 | Ollama daemon is not running | Run `ollama serve` in a background terminal. |
+| Odia model dhee-odia is not installed | Model weights missing in Ollama | Run `powershell scripts/create_dhee_odia.ps1` or `ollama pull dhee-odia`. |
+| SSE stream stops / buffers chunks | Gzip compression is buffering SSE | Verify that `server.js` lines 70-79 exclude the active SSE path from compression. |
+| Startup blocked: non-default PIN required | NODE_ENV=production with default PINs | Change STUDENT_PIN and TEACHER_PIN in `.env` to secure values. |
+| Browser console 503 on offline POST | Service worker lacks mutation queue | Expected P0 gap; connect client device to the hub Wi-Fi. |
+
+
+================================================================================
+SECTION 11: DATA STRUCTURES, ALGORITHMS & PEDAGOGICAL BUSINESS LOGIC
+================================================================================
+
+11.1 Topic Keyword Trie (agent/trie.js)
+- Purpose: Class 9 curriculum keyword matching across thousands of Odia terms.
+- Implementation: Standard prefix Trie where each node represents a character.
+- Complexity: Search time is O(K) where K is the query word length, completely
+  independent of the number of registered curriculum keywords (N).
+
+11.2 SuperMemo SM-2 Spaced Repetition Algorithm (agent/progressStore.js)
+- Formulas Implemented:
+  1. EF' = EF + (0.1 - (5 - q) * (0.08 + (5 - q) * 0.02))
+     Where EF is clamped to a minimum of 1.3.
+  2. If score q >= 3 (Pass):
+     - If repetitions == 0 -> interval = 1 day
+     - If repetitions == 1 -> interval = 6 days
+     - If repetitions > 1  -> interval = round(previous_interval * EF)
+  3. If score q < 3 (Fail):
+     - repetitions = 0
+     - interval = 1 day
+- Benefit: Guarantees that Sunita is prompted to review difficult concepts precisely
+  at the point of forgetting.
+
+
+================================================================================
+SECTION 12: DESIGN DECISIONS, ARCHITECTURAL TRADE-OFFS & CODE QUALITY AUDIT
+================================================================================
+
+12.1 Key Design Decisions & Trade-Offs
+1. Local Ollama vs. Cloud API (OpenAI/Anthropic):
+   - Decision: 100% local Ollama inference.
+   - Trade-off: Higher token latency (10-15s vs 2s on cloud) and lower model parameter
+     capacity (2B/4B vs 70B+), but guarantees zero subscription cost and 100% offline
+     functionality in rural villages with zero internet.
+2. Flat-File JSON vs. SQLite / PostgreSQL:
+   - Decision: Atomic file-backed JSON store (progressStore.js).
+   - Trade-off: Not suitable for 10,000 concurrent writes, but completely removes
+     C++ compilation dependencies, native database drivers, and setup friction on
+     school laptops.
+3. Vanilla JS vs. Modern Frontend Framework (React/Vite):
+   - Decision: Vanilla HTML5, CSS3, and ES6 modules.
+   - Trade-off: Manual DOM manipulation in scripts/agent.js, but ultra-lightweight
+     (<200KB bundle) running smoothly on 1GB RAM Android Go phones.
+
+12.2 Known Architectural Gaps (P0 & P1 Backlog)
+1. Hidden Agent Toggle (P0 Blocker):
+   In public/index.html (line 99), <button id="agent-toggle"> is hidden with
+   style="display:none;". The multi-tool planner is fully functional on the backend
+   (/agent), but browser users only trigger single-turn /chat unless unhidden.
+2. Missing IndexedDB Mutation Queue (P1 Blocker):
+   In public/sw.js (lines 135-152), failed POST requests return HTTP 503 when the
+   client disconnects from the laptop hub. An IndexedDB queue is required to buffer
+   quiz answers and replay them upon reconnection.
+
+
+================================================================================
+SECTION 13: TECHNICAL VIVA & INTERVIEW PREPARATION QUESTION BANK (80 Q&As)
+================================================================================
+
+--- CATEGORY 1: BASIC PROJECT & ARCHITECTURE (20 Questions) ---
+
+Q1: What is the primary problem StudyBuddy solves?
+A1: It provides an Odia-first, local-first agentic science tutor for Class 9 students
+in rural Odisha with poor connectivity, using zero cloud dependencies.
+
+Q2: Who is the target persona?
+A2: Sunita, a 14-year-old Class 9 student in rural southern Odisha who speaks Kui/Odia,
+uses a shared low-end phone for 1 hour an evening, and faces weak connectivity.
+
+Q3: What models run locally in StudyBuddy?
+A3: dhee-odia:latest (2B Qwen-based Odia specialist) and qwen3:4b (reasoning/planning).
+
+Q4: How does the application run without internet?
+A4: Ollama and Express run locally on a laptop or mini-PC acting as a local Wi-Fi hub;
+the PWA shell is precached by a Service Worker.
+
+Q5: Which frontend framework is used?
+A5: Vanilla HTML5, CSS3, and ES6 JavaScript. No heavy frameworks are used to ensure
+smooth performance on low-spec phones.
+
+Q6: How does the server authenticate students and teachers?
+A6: Via role-based 4-digit PIN authentication stored in HTTP-only session cookies.
+
+Q7: What port does the local server run on?
+A7: Port 3000 (binding to 0.0.0.0 to allow local Wi-Fi connections).
+
+Q8: Where does Ollama run?
+A8: Port 11434 on localhost.
+
+Q9: What happens when an Odia doubt is submitted?
+A9: The system detects Odia Unicode, retrieves verified SCERT facts, calls dhee-odia,
+validates the output against language policy, and streams tokens via SSE.
+
+Q10: What are the 6 tools in agent/tools.js?
+A10: explain_topic, generate_quiz, track_progress, suggest_next_topic,
+ask_socratic_question, and generate_concept_map.
+
+Q11: How is student progress stored?
+A11: In data/progress.json using atomic file writes with corruption auto-backup.
+
+Q12: Which spaced repetition algorithm is used?
+A12: The SuperMemo SM-2 algorithm.
+
+Q13: How does the teacher dashboard receive real-time updates?
+A13: Via a Server-Sent Events (SSE) stream on /api/events.
+
+Q14: How are concept graphs rendered?
+A14: Using D3.js v7 on an interactive SVG canvas in public/scripts/concept-map.js.
+
+Q15: What audio capabilities exist?
+A15: Web Speech API STT (or-IN voice recognition) and client-side TTS in public/scripts/speech.js.
+
+Q16: How does StudyBuddy prevent small model hallucination?
+A16: By grounding generation in verified SCERT Class 9 facts and running a multi-tier
+validation, repair, and fallback pipeline.
+
+Q17: What does the PWA Service Worker cache?
+A17: Static shell assets (HTML, CSS, JS, vendor libraries D3 and Chart.js) under cache
+name studybuddy-v7.
+
+Q18: How does compression work without breaking SSE?
+A18: Compression is enabled for responses >1KB but explicitly bypassed for SSE routes.
+
+Q19: What happens if data/progress.json is corrupted?
+A19: progressStore.js renames the broken file to progress.json.corrupt.<ts> and initializes
+a fresh schema.
+
+Q20: What Class 9 science topics are supported?
+A20: 8 core topics: photosynthesis, matter, states of matter, evaporation, water cycle,
+force and motion, cell, and respiration.
+
+--- CATEGORY 2: INTERMEDIATE ARCHITECTURE & WORKFLOW (20 Questions) ---
+
+Q21: Why was a dual-model architecture selected?
+A21: A 2B Odia model is fast and linguistically accurate for Odia text, but lacks reasoning
+capacity for multi-step agent tool planning, which is handled by qwen3:4b.
+
+Q22: How does routes/chat.js determine user language?
+A22: By checking the dropdown setting and running a regex test for Odia Unicode (\u0b00-\u0b7f).
+
+Q23: How does the SmartCache layer work?
+A23: It checks 4 layers: LRU memory, in-flight promises, disk-persisted JSON, and
+predictively pre-warmed responses.
+
+Q24: What is the purpose of runParallelAgent?
+A24: It prompts the LLM to generate a tool plan, executes independent tools concurrently
+via Promise.all, and synthesizes a final answer.
+
+Q25: What is the fallback for runParallelAgent?
+A25: runAgentLoop, a deterministic 4-stage pipeline that executes if planning fails.
+
+Q26: How does parseJSON.js handle messy LLM outputs?
+A22: It strips markdown code fences, removes control characters, extracts JSON substrings,
+and fixes trailing commas.
+
+Q27: What is the function of studentLearningState.js?
+A27: It implements a finite state machine tracking concept confidence: unknown -> partial
+-> understood or needs_review.
+
+Q28: How does the system handle an Odia scientific term corruption?
+A28: languagePolicy.js flags the corruption, generates a targeted repair prompt, and falls
+back to SCERT facts if the model fails to fix it.
+
+Q29: Why does server.js bind to 0.0.0.0?
+A29: To expose the hub server to all devices connected to the local Wi-Fi or hotspot.
+
+Q30: How does routes/quiz.js grade answers?
+A30: It compares user option indices with the correct index and updates SM-2 repetition
+records in progressStore.js.
+
+Q31: What role does dynamicTaxonomy.js play?
+A31: It learns new concept keywords dynamically at runtime and caches them in
+data/taxonomy_learned.json.
+
+Q32: How is SSE keep-alive maintained?
+A32: By periodically sending comment lines (':\n\n') that prevent proxy and browser timeouts.
+
+Q33: How does speech.js handle devices without an Odia TTS voice?
+A33: It falls back to Indian English phonetic synthesis or safely alerts the user without
+breaking the chat UI.
+
+Q34: What is the purpose of devTiming.js?
+A34: It tracks per-request latency, CPU usage, and heap memory allocations for the dev panel.
+
+Q35: How does targetedPractice.js select remedial activities?
+A35: It queries getWeakConcepts() and generates exercises targeting the specific failed sub-concept.
+
+Q36: Why are sessions configured with secure: false?
+A36: Because local offline community hubs operate over HTTP (not HTTPS) on local Wi-Fi networks.
+
+Q37: What is the purpose of OLLAMA_KEEP_ALIVE=60m?
+A37: It instructs Ollama to keep model weights resident in VRAM for 60 minutes, eliminating cold-load delays.
+
+Q38: How does the teacher dashboard avoid polling?
+A38: It connects to /api/events and receives instantaneous SSE push notifications when student data changes.
+
+Q39: What prevents the dev panel from appearing in production?
+A39: server.js serves a blank no-op script on /devpanel.js when NODE_ENV === 'production'.
+
+Q40: How does masteryAgent.js determine topic mastery?
+A40: By verifying that all required sub-concepts have reached 'understood' status with quiz scores >= 80%.
+
+--- CATEGORY 3: ADVANCED IMPLEMENTATION & DEBUGGING (20 Questions) ---
+
+Q41: Explain the atomic write pattern in progressStore.js.
+A41: Data is written to progress.json.tmp and then atomically renamed via fs.renameSync,
+ensuring OS-level file system integrity during sudden power failure.
+
+Q42: How does the SM-2 algorithm calculate the new Ease Factor?
+A42: EF' = EF + (0.1 - (5 - q) * (0.08 + (5 - q) * 0.02)), clamped to a minimum value of 1.3.
+
+Q43: How do you debug an Ollama connection refused error?
+A43: Verify that the Ollama daemon is active via `ollama serve` and check that port 11434
+is listening.
+
+Q44: Why does compression break SSE streams if not bypassed?
+A44: Gzip buffers chunks until a block threshold is met, preventing individual token chunks
+from reaching the client in real time.
+
+Q45: Explain the structure of an SSE chunk sent by routes/chat.js.
+A45: It follows the W3C spec: `data: {"token": "..."}\n\n`.
+
+Q46: How does languagePolicy.js detect Odia script?
+A46: By testing the string against the Unicode regular expression /[\u0B00-\u0B7F]/.
+
+Q47: What happens during model pre-warming in helpers.js?
+A47: A dummy prompt ("hello") is sent to Ollama on startup to force model weights into GPU memory.
+
+Q48: How does the Trie in agent/trie.js achieve O(K) lookup?
+A48: Each node represents a character; traversal stops as soon as a prefix mismatch occurs,
+independent of taxonomy size.
+
+Q49: How does the system prevent infinite repair loops with the LLM?
+A49: It enforces a strict 1-shot repair budget; if the first repair fails, it immediately
+falls back to verified SCERT facts.
+
+Q50: What is the purpose of AbortController in llmProvider.js?
+A50: It enforces a hard timeout (e.g. 90 seconds) on Ollama HTTP requests to prevent hung processes.
+
+Q51: How does routes/admin.js handle CSV taxonomy uploads?
+A51: It uses csv-parse to stream and validate rows, verifying required columns (topic,
+concept, keywords) before saving.
+
+Q52: How is memory leak prevented in server.js SSE clients?
+A52: A req.on('close') listener removes disconnected client response objects from the
+sseClients Set.
+
+Q53: How does parseJSON.js repair unescaped newlines in LLM JSON?
+A53: It uses regular expressions to escape literal newlines within quotes before calling JSON.parse.
+
+Q54: What happens if Ollama runs on CPU instead of GPU?
+A54: Token generation drops from ~30 tokens/sec to ~1-2 tokens/sec, causing 40s+ latencies.
+
+Q55: How does structuredTutor.js structure its prompt?
+A55: It asks for a 3-part pedagogical response: Overview (ସାରାଂଶ), Detailed Explanation
+(ବିସ୍ତୃତ ବୁଝାମଣା), and Key Takeaway (ମୁଖ୍ୟ ବିନ୍ଦୁ).
+
+Q56: How does the frontend handle token streaming?
+A56: It reads the stream via response.body.getReader() and decodes chunks with TextDecoder.
+
+Q57: What is the memory overhead of the StudyBuddy Node.js process?
+A57: Approximately 60MB to 120MB RSS under normal load.
+
+Q58: Why is multerErrorHandler necessary?
+A58: To intercept and format file-size and file-type exceptions from Multer before Express crashes.
+
+Q59: How does progressStore.js ensure student IDs are safe?
+A59: It sanitizes student IDs using regex to prevent directory traversal attacks.
+
+Q60: What test validates factual accuracy in Odia?
+A60: tests/class9-knowledge.test.js, which runs 28 unit and live assertions against SCERT facts.
+
+--- CATEGORY 4: TECHNOLOGY STACK & TRADE-OFFS (10 Questions) ---
+
+Q61: Why Node.js instead of Python FastAPI?
+A61: Node.js handles static PWA serving, session management, and SSE connections with
+minimal memory footprint on a single lightweight thread.
+
+Q62: Why Ollama instead of llama.cpp direct bindings?
+A62: Ollama provides clean HTTP REST APIs, robust GPU offloading, and background model
+lifecycle management out of the box.
+
+Q63: What are the trade-offs of flat-file JSON storage?
+A63: Zero setup and zero memory overhead, but lacks transaction isolation for thousands of
+concurrent users. Perfect for a local classroom hub.
+
+Q64: Why Vanilla CSS over TailwindCSS?
+A64: Zero build step, instant reload, no PostCSS pipeline, and full control over native
+CSS variables for low-end phone performance.
+
+Q65: Why D3.js instead of Cytoscape or Vis.js?
+A65: D3.js v7 is lightweight, modular, and provides full control over SVG force-directed
+physics simulations.
+
+Q66: Why Server-Sent Events instead of WebSockets?
+A66: SSE runs over standard HTTP, supports automatic browser reconnection, requires no
+duplex handshake, and works through proxies with zero external dependencies.
+
+Q67: What are the trade-offs of running dhee-odia (2B)?
+A67: Fast inference on 4GB VRAM GPUs, but requires strict external rule validation to
+prevent factual drift.
+
+Q68: Why not use LangChain or AutoGen?
+A68: Frameworks add hundreds of dependencies and high abstraction overhead. StudyBuddy's
+custom agent runtime is under 600 lines and easily auditable.
+
+Q69: What is the benefit of Service Worker precaching?
+A69: The application shell and UI load instantly even if the local Wi-Fi connection to the
+hub drops momentarily.
+
+Q70: Why use CommonJS over ES Modules in the backend?
+A70: Native Node.js stability, zero transpilation requirements, and seamless compatibility
+with express and express-session.
+
+--- CATEGORY 5: DESIGN TRADE-OFFS, LIMITATIONS & SCALING (10 Questions) ---
+
+Q71: What is the single biggest architectural limitation today?
+A71: The absence of an offline client mutation queue (IndexedDB); if a phone loses Wi-Fi
+during a quiz, answers cannot sync until re-submitted.
+
+Q72: How would you scale StudyBuddy to 10,000 concurrent users?
+A72: Replace flat-file JSON with PostgreSQL / Redis, deploy stateless Node containers behind
+NGINX, and run a vLLM inference cluster with continuous batching.
+
+Q73: What is the primary bottleneck during live demonstrations?
+A73: Cold model loading if Ollama unloads weights from VRAM. Solved via OLLAMA_KEEP_ALIVE=60m
+and startup pre-warming.
+
+Q74: Why is the agent toggle hidden in index.html?
+A74: It was hidden during UI testing; unhiding it exposes the full autonomous multi-tool
+planner to judges.
+
+Q75: What happens if a student asks a doubt outside Class 9 Science?
+A75: The system identifies the out-of-scope intent and gently redirects the student back to
+supported Class 9 science topics.
+
+Q76: How does the system handle concurrent student quiz submissions?
+A76: Node.js event loop serializes the synchronous JSON file write operations; atomic
+renames prevent file corruption.
+
+Q77: How are Odia scientific term corruptions identified?
+A77: Through an explicit lookup table in lib/languagePolicy.js compiled against Odisha
+SCERT textbooks.
+
+Q78: What happens if the demo laptop loses power?
+A78: Upon reboot, server.js recovers from data/progress.json; any interrupted write is
+discarded in favor of the last valid atomic state.
+
+Q79: Could StudyBuddy support other languages like Sambalpuri or Santali?
+A79: Yes, by adding linguistic rule policies in lib/ and providing a localized fine-tuned
+Ollama model.
+
+Q80: Why is StudyBuddy genuinely agentic rather than a simple chatbot?
+A80: It maintains per-learner state, uses an autonomous LLM planner to dispatch tools,
+observes tool execution results, evaluates knowledge gaps, and independently decides what
+the student should study next.
+
+
+================================================================================
+SECTION 14: FINAL PROJECT MASTERY SUMMARY & 5-MINUTE PITCH
+================================================================================
+
+14.1 The 5-Minute Technical Viva Pitch
+"Good morning, judges. I am presenting StudyBuddy, a zero-cloud, local-first agentic
+AI tutor designed specifically for Class 9 students in rural Odisha, India.
+
+In rural government schools, students like our persona Sunita speak Odia or Kui at home,
+have shared access to a low-end phone for only an hour an evening, and face weak or
+non-existent internet connectivity. Existing EdTech platforms fail because they require
+cloud streaming, operate in English or Hindi, and function as static chatbots with no
+pedagogical memory.
+
+StudyBuddy solves this through a local-first hub architecture. The entire system runs
+on a local school laptop or village hub using Node.js and Ollama, requiring zero cloud
+subscriptions or paid API keys.
+
+Our architecture features four major innovations:
+1. Dual-Model Local Routing: We route natural Odia questions to a dedicated 2B Odia
+   model, while utilizing qwen3:4b for complex agent reasoning and tool planning.
+2. Grounded Multi-Tier Guardrails: Because small 2B models frequently hallucinate in
+   regional languages, we ground generation in 1,433 lines of verified Odisha SCERT
+   textbook facts, validate outputs against a 2,400-line Odia language policy, and
+   execute a 1-shot repair loop with deterministic fallback.
+3. Autonomous Pedagogical Agent: Rather than just chatting, our agent tracks concept
+   confidence across 8 science chapters, calculates review intervals using the SM-2
+   spaced repetition algorithm, and autonomously prescribes whether Sunita should
+   introduce, practice, or review a topic.
+4. Real-Time Classroom Telemetry: Our server streams live student confusion events to a
+   teacher dashboard over Server-Sent Events, enabling educators to intervene where
+   students struggle most.
+
+StudyBuddy is fast, verified across 38 automated test suites, runs 100% offline, and
+delivers genuine educational equity in the student's mother tongue. Thank you."
+
+14.2 Student Mastery Verification Checklist
+- [x] Can explain Sunita persona and rural low-connectivity constraints.
+- [x] Can trace a request from public/scripts/chat.js to routes/chat.js and Ollama.
+- [x] Can explain dual-model routing (dhee-odia vs qwen3:4b) in agent/models.js.
+- [x] Can explain how the 4-layer SmartCache prevents redundant inference.
+- [x] Can explain why SSE streams must bypass gzip compression.
+- [x] Can explain the SM-2 spaced repetition algorithm in progressStore.js.
+- [x] Can explain atomic JSON disk writes and corruption auto-backup.
+- [x] Can explain the multi-tier safety pipeline (Validation -> Repair -> SCERT Fallback).
+- [x] Can run and explain test suites (speech-tts, student-learning-state, class9-knowledge).
+- [x] Can confidently answer all 80 technical viva questions.
+
+================================================================================
+END OF STUDYBUDDY REPOSITORY MASTERY REPORT
+================================================================================
