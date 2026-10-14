@@ -123,7 +123,37 @@ function getChatHistory(studentId, limit = 50) {
   if (!studentId) return [];
   const store = readStore();
   const list = (store.chats && store.chats[studentId]) || [];
-  return list.slice(-limit);
+  if (list.length > 0) {
+    return list.slice(-limit);
+  }
+
+  // Fallback: If chat history is empty but student studied previous topics,
+  // reconstruct learning summary history so returning students immediately see what they learned
+  const sessions = (store.sessions || [])
+    .filter(s => (s.studentId || DEFAULT_STUDENT) === studentId);
+
+  if (sessions.length > 0) {
+    const fallbackMsgs = [];
+    sessions.slice(-6).forEach(s => {
+      const topicName = s.topic ? s.topic.trim() : 'Study Session';
+      fallbackMsgs.push({
+        role: 'user',
+        content: `I studied: ${topicName}`,
+        topic: topicName,
+        timestamp: s.timestamp
+      });
+      const scoreNote = s.quizScore !== null && s.quizScore !== undefined ? ` (Quiz score: ${s.quizScore}%)` : '';
+      fallbackMsgs.push({
+        role: 'assistant',
+        content: `We explored **${topicName}**${scoreNote}. You can ask to review this, take a follow-up quiz, or start something new!`,
+        topic: topicName,
+        timestamp: s.timestamp
+      });
+    });
+    return fallbackMsgs;
+  }
+
+  return [];
 }
 
 function clearChatHistory(studentId) {
